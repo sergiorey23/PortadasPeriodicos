@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Portadas</string>
+    <string name="fav_tab">Favoritos</string>
+    <string name="first_tab" translatable="false">General</string>
+    <string name="second_tab">Deportes</string>
+    <string name="third_tab">Economia</string>
+    <string name="fourth_tab">Locales</string>
+    <string name="fifth_tab">Internacional</string>
+    <string name="about">Arcerca de</string>
+    <string name="help">Ayuda</string>
+    <string name="rate">Puntuar</string>
+    <string name="action_share">Compartir</string>
+    <string name="action_fav">Añadir a favoritos</string>
+    <string name="help_description">Mantén pulsado en la portada para compartirla, guardarla o visitar su pagina web.</string>
+    <string name="help_description2">También puedes ver las portadas con el widget de la app.</string>
+    <string name="rate_app">Si te gusta la app, deja una reseña! Gracias!</string>
+
+    <string name="banner_inferior_ad_unit_id" translatable="false">ca-app-pub-5328901415478088/5031443458</string>
+    <string name="titleAppAbout" translatable="false">PortadasPeriodicos</string>
+    <string name="close">Cerrar</string>
+    <string name="instagram" translatable="false">Instagram</string>
+    <string name="contact">Contacto</string>
+    <string name="save">Guardar</string>
+    <string name="refresh">Actualizar</string>
+    <string name="settings">Ajustes</string>
+    <string name="mode">Modo oscuro</string>
+    <string name="tema">Tema</string>
+    <string name="about_desc">\t¿Tienes alguna sugerencia? ¿Falta alguna portada?\n\tNo dudes en comentármelo!</string>
+
+</resources>
