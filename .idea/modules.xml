@@ -3,8 +3,11 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/PortadasPeriodicos.iml" filepath="$PROJECT_DIR$/PortadasPeriodicos.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/sample/sample.iml" filepath="$PROJECT_DIR$/sample/sample.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/PortadasPeriodicos.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/PortadasPeriodicos.app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/PortadasPeriodicos.app.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/PortadasPeriodicos.app.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/PortadasPeriodicos.app.main.iml" filepath="$PROJECT_DIR$/.idea/modules/app/PortadasPeriodicos.app.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/PortadasPeriodicos.app.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/PortadasPeriodicos.app.unitTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/sample/PortadasPeriodicos.sample.iml" filepath="$PROJECT_DIR$/.idea/modules/sample/PortadasPeriodicos.sample.iml" />
     </modules>
   </component>
 </project>

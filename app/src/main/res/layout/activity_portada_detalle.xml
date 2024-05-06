@@ -45,7 +45,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
-            android:layout_marginRight="75dp"
+            android:layout_marginEnd="75dp"
             android:layout_marginBottom="15dp"
             android:clickable="true"
             android:focusable="true"
@@ -53,14 +53,15 @@
             android:src="@drawable/ic_language_black_24dp"
             ads:fabCustomSize="50dp"
             ads:maxImageSize="40dp"
-            tools:targetApi="lollipop" />
+            tools:targetApi="lollipop"
+            android:layout_marginRight="75dp" />
 
     </FrameLayout>
-<!--    <com.google.android.gms.ads.AdView
-        android:id="@+id/av_bottom_banner"
+    <LinearLayout
+        android:id="@+id/bannerContainerDetail"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        ads:adSize="SMART_BANNER"
-        ads:adUnitId="@string/banner_inferior_ad_unit_id" />-->
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        />
 </LinearLayout>

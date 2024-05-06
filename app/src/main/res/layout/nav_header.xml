@@ -15,6 +15,7 @@
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:srcCompat="@mipmap/news_icon" />
+        app:srcCompat="@mipmap/news_icon"
+        android:contentDescription="News" />
 
 </LinearLayout>

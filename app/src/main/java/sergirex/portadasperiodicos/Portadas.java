@@ -14,12 +14,14 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.text.Html;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -43,6 +45,7 @@ import androidx.viewpager.widget.ViewPager;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
+import com.facebook.ads.*;
 
 import java.io.File;
 import java.text.DateFormat;
@@ -60,7 +63,7 @@ public class Portadas extends AppCompatActivity {
     private ViewPager mViewPager;
     private AlertDialog alertDialog;
     private AlertDialog alertDialogNoConn;
-    //private AdView mBottomBanner;
+    private AdView bottomBanner;
     private TabLayout tabLayout;
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private SharedPreferences prefs;
@@ -74,7 +77,7 @@ public class Portadas extends AppCompatActivity {
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
         if (prefs.getBoolean("switch_preference", false)) {
             dark = true;
-            setTheme(R.style.Theme_AppCompat_NoActionBar);
+            setTheme(R.style.AppThemeDark);
         }else{
             setTheme(R.style.AppTheme);
         }
@@ -125,7 +128,7 @@ public class Portadas extends AppCompatActivity {
                     Intent i = new Intent(Intent.ACTION_SEND);
                     i.setType("text/plain");
                     i.putExtra(Intent.EXTRA_SUBJECT, getResources().getString(R.string.app_name));
-                    String sAux = "Descarga la nueva app de Portadas gratis!\n\nhttps://play.google.com/store/apps/details?id=" + getPackageName();
+                    String sAux = "Descarga la app de Portadas gratis!\n\nhttps://play.google.com/store/apps/details?id=" + getPackageName();
                     i.putExtra(Intent.EXTRA_TEXT, sAux);
                     startActivity(Intent.createChooser(i, null));
                 } else if (menuItem.getItemId() == R.id.nav_about) {
@@ -145,20 +148,42 @@ public class Portadas extends AppCompatActivity {
         mDrawerLayout.addDrawerListener(mDrawerToggle);
 
         mDrawerToggle.syncState();
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    != PackageManager.PERMISSION_GRANTED) {
 
-        if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                        MY_PERMISSIONS_REQUEST_WRITE_STORAGE);
+            }
+        }else {
+            if (ContextCompat.checkSelfPermission(this,
+                    Manifest.permission.READ_MEDIA_IMAGES)
+                    != PackageManager.PERMISSION_GRANTED) {
 
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                    MY_PERMISSIONS_REQUEST_WRITE_STORAGE);
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.READ_MEDIA_IMAGES},
+                        MY_PERMISSIONS_REQUEST_WRITE_STORAGE);
+            }
         }
 
-        /*MobileAds.initialize(this, "ca-app-pub-5328901415478088~3554710257");
-        mBottomBanner =  findViewById(R.id.av_bottom_banner);
-        AdRequest adRequest = new AdRequest.Builder().build();
-        mBottomBanner.loadAd(adRequest);*/
+        AudienceNetworkAds.initialize(this);
+        //AdSettings.setTestMode(true);
+        // Instantiate an AdView object.
+        // NOTE: The placement ID from the Facebook Monetization Manager identifies your App.
+        // To get test ads, add IMG_16_9_APP_INSTALL# to your placement id. Remove this when your app is ready to serve real ads.
+        boolean isPhone = getResources().getBoolean(R.bool.isPhone);
+        if (isPhone) {
+            bottomBanner = new AdView(this, "799967435028134_799969321694612", AdSize.BANNER_HEIGHT_50);
+        } else {
+            bottomBanner = new AdView(this, "799967435028134_799969321694612", AdSize.BANNER_HEIGHT_90);
+        }
+
+        // Find the Ad Container
+        LinearLayout adContainer = findViewById(R.id.bannerContainer);
+        adContainer.addView(bottomBanner);
+        bottomBanner.loadAd();
     }
 
     void loadSectionsAdapter(){
@@ -168,7 +193,6 @@ public class Portadas extends AppCompatActivity {
         mViewPager.setOffscreenPageLimit(mSectionsPagerAdapter.getCount()-1);
         tabLayout.setupWithViewPager(mViewPager);
         String lpValue = prefs.getString("init_category", getString(R.string.first_tab));
-        assert lpValue != null;
         if(prefsPor.getAll().isEmpty()) {
             switch (lpValue.substring(0,3)) {
                 case "Fav":
@@ -225,38 +249,49 @@ public class Portadas extends AppCompatActivity {
     void showAboutInfo(){
         View aboutLayout = getLayoutInflater().inflate(R.layout.about, mDrawerLayout ,false);
         int theme = prefs.getBoolean("switch_preference", false)?
-                R.style.Theme_AppCompat_NoActionBar : R.style.AppTheme;
+                R.style.AppThemeDark : R.style.AppTheme;
         AlertDialog.Builder builder = new AlertDialog.Builder(this, theme);
         builder.setPositiveButton(R.string.close, null);
         builder.setView(aboutLayout);
-        Button button = aboutLayout.findViewById(R.id.instaContact);
+        TextView appSource = aboutLayout.findViewById(R.id.appSource);
         TextView tv = aboutLayout.findViewById(R.id.appVersion);
+
         tv.setText("v".concat(BuildConfig.VERSION_NAME));
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Uri uri = Uri.parse("https://www.instagram.com/sergiorey23");
-                Intent likeIng = new Intent(Intent.ACTION_VIEW, uri);
+        appSource.setOnClickListener(view -> {
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(Uri.parse("https://www.lasportadas.es/"));
+            startActivity(intent);
+        });
 
-                likeIng.setPackage("com.instagram.android");
-
-                try {
-                    startActivity(likeIng);
-                } catch (ActivityNotFoundException e) {
-                    startActivity(new Intent(Intent.ACTION_VIEW,
-                            Uri.parse("https://www.instagram.com/sergiorey23")));
-                }
+        TextView privacy = aboutLayout.findViewById(R.id.privacy_policy);
+        privacy.setOnClickListener(view -> {
+            Uri uri = Uri.parse("https://www.lasportadas.es/privacy.php");
+            Intent browserIntent = new Intent(Intent.ACTION_VIEW, uri);
+            try {
+                startActivity(browserIntent);
+            } catch (ActivityNotFoundException e) {
+                startActivity(new Intent(Intent.ACTION_VIEW, uri));
             }
         });
+//        Button paypal = aboutLayout.findViewById(R.id.paypal);
+//        paypal.setOnClickListener(view -> {
+//            Uri uri = Uri.parse("https://www.paypal.com/donate?hosted_button_id=4H8LT2PVZEE78");
+//            Intent browserIntent = new Intent(Intent.ACTION_VIEW, uri);
+//            browserIntent.setPackage("com.instagram.android.p2pmobile");
+//
+//            try {
+//                startActivity(browserIntent);
+//            } catch (ActivityNotFoundException e) {
+//                startActivity(new Intent(Intent.ACTION_VIEW, uri));
+//            }
+//        });
+
         Button button2 = aboutLayout.findViewById(R.id.contact);
-        button2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Uri uri = Uri.parse("mailto:sssergiooo23@gmail.com");
-                Intent emailIntent = new Intent(Intent.ACTION_SENDTO, uri);
-                emailIntent.setData(uri);
-                startActivity(emailIntent);
-            }
+        button2.setOnClickListener(view -> {
+            Uri uri = Uri.parse("mailto:sssergiooo23@gmail.com");
+            Intent emailIntent = new Intent(Intent.ACTION_SENDTO, uri);
+            emailIntent.setData(uri);
+            startActivity(emailIntent);
         });
         builder.create();
         builder.show();
@@ -265,7 +300,7 @@ public class Portadas extends AppCompatActivity {
     private AlertDialog showDialog() {
         if (alertDialog == null) {
             int theme = prefs.getBoolean("switch_preference", false)?
-                R.style.Theme_AppCompat_NoActionBar : R.style.AppTheme;
+                R.style.AppThemeDark : R.style.AppTheme;
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this, theme);
             alertDialogBuilder.setTitle(R.string.help);
             alertDialogBuilder.setIcon(R.mipmap.news_icon);
@@ -355,6 +390,7 @@ public class Portadas extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+        super.onBackPressed();
         if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
             mDrawerLayout.closeDrawer(GravityCompat.START);
         } else {
@@ -370,7 +406,7 @@ public class Portadas extends AppCompatActivity {
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem menuItem) {
+    public boolean onOptionsItemSelected(@NonNull MenuItem menuItem) {
         if(descargar && !isOnline()) {
             if (alertDialogNoConn == null)
                 alertDialogNoConn = createNoConnectionDialog();
@@ -397,6 +433,7 @@ public class Portadas extends AppCompatActivity {
     public boolean isOnline() {
         ConnectivityManager cm =
                 (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        assert cm != null;
         NetworkInfo netInfo = cm.getActiveNetworkInfo();
         return netInfo != null && netInfo.isConnectedOrConnecting();
     }
@@ -405,11 +442,22 @@ public class Portadas extends AppCompatActivity {
         MediaScannerConnection
                 .scanFile(ctxt, new String[] {f.getAbsolutePath()},
                         new String[] {mimeType}, null);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            final Intent scanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+            final Uri contentUri = Uri.fromFile(f);
+            scanIntent.setData(contentUri);
+            ctxt.sendBroadcast(scanIntent);
+        } else {
+            final Intent intent = new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.parse("file://" + Environment.getExternalStorageDirectory()));
+            ctxt.sendBroadcast(intent);
+        }
+
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == MY_PERMISSIONS_REQUEST_WRITE_STORAGE) {// If request is cancelled, the result arrays are empty.
             if (grantResults.length > 0
                     && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -477,20 +525,20 @@ public class Portadas extends AppCompatActivity {
             }
         }
     }
-/*    @Override
+    /*@Override
     protected void onPause() {
         super.onPause();
-        if (mBottomBanner != null) {
-            mBottomBanner.pause();
+        if (bottomBanner != null) {
+            bottomBanner.pause();
         }
-    }
+    }*/
 
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
-        if (mBottomBanner != null) {
-            mBottomBanner.destroy();
+        if (bottomBanner != null) {
+            bottomBanner.destroy();
         }
-    }*/
+        super.onDestroy();
+    }
 }

@@ -11,11 +11,13 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -25,21 +27,22 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.FileProvider;
 import androidx.preference.PreferenceManager;
 
+import com.facebook.ads.AdSettings;
+import com.facebook.ads.AdSize;
+import com.facebook.ads.AdView;
+import com.facebook.ads.AudienceNetworkAds;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
+import com.squareup.picasso.Picasso;
 
 import java.io.File;
+import java.util.List;
 import java.util.Objects;
-
-import coil.ImageLoader;
-import coil.request.ImageRequest;
 
 import static sergirex.portadasperiodicos.GetPortadas.MY_PERMISSIONS_REQUEST_WRITE_STORAGE;
 import static sergirex.portadasperiodicos.Portadas.scanFile;
 import static sergirex.portadasperiodicos.SavePortada.permission;
 
-//import com.google.android.gms.ads.AdRequest;
-//import com.google.android.gms.ads.AdView;
 
 public class PortadaDetalle extends AppCompatActivity {
     private Portada portada;
@@ -48,13 +51,14 @@ public class PortadaDetalle extends AppCompatActivity {
     private SharedPreferences prefsPer;
     private AlertDialog alertDialogNoConn;
     private ImageView imageView;
+    private AdView bottomBanner;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
         if (prefs.getBoolean("switch_preference", false)) {
             dark = true;
-            setTheme(R.style.Theme_AppCompat_NoActionBar);
+            setTheme(R.style.AppThemeDark);
         }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_portada_detalle);
@@ -67,9 +71,7 @@ public class PortadaDetalle extends AppCompatActivity {
         toolbar.setNavigationIcon(R.drawable.ic_arrow_back_black_24dp);
         String title = portada.getTitle().replace("_", " ");
         title = title.substring(0, 1).toUpperCase() + title.substring(1);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            Objects.requireNonNull(getSupportActionBar()).setTitle(title);
-        }
+        Objects.requireNonNull(getSupportActionBar()).setTitle(title);
         toolbar.setNavigationOnClickListener(v -> onBackPressed());
         imageView = findViewById(R.id.imagen_extendida);
 
@@ -80,6 +82,7 @@ public class PortadaDetalle extends AppCompatActivity {
         if (prefsPer.contains(portada.getWebPeriodico())) {
             fabfav.setImageResource(R.drawable.ic_favorite_black_24dp);
         }
+        fabfav.setOnDragListener((view, dragEvent) -> false);
         fabfav.setOnClickListener(view -> {
             SharedPreferences.Editor editor = prefsPer.edit();
             if (prefsPer.contains(portada.getWebPeriodico())) {
@@ -104,20 +107,7 @@ public class PortadaDetalle extends AppCompatActivity {
             pd.setCancelable(false);
             pd.show();
             pd.setIndeterminate(true);
-            ImageLoader imageLoader = new ImageLoader.Builder(this)
-                    .availableMemoryPercentage(0.25)
-                    .crossfade(true)
-                    .build();
-
-            ImageRequest request = new ImageRequest.Builder(this)
-                    .data(portada.getUrlPortada())
-                    .crossfade(true)
-                    .target(imageView)
-                    .build();
-            imageLoader.enqueue(request);
-            pd.cancel();
-            pd.dismiss();
-            /*Picasso.get().load(portada.getUrlPortada())
+            Picasso.get().load(portada.getUrlPortada())
                     .into(imageView, new com.squareup.picasso.Callback() {
                         @Override
                         public void onSuccess() {
@@ -132,13 +122,17 @@ public class PortadaDetalle extends AppCompatActivity {
                             Picasso.get().load(portada.getUrlPortada())
                                     .into(imageView);
                         }
-                    });*/
+                    });
         }
 
-        /*AdView mBottomBanner = findViewById(R.id.av_bottom_banner);
-        AdRequest adRequest = new AdRequest.Builder().build();
-        mBottomBanner.loadAd(adRequest);
-        savePortada = new SavePortada(this);*/
+        AudienceNetworkAds.initialize(this);
+        bottomBanner = new AdView(this, "799967435028134_799969321694612", AdSize.BANNER_HEIGHT_90);
+
+        //AdSettings.setTestMode(true);
+        // Find the Ad Container
+        LinearLayout adContainer = findViewById(R.id.bannerContainerDetail);
+        adContainer.addView(bottomBanner);
+        bottomBanner.loadAd();
     }
 
     @Override
@@ -166,39 +160,39 @@ public class PortadaDetalle extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         SavePortada savePortada = new SavePortada(this);
-        switch (item.getItemId()) {
-            case R.id.share:
-                File cacheFile = savePortada.saveFile(getCacheDir(), portada.getTitle(), ((BitmapDrawable) imageView.getDrawable()).getBitmap());
-                Uri fileURI = FileProvider.getUriForFile(this, "sergirex.portadasperiodicos.fileprovider", cacheFile);
-                Intent i = new Intent(Intent.ACTION_SEND);
-                i.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                i.putExtra(Intent.EXTRA_STREAM, fileURI);
-                i.putExtra(Intent.EXTRA_TEXT, "https://play.google.com/store/apps/details?id=" + getPackageName());
-                i.setType("image/png");
-                startActivity(Intent.createChooser(i, "Compartir portada"));
-                cacheFile.delete();
-                return true;
-            case R.id.save:
-                if (savePortada.isExternalStorageWritable()) {
-                    if (!savePortada.checkPermissions())
-                        return false;
-                    File file;
-                    if ((file = new File(savePortada.getAlbumStorageDir() + File.separator + portada.getTitle() + ".png")).exists()) {
-                        Snackbar sb = Snackbar.make(findViewById(R.id.imagen_extendida), "Ya se ha guardado la portada", Snackbar.LENGTH_SHORT);
-                        sb.setAnimationMode(Snackbar.ANIMATION_MODE_FADE);
-                        sb.show();
-                        return true;
-                    }
-                    savePortada.saveFile(savePortada.getAlbumStorageDir(), portada.getTitle(), ((BitmapDrawable) imageView.getDrawable()).getBitmap());
-
-                    scanFile(this, file, "images/png");
-                    Snackbar sb = Snackbar.make(findViewById(R.id.imagen_extendida), "Portada guarda correctamente en " + file.getAbsolutePath(), Snackbar.LENGTH_SHORT);
+        int itemId = item.getItemId();
+        if (itemId == R.id.share) {
+            Uri fileURI = savePortada.saveFile(portada.getTitle(), ((BitmapDrawable) imageView.getDrawable()).getBitmap());
+            Intent i = new Intent(Intent.ACTION_SEND);
+            i.putExtra(Intent.EXTRA_STREAM, fileURI);
+            i.putExtra(Intent.EXTRA_TEXT, "https://play.google.com/store/apps/details?id=" + getPackageName());
+            i.setType("image/jpeg");
+            Intent chooser = Intent.createChooser(i, "Compartir portada");
+            startActivity(chooser);
+            return true;
+        } else if (itemId == R.id.save) {
+            if (savePortada.isExternalStorageWritable()) {
+                if (!savePortada.checkPermissions())
+                    return false;
+                File file;
+                if ((file = new File(savePortada.getAlbumStorageDir() + File.separator + portada.getTitle() + ".jpg")).exists()) {
+                    Snackbar sb = Snackbar.make(findViewById(R.id.imagen_extendida), "Ya se ha guardado la portada", Snackbar.LENGTH_SHORT);
                     sb.setAnimationMode(Snackbar.ANIMATION_MODE_FADE);
                     sb.show();
-                } else {
-                    Toast.makeText(this, "Internal Storage unreadable", Toast.LENGTH_LONG).show();
+                    return true;
                 }
-                return true;
+                savePortada.saveFile(savePortada.getAlbumStorageDir(), portada.getTitle(), ((BitmapDrawable) imageView.getDrawable()).getBitmap());
+
+                scanFile(this, file, "images/jp" +
+                        "eg");
+
+                Snackbar sb = Snackbar.make(findViewById(R.id.imagen_extendida), "Portada guarda correctamente en " + file.getAbsolutePath(), Snackbar.LENGTH_SHORT);
+                sb.setAnimationMode(Snackbar.ANIMATION_MODE_FADE);
+                sb.show();
+            } else {
+                Toast.makeText(this, "Internal Storage unreadable", Toast.LENGTH_LONG).show();
+            }
+            return true;
         }
 
         return false;
@@ -230,6 +224,7 @@ public class PortadaDetalle extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == MY_PERMISSIONS_REQUEST_WRITE_STORAGE) {// If request is cancelled, the result arrays are empty.
             if (grantResults.length > 0
                     && grantResults[0] == PackageManager.PERMISSION_GRANTED) {

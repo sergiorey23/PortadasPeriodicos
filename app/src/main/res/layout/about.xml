@@ -3,13 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:gravity="center_horizontal"
     android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_marginTop="30dp"
         android:orientation="horizontal">
 
@@ -34,37 +34,17 @@
     <TextView
         android:id="@+id/appVersion"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="29dp"
         android:layout_marginTop="20dp"
         android:layout_marginBottom="20dp"
         android:gravity="center_horizontal" />
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="?android:attr/listDivider" />
-
-    <Button
-        android:id="@+id/instaContact"
-        style="@style/Widget.AppCompat.Button.Borderless"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:drawableStart="@drawable/ic_instagram_simple_icon"
-        android:drawableLeft="@drawable/ic_instagram_simple_icon"
-        android:text="@string/instagram"
-        android:textAppearance="@style/TextAppearance.AppCompat.Light.SearchResult.Subtitle" />
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="?android:attr/listDivider" />
 
     <Space
         android:layout_width="match_parent"
         android:layout_height="10dp" />
 
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
         android:lineSpacingExtra="4sp"
@@ -76,16 +56,11 @@
         android:layout_width="match_parent"
         android:layout_height="10dp" />
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="?android:attr/listDivider" />
-
     <Button
         android:id="@+id/contact"
-        style="@style/Widget.AppCompat.Button.Borderless"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        style="@style/Widget.AppCompat.Button"
+        android:layout_width="322dp"
+        android:layout_height="wrap_content"
         android:drawableStart="@drawable/ic_contact_mail_black_24dp"
         android:drawableLeft="@drawable/ic_contact_mail_black_24dp"
         android:text="@string/contact"
@@ -95,5 +70,79 @@
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="?android:attr/listDivider" />
+
+<!--    <TextView-->
+<!--        android:id="@+id/textView2"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_marginLeft="16dp"-->
+<!--        android:layout_marginTop="16dp"-->
+<!--        android:layout_marginRight="16dp"-->
+<!--        android:layout_marginBottom="8dp"-->
+<!--        android:gravity="center_horizontal"-->
+<!--        android:lineSpacingExtra="4sp"-->
+<!--        android:text="@string/freeApp"-->
+<!--        android:textAllCaps="false"-->
+<!--        android:textAppearance="@style/TextAppearance.AppCompat.Body1" />-->
+
+<!--    <Button-->
+<!--        android:id="@+id/paypal"-->
+<!--        style="@style/Widget.AppCompat.Button"-->
+<!--        android:layout_width="322dp"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:drawableStart="@drawable/paypal"-->
+<!--        android:drawableLeft="@drawable/paypal"-->
+<!--        android:text="@string/supportDeveloper"-->
+<!--        android:textAppearance="@style/TextAppearance.AppCompat.SearchResult.Subtitle" />-->
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="bottom"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/appSource"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginBottom="8dp"
+            android:gravity="center_horizontal"
+            android:lineSpacingExtra="4sp"
+            android:text="@string/appSource"
+            android:textAllCaps="false"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginBottom="8dp"
+            android:gravity="center_horizontal"
+            android:lineSpacingExtra="4sp"
+            android:text="@string/copyright"
+            android:textAllCaps="false"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+
+        <TextView
+            android:id="@+id/privacy_policy"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginBottom="16dp"
+            android:autoLink="web"
+            android:gravity="center_horizontal"
+            android:lineSpacingExtra="4sp"
+            android:linksClickable="true"
+            android:text="@string/privacy_policy"
+            android:textAllCaps="false"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
+
+    </LinearLayout>
 
 </LinearLayout>

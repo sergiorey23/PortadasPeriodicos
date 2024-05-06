@@ -27,5 +27,10 @@
     <string name="mode">Modo oscuro</string>
     <string name="tema">Tema</string>
     <string name="about_desc">\t¿Tienes alguna sugerencia? ¿Falta alguna portada?\n\tNo dudes en comentármelo!</string>
+    <string name="copyright">Todas las imágenes tienen derechos de autor de sus respectivos propietarios.</string>
+    <string name="freeApp">Esta aplicación es totalmente gratuita y libre de publicidad. Estaría muy agradecido si me invitara a un café. Muchas gracias.</string>
+    <string name="appSource">Una aplicación de lasportadas.es</string>
+    <string name="supportDeveloper">Invítame a un café</string>
+    <string name="privacy_policy">Política de privacidad</string>
 
 </resources>

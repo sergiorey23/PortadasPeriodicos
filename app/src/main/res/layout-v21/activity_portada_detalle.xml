@@ -58,11 +58,11 @@
             ads:maxImageSize="40dp" />
 
     </FrameLayout>
-<!--    <com.google.android.gms.ads.AdView
-        android:id="@+id/av_bottom_banner"
+    <LinearLayout
+        android:id="@+id/bannerContainerDetail"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        ads:adSize="SMART_BANNER"
-        ads:adUnitId="@string/banner_inferior_ad_unit_id" />-->
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        />
 </LinearLayout>

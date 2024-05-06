@@ -10,6 +10,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Environment;
 import android.util.Log;
 import android.widget.Toast;
@@ -43,15 +44,20 @@ class SavePortada {
     }
 
     boolean checkPermissions() {
+        String WRITE_EXTERNAL_STORAGE;
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            WRITE_EXTERNAL_STORAGE = Manifest.permission.WRITE_EXTERNAL_STORAGE;
+        } else {
+            WRITE_EXTERNAL_STORAGE = Manifest.permission.READ_MEDIA_IMAGES;
+        }
         if (ContextCompat.checkSelfPermission(context,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                WRITE_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
             permission = 1;
-
             ActivityCompat.requestPermissions((Activity) context,
-                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    new String[]{WRITE_EXTERNAL_STORAGE},
                     MY_PERMISSIONS_REQUEST_WRITE_STORAGE);
-        } else {
+        }else {
             return true;
         }
         return false;
@@ -72,31 +78,29 @@ class SavePortada {
     }
 
     Bitmap getThumbFile(String title) {
-        File file = new File(context.getCacheDir() + File.separator + title + ".png");
+        File file = new File(context.getCacheDir() + File.separator + title + ".jpg");
         if (file.exists())
             return BitmapFactory.decodeFile(file.getPath());
         else
             return null;
     }
 
-    File saveFile(File path, String fileName, Bitmap pic) {
+    void saveFile(File path, String fileName, Bitmap pic) {
         try {
-            File file = new File(path, fileName+".png");
+            File file = new File(path, fileName+".jpg");
             FileOutputStream fos = new FileOutputStream(file);
-            pic.compress(Bitmap.CompressFormat.PNG, 100, fos);
+            pic.compress(Bitmap.CompressFormat.JPEG, 100, fos);
             fos.close();
-            return file;
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return null;
     }
 
     Uri saveFile(String fileName, Bitmap pic) {
         try {
-            File file = new File(context.getCacheDir(), fileName + ".png");
+            File file = new File(context.getCacheDir(), fileName + ".jpg");
             FileOutputStream fos = new FileOutputStream(file);
-            pic.compress(Bitmap.CompressFormat.PNG, 100, fos);
+            pic.compress(Bitmap.CompressFormat.JPEG, 100, fos);
             fos.close();
             return FileProvider.getUriForFile(context, "sergirex.portadasperiodicos.fileprovider", file);
         } catch (IOException e) {
@@ -142,7 +146,7 @@ class DownloadPortada extends AsyncTask<String, FileOutputStream, FileOutputStre
             Bitmap portadaBM = BitmapFactory.decodeStream(is);
             if (file != null) {
                 FileOutputStream fos = new FileOutputStream(file);
-                portadaBM.compress(Bitmap.CompressFormat.PNG, 100, fos);
+                portadaBM.compress(Bitmap.CompressFormat.JPEG, 100, fos);
                 return fos;
             } else {
                 Uri fileURI = sp.saveFile(fileName, portadaBM);
@@ -152,7 +156,7 @@ class DownloadPortada extends AsyncTask<String, FileOutputStream, FileOutputStre
                 i.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 i.putExtra(Intent.EXTRA_STREAM, fileURI);
                 i.putExtra(Intent.EXTRA_TEXT, "https://play.google.com/store/apps/details?id=" + ctx.getPackageName());
-                i.setType("image/png");
+                i.setType("image/jpeg");
                 ctx.startActivity(Intent.createChooser(i, "Compartir portada"));
             }
         } catch (MalformedURLException e) {
@@ -168,7 +172,7 @@ class DownloadPortada extends AsyncTask<String, FileOutputStream, FileOutputStre
         if (fos != null) {
             try {
                 fos.close();
-                scanFile(ctx, file, "images/png");
+                scanFile(ctx, file, "images/jpeg");
                 Toast.makeText(ctx, "Portada guardada correctamente en " + file.getAbsolutePath(), Toast.LENGTH_SHORT).show();
             } catch (IOException e) {
                 e.printStackTrace();

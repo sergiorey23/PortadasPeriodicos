@@ -37,12 +37,12 @@ import java.util.Date;
 
 class GetPortadas extends AsyncTask<String, ImageButton, Boolean> {
     static final int MY_PERMISSIONS_REQUEST_WRITE_STORAGE = 0;
-    private WeakReference<View> rootView;
-    private WeakReference<Context> context;
+    private final WeakReference<View> rootView;
+    private final WeakReference<Context> context;
     private int portCont = 0;
     private WeakReference<LinearLayout> ly;
     private WeakReference<ProgressBar> pb;
-    private SharedPreferences fechasSP;
+    private final SharedPreferences fechasSP;
 
     GetPortadas(View rootView, String simpleName) {
         this.rootView = new WeakReference<>(rootView);
@@ -177,7 +177,7 @@ class GetPortadas extends AsyncTask<String, ImageButton, Boolean> {
                             if (!savePortada.checkPermissions())
                                 return false;
                             File file;
-                            if ((file = new File(savePortada.getAlbumStorageDir() + File.separator + portada.getTitle() + "_" + (finalFecha != null ? finalFecha.replace("/", "") : "") + ".png")).exists()) {
+                            if ((file = new File(savePortada.getAlbumStorageDir() + File.separator + portada.getTitle() + "_" + (finalFecha != null ? finalFecha.replace("/", "") : "") + ".jpg")).exists()) {
                                 Toast.makeText(context.get(), "Ya se ha guardado la portada.", Toast.LENGTH_LONG).show();
                                 return true;
                             }
