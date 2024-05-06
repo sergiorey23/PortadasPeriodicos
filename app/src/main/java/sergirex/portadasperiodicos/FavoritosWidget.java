@@ -177,7 +177,7 @@ public class FavoritosWidget extends AppWidgetProvider {
                     views.setImageViewBitmap(R.id.imageViewWidget, getPortada(index, context.getCacheDir().getAbsolutePath(), fecha));
                     Intent intentApp = new Intent(context, PortadaDetalle.class);
                     intentApp.putExtra("Portada", portada);
-                    PendingIntent pendingIntentAbrirApp = PendingIntent.getActivity(context, 0, intentApp, PendingIntent.FLAG_CANCEL_CURRENT);
+                    PendingIntent pendingIntentAbrirApp = PendingIntent.getActivity(context, 0, intentApp, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
                     views.setOnClickPendingIntent(R.id.imageViewWidget, pendingIntentAbrirApp);
                     AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
                     appWidgetManager.updateAppWidget(intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID), views);
@@ -200,7 +200,7 @@ public class FavoritosWidget extends AppWidgetProvider {
                     views.setImageViewBitmap(R.id.imageViewWidget, getPortada(index, context.getCacheDir().getAbsolutePath(), fecha));
                     Intent intentApp = new Intent(context, PortadaDetalle.class);
                     intentApp.putExtra("Portada", portada);
-                    PendingIntent pendingIntentAbrirApp = PendingIntent.getActivity(context, 0, intentApp, PendingIntent.FLAG_CANCEL_CURRENT);
+                    PendingIntent pendingIntentAbrirApp = PendingIntent.getActivity(context, 0, intentApp, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
                     views.setOnClickPendingIntent(R.id.imageViewWidget, pendingIntentAbrirApp);
                     AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
                     appWidgetManager.updateAppWidget(intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID), views);
