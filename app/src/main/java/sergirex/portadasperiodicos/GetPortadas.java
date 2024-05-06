@@ -145,7 +145,7 @@ class GetPortadas extends AsyncTask<String, ImageButton, Boolean> {
                     count = 0;
                 }
             }
-            final Portada portada = new Portada(title, webPeriodico, strUrl, periodico);
+            final Portada portada = new Portada(title, webPeriodico, strUrl, periodico, siglaPais);
 
             LinearLayout.LayoutParams paramsly = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 

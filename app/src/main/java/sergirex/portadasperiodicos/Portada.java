@@ -12,12 +12,14 @@ class Portada implements Serializable{
     private String webPeriodico;
     private String urlPortada;
     private String periodico;
+    private String siglaPais;
 
-    Portada(String title, String webPeriodico, String urlPortada, String periodico) {
+    Portada(String title, String webPeriodico, String urlPortada, String periodico, String siglaPais) {
         this.title = title;
         this.webPeriodico = webPeriodico;
         this.urlPortada = urlPortada;
         this.periodico = periodico;
+        this.siglaPais = siglaPais;
     }
 
     String getTitle() {
@@ -27,7 +29,7 @@ class Portada implements Serializable{
     String getPeriodico() { return periodico; }
 
     String getWebPeriodico() { return webPeriodico; }
-
     String getUrlPortada() { return urlPortada; }
-
+    void setUrlPortada(String url) { this.urlPortada = url; }
+    String getSiglaPais() { return siglaPais; }
 }

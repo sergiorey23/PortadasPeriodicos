@@ -5,13 +5,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -24,19 +26,26 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.content.FileProvider;
 import androidx.preference.PreferenceManager;
 
-import com.facebook.ads.AdSettings;
 import com.facebook.ads.AdSize;
 import com.facebook.ads.AdView;
 import com.facebook.ads.AudienceNetworkAds;
+import com.google.android.material.datepicker.MaterialDatePicker;
+import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
-import java.util.List;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 import java.util.Objects;
 
 import static sergirex.portadasperiodicos.GetPortadas.MY_PERMISSIONS_REQUEST_WRITE_STORAGE;
@@ -94,6 +103,15 @@ public class PortadaDetalle extends AppCompatActivity {
             }
             editor.apply();
         });
+
+        AudienceNetworkAds.initialize(this);
+        bottomBanner = new AdView(this, "799967435028134_799969321694612", AdSize.BANNER_HEIGHT_90);
+
+        //AdSettings.setTestMode(true);
+        // Find the Ad Container
+        LinearLayout adContainer = findViewById(R.id.bannerContainerDetail);
+        adContainer.addView(bottomBanner);
+        bottomBanner.loadAd();
     }
 
     void loadContent() {
@@ -124,15 +142,6 @@ public class PortadaDetalle extends AppCompatActivity {
                         }
                     });
         }
-
-        AudienceNetworkAds.initialize(this);
-        bottomBanner = new AdView(this, "799967435028134_799969321694612", AdSize.BANNER_HEIGHT_90);
-
-        //AdSettings.setTestMode(true);
-        // Find the Ad Container
-        LinearLayout adContainer = findViewById(R.id.bannerContainerDetail);
-        adContainer.addView(bottomBanner);
-        bottomBanner.loadAd();
     }
 
     @Override
@@ -161,7 +170,26 @@ public class PortadaDetalle extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         SavePortada savePortada = new SavePortada(this);
         int itemId = item.getItemId();
-        if (itemId == R.id.share) {
+        if (itemId == R.id.date) {
+            MaterialDatePicker<Long> datePicker = MaterialDatePicker.Builder.datePicker()
+                    .setTitleText("Select date")
+                    .build();
+            datePicker.show(getSupportFragmentManager(), "MATERIAL_DATE_PICKER");
+            datePicker.addOnPositiveButtonClickListener(
+                    aLong -> {
+                        //datePicker.getHeaderText()
+                        if(aLong > new Date().getTime()){
+                            Toast.makeText(this, "La fecha debe ser anterior a la actual", Toast.LENGTH_LONG).show();
+                            return;
+                        }
+                        DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd", Locale.US);
+                        String fecha = formatter.format(aLong);
+                        String strUrl = "http://img.kiosko.net/" + fecha + "/" + portada.getSiglaPais() + "/" + portada.getTitle() + ".jpg";
+                        portada.setUrlPortada(strUrl);
+                        loadContent();
+                    });
+
+        } else if (itemId == R.id.share) {
             Uri fileURI = savePortada.saveFile(portada.getTitle(), ((BitmapDrawable) imageView.getDrawable()).getBitmap());
             Intent i = new Intent(Intent.ACTION_SEND);
             i.putExtra(Intent.EXTRA_STREAM, fileURI);

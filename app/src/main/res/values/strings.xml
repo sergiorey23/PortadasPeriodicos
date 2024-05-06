@@ -32,5 +32,6 @@
     <string name="appSource">Una aplicación de lasportadas.es</string>
     <string name="supportDeveloper">Invítame a un café</string>
     <string name="privacy_policy">Política de privacidad</string>
+    <string name="date">Date</string>
 
 </resources>

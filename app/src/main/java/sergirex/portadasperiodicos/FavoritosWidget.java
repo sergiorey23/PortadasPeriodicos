@@ -78,8 +78,8 @@ public class FavoritosWidget extends AppWidgetProvider {
         intentRightBtn.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
         intentRightBtn.putExtra("fecha",fecha);
 
-        PendingIntent pendingIntentLeftBtn = PendingIntent.getBroadcast(context, 0, intentLeftBtn, PendingIntent.FLAG_UPDATE_CURRENT);
-        PendingIntent pendingIntentRightBtn = PendingIntent.getBroadcast(context, 0, intentRightBtn, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingIntentLeftBtn = PendingIntent.getBroadcast(context, 0, intentLeftBtn, PendingIntent.FLAG_IMMUTABLE);
+        PendingIntent pendingIntentRightBtn = PendingIntent.getBroadcast(context, 0, intentRightBtn, PendingIntent.FLAG_IMMUTABLE);
 
         views.setOnClickPendingIntent(R.id.leftBtn, pendingIntentLeftBtn);
         views.setOnClickPendingIntent(R.id.rightBtn, pendingIntentRightBtn);
@@ -89,7 +89,7 @@ public class FavoritosWidget extends AppWidgetProvider {
         Intent intentApp = new Intent(context, PortadaDetalle.class);
         intentApp.putExtra("Portada", portada);
 
-        PendingIntent pendingIntentAbrirApp = PendingIntent.getActivity(context, 0, intentApp, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingIntentAbrirApp = PendingIntent.getActivity(context, 0, intentApp, PendingIntent.FLAG_IMMUTABLE);
 
         views.setOnClickPendingIntent(R.id.imageViewWidget, pendingIntentAbrirApp);
 
@@ -116,7 +116,7 @@ public class FavoritosWidget extends AppWidgetProvider {
             webPeriodico = periodico;
         }
         String strUrl = "http://img.kiosko.net/" + fecha + "/" + siglaPais + "/" + title + ".640.jpg";
-        portada = new Portada(title, webPeriodico, strUrl.replace(".640", ""), periodico);
+        portada = new Portada(title, webPeriodico, strUrl.replace(".640", ""), periodico,siglaPais);
         File file;
         if(fecha != null && (file = new File( path+ File.separator + title + "t.png")).exists()){
             return BitmapFactory.decodeFile(file.getPath());
@@ -177,7 +177,7 @@ public class FavoritosWidget extends AppWidgetProvider {
                     views.setImageViewBitmap(R.id.imageViewWidget, getPortada(index, context.getCacheDir().getAbsolutePath(), fecha));
                     Intent intentApp = new Intent(context, PortadaDetalle.class);
                     intentApp.putExtra("Portada", portada);
-                    PendingIntent pendingIntentAbrirApp = PendingIntent.getActivity(context, 0, intentApp, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+                    PendingIntent pendingIntentAbrirApp = PendingIntent.getActivity(context, 0, intentApp, PendingIntent.FLAG_IMMUTABLE);
                     views.setOnClickPendingIntent(R.id.imageViewWidget, pendingIntentAbrirApp);
                     AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
                     appWidgetManager.updateAppWidget(intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID), views);
@@ -200,7 +200,7 @@ public class FavoritosWidget extends AppWidgetProvider {
                     views.setImageViewBitmap(R.id.imageViewWidget, getPortada(index, context.getCacheDir().getAbsolutePath(), fecha));
                     Intent intentApp = new Intent(context, PortadaDetalle.class);
                     intentApp.putExtra("Portada", portada);
-                    PendingIntent pendingIntentAbrirApp = PendingIntent.getActivity(context, 0, intentApp, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+                    PendingIntent pendingIntentAbrirApp = PendingIntent.getActivity(context, 0, intentApp, PendingIntent.FLAG_IMMUTABLE);
                     views.setOnClickPendingIntent(R.id.imageViewWidget, pendingIntentAbrirApp);
                     AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
                     appWidgetManager.updateAppWidget(intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID), views);
