@@ -1,5 +1,7 @@
 package sergirex.portadasperiodicos;
 
+import static android.content.Context.MODE_PRIVATE;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
@@ -43,11 +45,11 @@ class GetPortadas extends AsyncTask<String, ImageButton, Boolean> {
     private WeakReference<LinearLayout> ly;
     private WeakReference<ProgressBar> pb;
     private final SharedPreferences fechasSP;
-
+    private int adCount = 0;
     GetPortadas(View rootView, String simpleName) {
         this.rootView = new WeakReference<>(rootView);
         context = new WeakReference<>(rootView.getContext());
-        fechasSP = context.get().getSharedPreferences("Fechas" + simpleName, Context.MODE_PRIVATE);
+        fechasSP = context.get().getSharedPreferences("Fechas" + simpleName, MODE_PRIVATE);
     }
 
     View getRootView() {
@@ -71,8 +73,14 @@ class GetPortadas extends AsyncTask<String, ImageButton, Boolean> {
         if (calendar.get(Calendar.HOUR_OF_DAY) < 4) {
             calendar.add(Calendar.DATE, -1);
         }
+        SharedPreferences datePrefs = context.get().getSharedPreferences("fecha", Context.MODE_PRIVATE);
+        String fecha = datePrefs.getString("fecha", null);
         @SuppressLint("SimpleDateFormat") DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd");
-        String fecha = formatter.format(calendar.getTime());
+
+        if(fecha == null){
+            fecha = formatter.format(calendar.getTime());
+        }
+
         String fechaAux = fecha;
         SharedPreferences.Editor editor = null;
         String fechaPortadas = fechasSP.getString("fechaPortadas", null);
@@ -159,6 +167,8 @@ class GetPortadas extends AsyncTask<String, ImageButton, Boolean> {
             imageButton.setOnClickListener(view -> {
                 Intent intent = new Intent(context.get(), PortadaDetalle.class);
                 intent.putExtra("Portada", portada);
+                adCount++;
+                intent.putExtra("showAd", adCount);
                 context.get().startActivity(intent);
             });
             final String finalFecha = fecha;

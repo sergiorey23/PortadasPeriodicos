@@ -1,6 +1,7 @@
 package sergirex.portadasperiodicos;
 
 import android.app.ProgressDialog;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -13,6 +14,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -28,11 +30,17 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.preference.PreferenceManager;
 
+import com.facebook.ads.Ad;
+import com.facebook.ads.AdError;
+import com.facebook.ads.AdSettings;
 import com.facebook.ads.AdSize;
 import com.facebook.ads.AdView;
 import com.facebook.ads.AudienceNetworkAds;
+import com.facebook.ads.InterstitialAd;
+import com.facebook.ads.InterstitialAdListener;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.squareup.picasso.Picasso;
@@ -61,6 +69,8 @@ public class PortadaDetalle extends AppCompatActivity {
     private AlertDialog alertDialogNoConn;
     private ImageView imageView;
     private AdView bottomBanner;
+    private InterstitialAd interstitialAd;
+    private Long today;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,7 +83,7 @@ public class PortadaDetalle extends AppCompatActivity {
         setContentView(R.layout.activity_portada_detalle);
 
         portada = (Portada) getIntent().getSerializableExtra("Portada");
-
+        int showAd = getIntent().getIntExtra("showAd",0);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -104,15 +114,85 @@ public class PortadaDetalle extends AppCompatActivity {
             editor.apply();
         });
 
+        prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        int rate = prefs.getInt("rate",0);
+        if(rate == 0 && showAd%2==0) {
+            SharedPreferences.Editor editor = prefs.edit();
+            new MaterialAlertDialogBuilder(this,R.style.Theme_MyApp_Dialog_Alert)
+                    .setTitle(R.string.rateTitle)
+                    .setMessage(R.string.rateDescription)
+                    .setIcon(R.mipmap.news_icon)
+                    .setNeutralButton("No", (dialog, which) -> {
+                        editor.putInt("rate", 1);
+                        editor.apply();
+                    }).setNegativeButton(R.string.later, (dialog, which) -> {
+                        editor.putInt("rate", 2);
+                        editor.apply();
+                    }).setPositiveButton(R.string.sure, (dialog, which) -> {
+                        editor.putInt("rate", 1);
+                        editor.apply();
+                        Uri uri = Uri.parse("market://details?id=" + getPackageName());
+                        Intent myAppLinkToMarket = new Intent(Intent.ACTION_VIEW, uri);
+                        try {
+                            startActivity(myAppLinkToMarket);
+                        } catch (ActivityNotFoundException e) {
+                            Toast.makeText(this, " unable to find market app", Toast.LENGTH_LONG).show();
+                        }
+                    }).show();
+        }
         AudienceNetworkAds.initialize(this);
-        bottomBanner = new AdView(this, "799967435028134_799969321694612", AdSize.BANNER_HEIGHT_90);
-
-        //AdSettings.setTestMode(true);
+        AdSettings.setTestMode(true);
+        bottomBanner = new AdView(this, "799967435028134_799969321694612", AdSize.BANNER_HEIGHT_50);
         // Find the Ad Container
         LinearLayout adContainer = findViewById(R.id.bannerContainerDetail);
         adContainer.addView(bottomBanner);
         bottomBanner.loadAd();
+        if (showAd%3==0) {
+            interstitialAd = new InterstitialAd(this, "799967435028134_801174748240736");
+            String TAG = "AD";
+            InterstitialAdListener interstitialAdListener = new InterstitialAdListener() {
+
+                @Override
+                public void onInterstitialDisplayed(Ad ad) {
+                    // Interstitial ad displayed callback
+                }
+
+                @Override
+                public void onInterstitialDismissed(Ad ad) {
+                    // Interstitial dismissed callback
+                }
+
+                @Override
+                public void onError(Ad ad, AdError adError) {
+                    // Ad error callback
+                    Log.e(TAG, "Interstitial ad failed to load: " + adError.getErrorMessage());
+                }
+
+                @Override
+                public void onAdLoaded(Ad ad) {
+                    // Interstitial ad is loaded and ready to be displayed
+                    Log.d(TAG, "Interstitial ad is loaded and ready to be displayed!");
+                    // Show the ad
+                    interstitialAd.show();
+                }
+
+                @Override
+                public void onAdClicked(Ad ad) {
+                    // Ad clicked callback
+                }
+
+                @Override
+                public void onLoggingImpression(Ad ad) {
+                    // Ad impression logged callback
+                }
+            };
+
+            interstitialAd.loadAd(interstitialAd.buildLoadAdConfig()
+                    .withAdListener(interstitialAdListener)
+                    .build());
+        }
     }
+
 
     void loadContent() {
         if (!isOnline()) {
@@ -171,8 +251,9 @@ public class PortadaDetalle extends AppCompatActivity {
         SavePortada savePortada = new SavePortada(this);
         int itemId = item.getItemId();
         if (itemId == R.id.date) {
+            if(today == null) today = MaterialDatePicker.todayInUtcMilliseconds();
             MaterialDatePicker<Long> datePicker = MaterialDatePicker.Builder.datePicker()
-                    .setTitleText("Select date")
+                    .setTitleText("Select date").setSelection(today)
                     .build();
             datePicker.show(getSupportFragmentManager(), "MATERIAL_DATE_PICKER");
             datePicker.addOnPositiveButtonClickListener(
@@ -182,6 +263,7 @@ public class PortadaDetalle extends AppCompatActivity {
                             Toast.makeText(this, "La fecha debe ser anterior a la actual", Toast.LENGTH_LONG).show();
                             return;
                         }
+                        today = aLong;
                         DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd", Locale.US);
                         String fecha = formatter.format(aLong);
                         String strUrl = "http://img.kiosko.net/" + fecha + "/" + portada.getSiglaPais() + "/" + portada.getTitle() + ".jpg";
@@ -267,5 +349,13 @@ public class PortadaDetalle extends AppCompatActivity {
                 sb.show();
             }
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (interstitialAd != null) {
+            interstitialAd.destroy();
+        }
+        super.onDestroy();
     }
 }

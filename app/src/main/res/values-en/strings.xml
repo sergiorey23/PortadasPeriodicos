@@ -28,4 +28,8 @@
     <string name="supportDeveloper">Inviteme a coffe</string>
     <string name="privacy_policy">Privacy Policy</string>
     <string name="date">Date</string>
+    <string name="rateTitle">Rate Portadas</string>
+    <string name="rateDescription">If you are enjoying the app. Would you mind rating it on the Play Store?</string>
+    <string name="later">Later</string>
+    <string name="sure">Sure!</string>
 </resources>

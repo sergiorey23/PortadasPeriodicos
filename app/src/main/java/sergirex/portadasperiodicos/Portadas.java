@@ -43,6 +43,7 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.preference.PreferenceManager;
 import androidx.viewpager.widget.ViewPager;
 
+import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
@@ -55,6 +56,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import static sergirex.portadasperiodicos.GetPortadas.MY_PERMISSIONS_REQUEST_WRITE_STORAGE;
 import static sergirex.portadasperiodicos.SavePortada.permission;
@@ -69,9 +71,11 @@ public class Portadas extends AppCompatActivity {
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private SharedPreferences prefs;
     private SharedPreferences prefsPor;
+    private SharedPreferences datePrefs;
     private int favsCount = 0;
     private boolean dark = false;
     private boolean descargar= false;
+    private Long today;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,6 +111,12 @@ public class Portadas extends AppCompatActivity {
         tabLayout = findViewById(R.id.tabs);
         prefsPor = getSharedPreferences("periodicos", Context.MODE_PRIVATE);
 
+        int rateDialog = prefs.getInt("rate",0);
+        if(rateDialog == 2){
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putInt("rate",0);
+            editor.apply();
+        }
 
         if (descargar && !isOnline()) {
             if (alertDialogNoConn == null)
@@ -168,6 +178,11 @@ public class Portadas extends AppCompatActivity {
                         MY_PERMISSIONS_REQUEST_WRITE_STORAGE);
             }
         }
+
+        datePrefs = getSharedPreferences("fecha", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = datePrefs.edit();
+        editor.remove("fecha");
+        editor.apply();
 
         AudienceNetworkAds.initialize(this);
         //AdSettings.setTestMode(true);
@@ -422,6 +437,28 @@ public class Portadas extends AppCompatActivity {
                 sb.setAnimationMode(Snackbar.ANIMATION_MODE_FADE);
                 sb.show();
             }
+            return true;
+        } else if(menuItem.getItemId() == R.id.date){
+            if(today == null) today = MaterialDatePicker.todayInUtcMilliseconds();
+            MaterialDatePicker<Long> datePicker = MaterialDatePicker.Builder.datePicker()
+                    .setTitleText("Select date").setSelection(today)
+                    .build();
+            datePicker.show(getSupportFragmentManager(), "MATERIAL_DATE_PICKER");
+            datePicker.addOnPositiveButtonClickListener(
+                    aLong -> {
+                        //datePicker.getHeaderText()
+                        if(aLong > new Date().getTime()){
+                            Toast.makeText(this, "La fecha debe ser anterior a la actual", Toast.LENGTH_LONG).show();
+                            return;
+                        }
+                        today = aLong;
+                        DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd", Locale.US);
+                        String fecha = formatter.format(aLong);
+                        SharedPreferences.Editor editor = datePrefs.edit();
+                        editor.putString("fecha", fecha);
+                        editor.apply();
+                        loadSectionsAdapter();
+                    });
             return true;
         }
         Fragment fragment = mSectionsPagerAdapter.getItem(tabLayout.getSelectedTabPosition());
