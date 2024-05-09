@@ -252,7 +252,8 @@ public class PortadaDetalle extends AppCompatActivity {
         int itemId = item.getItemId();
         if (itemId == R.id.date) {
             if(today == null) today = MaterialDatePicker.todayInUtcMilliseconds();
-            MaterialDatePicker<Long> datePicker = MaterialDatePicker.Builder.datePicker()
+            MaterialDatePicker<Long> datePicker = MaterialDatePicker.Builder
+                    .datePicker()
                     .setTitleText("Select date").setSelection(today)
                     .build();
             datePicker.show(getSupportFragmentManager(), "MATERIAL_DATE_PICKER");

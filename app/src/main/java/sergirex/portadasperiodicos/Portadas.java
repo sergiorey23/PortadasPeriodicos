@@ -264,8 +264,7 @@ public class Portadas extends AppCompatActivity {
 
     void showAboutInfo(){
         View aboutLayout = getLayoutInflater().inflate(R.layout.about, mDrawerLayout ,false);
-        int theme = prefs.getBoolean("switch_preference", false)?
-                R.style.AppThemeDark : R.style.AppTheme;
+        int theme = dark ? R.style.AppThemeDark : R.style.AppTheme;
         AlertDialog.Builder builder = new AlertDialog.Builder(this, theme);
         builder.setPositiveButton(R.string.close, null);
         builder.setView(aboutLayout);
@@ -418,6 +417,12 @@ public class Portadas extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.refresh, menu);
+        /*MenuItem shareItem = menu.findItem(R.id.date);
+
+        if (dark) {
+            shareItem.setVisible(false);
+        }*/
+
         return true;
     }
 
@@ -440,7 +445,8 @@ public class Portadas extends AppCompatActivity {
             return true;
         } else if(menuItem.getItemId() == R.id.date){
             if(today == null) today = MaterialDatePicker.todayInUtcMilliseconds();
-            MaterialDatePicker<Long> datePicker = MaterialDatePicker.Builder.datePicker()
+            MaterialDatePicker<Long> datePicker = MaterialDatePicker.Builder
+                    .datePicker()
                     .setTitleText("Select date").setSelection(today)
                     .build();
             datePicker.show(getSupportFragmentManager(), "MATERIAL_DATE_PICKER");
