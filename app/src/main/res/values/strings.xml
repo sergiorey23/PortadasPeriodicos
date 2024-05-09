@@ -36,5 +36,9 @@
     <string name="rateDescription">Si estás disfrutando de la app. ¿Te importaría calificarla en la Play Store?</string>
     <string name="later">Mas tarde</string>
     <string name="sure">Claro!</string>
+    <string name="default_system">Predeterminado del sistema</string>
+    <string name="light">Claro</string>
+    <string name="dark">Oscuro</string>
+    <string name="categories">Categorias</string>
 
 </resources>

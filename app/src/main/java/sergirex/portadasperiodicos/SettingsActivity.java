@@ -1,6 +1,7 @@
 package sergirex.portadasperiodicos;
 
 import android.app.Activity;
+import android.content.res.Configuration;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -13,8 +14,16 @@ public class SettingsActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("switch_preference", false))
-            setTheme(R.style.AppThemeDark);
+        String mode = PreferenceManager.getDefaultSharedPreferences(this).getString("theme","default");
+        switch (mode) {
+            case "default":
+                if ((getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES) {
+                    setTheme(R.style.AppThemeDark);
+                }
+                break;
+            case "dark":
+                setTheme(R.style.AppThemeDark);
+        }
         super.onCreate(savedInstanceState);
         getSupportFragmentManager().beginTransaction().replace(android.R.id.content, new MyPreferenceFragment()).commit();
 
@@ -27,11 +36,13 @@ public class SettingsActivity extends AppCompatActivity {
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
             setPreferencesFromResource(R.xml.preferences, rootKey);
 
-            SwitchPreferenceCompat theme_switcher = (SwitchPreferenceCompat) findPreference("switch_preference");
-
-            theme_switcher.setOnPreferenceChangeListener(new androidx.preference.Preference.OnPreferenceChangeListener() {
+            androidx.preference.ListPreference modesLP = (androidx.preference.ListPreference) findPreference("theme");
+            modesLP.setSummary(modesLP.getEntry());
+            modesLP.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
-                public boolean onPreferenceChange(androidx.preference.Preference preference, Object newValue) {
+                public boolean onPreferenceChange(Preference preference, Object newValue) {
+                    preference.setSummary(newValue.toString());
+                    preference.setDefaultValue(newValue);
                     Activity activity = getActivity();
                     if(activity != null) {
                         getActivity().recreate();

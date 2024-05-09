@@ -3,12 +3,17 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <PreferenceCategory android:title="@string/tema"
         app:iconSpaceReserved="false">
-        <SwitchPreferenceCompat
-            android:defaultValue="false"
-            android:key="switch_preference"
-            android:title="@string/mode"
-            app:iconSpaceReserved="false"/>
+        <ListPreference
+            android:defaultValue="default"
+            android:summary="@string/default_system"
+            app:iconSpaceReserved="false"
+            android:entries="@array/modos_ui"
+            android:entryValues="@array/modos_ui_values"
+            android:key="theme"
+            android:title="Modo" />
     </PreferenceCategory>
+    <PreferenceCategory android:title="@string/categories"
+        app:iconSpaceReserved="false">
     <ListPreference
         android:defaultValue="@string/first_tab"
         android:summary="@string/first_tab"
@@ -17,4 +22,5 @@
         android:entryValues="@array/portadas_categories"
         android:key="init_category"
         android:title="Categoría incial" />
+    </PreferenceCategory>
 </androidx.preference.PreferenceScreen>

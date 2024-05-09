@@ -32,4 +32,8 @@
     <string name="rateDescription">If you are enjoying the app. Would you mind rating it on the Play Store?</string>
     <string name="later">Later</string>
     <string name="sure">Sure!</string>
+    <string name="default_system">Default system</string>
+    <string name="light">Light</string>
+    <string name="dark">Dark</string>
+    <string name="categories">Categories</string>
 </resources>

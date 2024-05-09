@@ -8,4 +8,14 @@
         <item>@string/fourth_tab</item>
         <item>@string/fifth_tab</item>
     </string-array>
+    <string-array name="modos_ui">
+        <item>@string/default_system</item>
+        <item>@string/light</item>
+        <item>@string/dark</item>
+    </string-array>
+    <string-array name="modos_ui_values">
+        <item>default</item>
+        <item>light</item>
+        <item>dark</item>
+    </string-array>
 </resources>

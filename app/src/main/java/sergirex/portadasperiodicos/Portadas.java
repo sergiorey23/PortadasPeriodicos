@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.media.MediaScannerConnection;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -80,11 +81,25 @@ public class Portadas extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        if (prefs.getBoolean("switch_preference", false)) {
-            dark = true;
-            setTheme(R.style.AppThemeDark);
-        }else{
-            setTheme(R.style.AppTheme);
+        String theme = prefs.getString("theme","default");
+        switch (theme) {
+            case "default":
+                switch (getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) {
+                    case Configuration.UI_MODE_NIGHT_YES:
+                        setTheme(R.style.AppThemeDark);
+                        dark = true;
+                        break;
+                    case Configuration.UI_MODE_NIGHT_NO:
+                        setTheme(R.style.AppTheme);
+                        break;
+                }
+                break;
+            case "light":
+                setTheme(R.style.AppTheme);
+                break;
+            case "dark":
+                setTheme(R.style.AppThemeDark);
+                dark = true;
         }
         super.onCreate(savedInstanceState);
 
@@ -211,15 +226,7 @@ public class Portadas extends AppCompatActivity {
         String lpValue = prefs.getString("init_category", getString(R.string.first_tab));
         if(prefsPor.getAll().isEmpty()) {
             switch (lpValue.substring(0,3)) {
-                case "Fav":
-                    mViewPager.setCurrentItem(0);
-                    break;
-                case "Gen":
-                    mViewPager.setCurrentItem(0);
-                    break;
                 case "Dep":
-                    mViewPager.setCurrentItem(1);
-                    break;
                 case "Spo":
                     mViewPager.setCurrentItem(1);
                     break;
@@ -239,12 +246,7 @@ public class Portadas extends AppCompatActivity {
                 case "Fav":
                     mViewPager.setCurrentItem(0);
                     break;
-                case "Gen":
-                    mViewPager.setCurrentItem(1);
-                    break;
                 case "Dep":
-                    mViewPager.setCurrentItem(2);
-                    break;
                 case "Spo":
                     mViewPager.setCurrentItem(2);
                     break;
@@ -314,8 +316,7 @@ public class Portadas extends AppCompatActivity {
 
     private AlertDialog showDialog() {
         if (alertDialog == null) {
-            int theme = prefs.getBoolean("switch_preference", false)?
-                R.style.AppThemeDark : R.style.AppTheme;
+            int theme = dark ? R.style.AppThemeDark : R.style.AppTheme;
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this, theme);
             alertDialogBuilder.setTitle(R.string.help);
             alertDialogBuilder.setIcon(R.mipmap.news_icon);
@@ -538,9 +539,22 @@ public class Portadas extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        if((prefs.getBoolean("switch_preference", false) && !dark)
-            || (!prefs.getBoolean("switch_preference", false) && dark)){
+        String theme = prefs.getString("theme", "default");
+
+        if (theme.equals("dark") && !dark || theme.equals("light") && dark){
             recreate();
+        }else if(theme.equals("default")){
+            switch (getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) {
+                case Configuration.UI_MODE_NIGHT_YES:
+                    if(!dark){
+                        recreate();
+                    }
+                    break;
+                case Configuration.UI_MODE_NIGHT_NO:
+                    if(dark){
+                        recreate();
+                    }
+            }
         }
         /*if (mBottomBanner != null) {
             mBottomBanner.resume();

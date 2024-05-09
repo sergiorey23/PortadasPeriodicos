@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
@@ -75,9 +76,17 @@ public class PortadaDetalle extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        if (prefs.getBoolean("switch_preference", false)) {
-            dark = true;
-            setTheme(R.style.AppThemeDark);
+        String theme = prefs.getString("theme","default");
+        switch (theme) {
+            case "default":
+                if ((getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES) {
+                    setTheme(R.style.AppThemeDark);
+                    dark = true;
+                }
+                break;
+            case "dark":
+                setTheme(R.style.AppThemeDark);
+                dark = true;
         }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_portada_detalle);
@@ -227,10 +236,10 @@ public class PortadaDetalle extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        if (prefs.getBoolean("switch_preference", false) && !dark) {
+        /*if (prefs.getBoolean("switch_preference", false) && !dark) {
             dark = true;
             recreate();
-        }
+        }*/
     }
 
     public void onClickWebBtn(View view) {
