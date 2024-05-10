@@ -115,11 +115,11 @@ class GetPortadas extends AsyncTask<String, ImageButton, Boolean> {
             String strUrl = null;
             if (!descargar && fechasSP.getString(title, null) != null && (portadaBM = savePortada.getThumbFile(title + 't')) != null) {
                 fecha = fechasSP.getString(title, fecha);
-                strUrl = "http://img.kiosko.net/" + fecha + "/" + siglaPais + "/" + title + ".jpg";
+                strUrl = "https://img.kiosko.net/" + fecha + "/" + siglaPais + "/" + title + ".jpg";
             } else {
                 do {
                     try {
-                        strUrl = "http://img.kiosko.net/" + fecha + "/" + siglaPais + "/" + title + ".640.jpg";
+                        strUrl = "https://img.kiosko.net/" + fecha + "/" + siglaPais + "/" + title + ".640.jpg";
                         url = new URL(strUrl);
                         is = (InputStream) url.getContent();
                     } catch (FileNotFoundException fne) {

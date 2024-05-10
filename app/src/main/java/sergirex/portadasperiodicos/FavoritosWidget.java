@@ -115,7 +115,7 @@ public class FavoritosWidget extends AppWidgetProvider {
             title = periodico.split("\\.")[0];
             webPeriodico = periodico;
         }
-        String strUrl = "http://img.kiosko.net/" + fecha + "/" + siglaPais + "/" + title + ".640.jpg";
+        String strUrl = "https://img.kiosko.net/" + fecha + "/" + siglaPais + "/" + title + ".640.jpg";
         portada = new Portada(title, webPeriodico, strUrl.replace(".640", ""), periodico,siglaPais);
         File file;
         if(fecha != null && (file = new File( path+ File.separator + title + "t.png")).exists()){
@@ -137,7 +137,7 @@ public class FavoritosWidget extends AppWidgetProvider {
         int count = 0;
         do {
             try {
-                strUrl = "http://img.kiosko.net/" + fecha + "/" + siglaPais + "/" + title + ".640.jpg";
+                strUrl = "https://img.kiosko.net/" + fecha + "/" + siglaPais + "/" + title + ".640.jpg";
                 url = new URL(strUrl);
                 is = (InputStream) url.getContent();
             } catch (FileNotFoundException fne) {

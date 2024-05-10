@@ -359,6 +359,7 @@ public class Portadas extends AppCompatActivity {
                     SharedPreferences.Editor editor = prefs.edit();
                     editor.putBoolean("remove_fb_ads",true);
                     editor.apply();
+                    bottomBanner.removeAllViews();
                 }
             });
             Log.d(TAG, "Purchase Token: " + purchases.getPurchaseToken());
@@ -389,6 +390,7 @@ public class Portadas extends AppCompatActivity {
                                         editor.putBoolean("remove_fb_ads",true);
                                         editor.apply();
                                         sb = Snackbar.make(mDrawerLayout, "Successfully restored", Snackbar.LENGTH_SHORT);
+                                        bottomBanner.removeAllViews();
                                     } else {
                                         Log.d(TAG, "Oops, No purchase found.");
                                         sb = Snackbar.make(mDrawerLayout, "No purchase found", Snackbar.LENGTH_SHORT);

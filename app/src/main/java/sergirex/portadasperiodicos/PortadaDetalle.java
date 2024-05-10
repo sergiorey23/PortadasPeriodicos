@@ -291,7 +291,7 @@ public class PortadaDetalle extends AppCompatActivity {
                         today = aLong;
                         DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd", Locale.US);
                         String fecha = formatter.format(aLong);
-                        String strUrl = "http://img.kiosko.net/" + fecha + "/" + portada.getSiglaPais() + "/" + portada.getTitle() + ".jpg";
+                        String strUrl = "https://img.kiosko.net/" + fecha + "/" + portada.getSiglaPais() + "/" + portada.getTitle() + ".jpg";
                         portada.setUrlPortada(strUrl);
                         loadContent();
                     });
