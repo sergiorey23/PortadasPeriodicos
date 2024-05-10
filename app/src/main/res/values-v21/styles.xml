@@ -12,6 +12,7 @@
         <item name="materialCalendarFullscreenTheme">@style/ThemeOverlay.MaterialComponents.MaterialCalendar.Fullscreen</item>
         <item name="materialCalendarTheme">@style/ThemeOverlay.MaterialComponents.MaterialCalendar</item>
         <item name="android:windowActionBar">false</item>
+        <item name="android:windowAnimationStyle">@style/WindowAnimationTransition</item>
         <item name="windowNoTitle">true</item>
     </style>
     <style name="AppThemeDark" parent="Theme.Material3.Dark">
