@@ -4,6 +4,10 @@
         android:id="@+id/nav_settings"
         android:icon="@drawable/ic_settings_black_24dp"/>
 
+    <item android:title="@string/removeAds"
+        android:id="@+id/nav_remove_ads"
+        android:icon="@drawable/baseline_block_24"/>
+
     <item android:title="@string/rate"
         android:id="@+id/nav_rate"
         android:icon="@drawable/ic_rate_review_black_24dp"/>

@@ -40,5 +40,6 @@
     <string name="light">Claro</string>
     <string name="dark">Oscuro</string>
     <string name="categories">Categorias</string>
+    <string name="removeAds">Quitar anuncios</string>
 
 </resources>

@@ -7,15 +7,12 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -33,24 +30,22 @@ import androidx.preference.PreferenceManager;
 
 import com.facebook.ads.Ad;
 import com.facebook.ads.AdError;
-import com.facebook.ads.AdSettings;
 import com.facebook.ads.AdSize;
 import com.facebook.ads.AdView;
 import com.facebook.ads.AudienceNetworkAds;
 import com.facebook.ads.InterstitialAd;
 import com.facebook.ads.InterstitialAdListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.datepicker.MaterialDatePicker;
-import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.android.play.core.review.ReviewInfo;
+import com.google.android.play.core.review.ReviewManager;
+import com.google.android.play.core.review.ReviewManagerFactory;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -140,65 +135,85 @@ public class PortadaDetalle extends AppCompatActivity {
                     }).setPositiveButton(R.string.sure, (dialog, which) -> {
                         editor.putInt("rate", 1);
                         editor.apply();
-                        Uri uri = Uri.parse("market://details?id=" + getPackageName());
-                        Intent myAppLinkToMarket = new Intent(Intent.ACTION_VIEW, uri);
-                        try {
-                            startActivity(myAppLinkToMarket);
-                        } catch (ActivityNotFoundException e) {
-                            Toast.makeText(this, " unable to find market app", Toast.LENGTH_LONG).show();
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                            ReviewManager manager = ReviewManagerFactory.create(this);
+                            Task<ReviewInfo> request = manager.requestReviewFlow();
+                            request.addOnCompleteListener(task -> {
+                                if (task.isSuccessful()) {
+                                    // We can get the ReviewInfo object
+                                    ReviewInfo reviewInfo = task.getResult();
+                                    Task<Void> flow = manager.launchReviewFlow(this, reviewInfo);
+                                    flow.addOnCompleteListener(t -> {
+                                        Toast.makeText(this, "¡Gracias!", Toast.LENGTH_LONG).show();
+                                    });
+                                } else {
+                                    // There was some problem, log or handle the error code.
+                                    Log.e("Review Error", task.getException().getMessage());
+                                }
+                            });
+                        }else {
+                            Uri uri = Uri.parse("market://details?id=" + getPackageName());
+                            Intent myAppLinkToMarket = new Intent(Intent.ACTION_VIEW, uri);
+                            try {
+                                startActivity(myAppLinkToMarket);
+                            } catch (ActivityNotFoundException e) {
+                                Toast.makeText(this, " unable to find market app", Toast.LENGTH_LONG).show();
+                            }
                         }
                     }).show();
         }
-        AudienceNetworkAds.initialize(this);
-        AdSettings.setTestMode(true);
-        bottomBanner = new AdView(this, "799967435028134_799969321694612", AdSize.BANNER_HEIGHT_50);
-        // Find the Ad Container
-        LinearLayout adContainer = findViewById(R.id.bannerContainerDetail);
-        adContainer.addView(bottomBanner);
-        bottomBanner.loadAd();
-        if (showAd%3==0) {
-            interstitialAd = new InterstitialAd(this, "799967435028134_801174748240736");
-            String TAG = "AD";
-            InterstitialAdListener interstitialAdListener = new InterstitialAdListener() {
+        if(!prefs.getBoolean("remove_fb_ads", false)) {
+            AudienceNetworkAds.initialize(this);
+            //AdSettings.setTestMode(true);
+            bottomBanner = new AdView(this, "799967435028134_799969321694612", AdSize.BANNER_HEIGHT_50);
+            // Find the Ad Container
+            LinearLayout adContainer = findViewById(R.id.bannerContainerDetail);
+            adContainer.addView(bottomBanner);
+            bottomBanner.loadAd();
+            if (showAd%3==0) {
+                interstitialAd = new InterstitialAd(this, "799967435028134_801174748240736");
+                String TAG = "AD";
+                InterstitialAdListener interstitialAdListener = new InterstitialAdListener() {
 
-                @Override
-                public void onInterstitialDisplayed(Ad ad) {
-                    // Interstitial ad displayed callback
-                }
+                    @Override
+                    public void onInterstitialDisplayed(Ad ad) {
+                        // Interstitial ad displayed callback
+                    }
 
-                @Override
-                public void onInterstitialDismissed(Ad ad) {
-                    // Interstitial dismissed callback
-                }
+                    @Override
+                    public void onInterstitialDismissed(Ad ad) {
+                        // Interstitial dismissed callback
+                    }
 
-                @Override
-                public void onError(Ad ad, AdError adError) {
-                    // Ad error callback
-                    Log.e(TAG, "Interstitial ad failed to load: " + adError.getErrorMessage());
-                }
+                    @Override
+                    public void onError(Ad ad, AdError adError) {
+                        // Ad error callback
+                        Log.e(TAG, "Interstitial ad failed to load: " + adError.getErrorMessage());
+                    }
 
-                @Override
-                public void onAdLoaded(Ad ad) {
-                    // Interstitial ad is loaded and ready to be displayed
-                    Log.d(TAG, "Interstitial ad is loaded and ready to be displayed!");
-                    // Show the ad
-                    interstitialAd.show();
-                }
+                    @Override
+                    public void onAdLoaded(Ad ad) {
+                        // Interstitial ad is loaded and ready to be displayed
+                        Log.d(TAG, "Interstitial ad is loaded and ready to be displayed!");
+                        // Show the ad
+                        interstitialAd.show();
+                    }
 
-                @Override
-                public void onAdClicked(Ad ad) {
-                    // Ad clicked callback
-                }
+                    @Override
+                    public void onAdClicked(Ad ad) {
+                        // Ad clicked callback
+                    }
 
-                @Override
-                public void onLoggingImpression(Ad ad) {
-                    // Ad impression logged callback
-                }
-            };
+                    @Override
+                    public void onLoggingImpression(Ad ad) {
+                        // Ad impression logged callback
+                    }
+                };
 
-            interstitialAd.loadAd(interstitialAd.buildLoadAdConfig()
-                    .withAdListener(interstitialAdListener)
-                    .build());
+                interstitialAd.loadAd(interstitialAd.buildLoadAdConfig()
+                        .withAdListener(interstitialAdListener)
+                        .build());
+            }
         }
     }
 
