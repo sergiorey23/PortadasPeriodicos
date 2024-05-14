@@ -5,7 +5,6 @@ import static sergirex.portadasperiodicos.SavePortada.permission;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -47,7 +46,6 @@ import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.preference.PreferenceManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.viewpager.widget.ViewPager;
 
 import com.android.billingclient.api.AcknowledgePurchaseParams;
@@ -56,9 +54,7 @@ import com.android.billingclient.api.BillingClientStateListener;
 import com.android.billingclient.api.BillingFlowParams;
 import com.android.billingclient.api.BillingResult;
 import com.android.billingclient.api.ProductDetails;
-import com.android.billingclient.api.ProductDetailsResponseListener;
 import com.android.billingclient.api.Purchase;
-import com.android.billingclient.api.PurchasesUpdatedListener;
 import com.android.billingclient.api.QueryProductDetailsParams;
 import com.android.billingclient.api.QueryPurchasesParams;
 import com.facebook.ads.AdSize;
@@ -92,7 +88,6 @@ public class Portadas extends AppCompatActivity {
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private SharedPreferences prefs;
     private SharedPreferences prefsPor;
-    private SharedPreferences datePrefs;
     private BillingClient billingClient;
     private Handler handler;
     private List <ProductDetails> productDetailsList;
