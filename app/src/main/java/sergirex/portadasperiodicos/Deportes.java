@@ -16,10 +16,15 @@ import android.view.ViewGroup;
 
 public class Deportes extends Fragment {
 
+    private String fecha;
+    public Deportes(String fecha) {
+        this.fecha = fecha;
+    }
+
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.portada_layout, container, false);
-        GetPortadas getPortadas = new GetPortadas(rootView, getClass().getSimpleName());
+        GetPortadas getPortadas = new GetPortadas(rootView, getClass().getSimpleName(), fecha);
             getPortadas.execute(Periodicos.deportes);
 
         return getPortadas.getRootView();

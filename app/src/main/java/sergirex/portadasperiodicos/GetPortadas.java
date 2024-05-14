@@ -24,6 +24,7 @@ import android.widget.Toast;
 import androidx.appcompat.view.menu.MenuBuilder;
 import androidx.appcompat.view.menu.MenuPopupHelper;
 import androidx.appcompat.widget.PopupMenu;
+import androidx.preference.PreferenceManager;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -45,11 +46,15 @@ class GetPortadas extends AsyncTask<String, ImageButton, Boolean> {
     private WeakReference<LinearLayout> ly;
     private WeakReference<ProgressBar> pb;
     private final SharedPreferences fechasSP;
-    private int adCount = 0;
-    GetPortadas(View rootView, String simpleName) {
+    private final SharedPreferences prefs;
+    private String fecha;
+
+    GetPortadas(View rootView, String simpleName, String fecha) {
         this.rootView = new WeakReference<>(rootView);
         context = new WeakReference<>(rootView.getContext());
         fechasSP = context.get().getSharedPreferences("Fechas" + simpleName, MODE_PRIVATE);
+        prefs = PreferenceManager.getDefaultSharedPreferences(context.get());
+        this.fecha = fecha;
     }
 
     View getRootView() {
@@ -73,8 +78,7 @@ class GetPortadas extends AsyncTask<String, ImageButton, Boolean> {
         if (calendar.get(Calendar.HOUR_OF_DAY) < 4) {
             calendar.add(Calendar.DATE, -1);
         }
-        SharedPreferences datePrefs = context.get().getSharedPreferences("fecha", Context.MODE_PRIVATE);
-        String fecha = datePrefs.getString("fecha", null);
+
         @SuppressLint("SimpleDateFormat") DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd");
 
         if(fecha == null){
@@ -167,7 +171,10 @@ class GetPortadas extends AsyncTask<String, ImageButton, Boolean> {
             imageButton.setOnClickListener(view -> {
                 Intent intent = new Intent(context.get(), PortadaDetalle.class);
                 intent.putExtra("Portada", portada);
-                adCount++;
+                int adCount = prefs.getInt("adCount", 0)+1;
+                SharedPreferences.Editor edit = prefs.edit();
+                edit.putInt("adCount",adCount);
+                edit.apply();
                 intent.putExtra("showAd", adCount);
                 context.get().startActivity(intent);
             });

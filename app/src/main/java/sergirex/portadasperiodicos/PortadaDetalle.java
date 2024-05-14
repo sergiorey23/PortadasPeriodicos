@@ -30,6 +30,7 @@ import androidx.preference.PreferenceManager;
 
 import com.facebook.ads.Ad;
 import com.facebook.ads.AdError;
+import com.facebook.ads.AdSettings;
 import com.facebook.ads.AdSize;
 import com.facebook.ads.AdView;
 import com.facebook.ads.AudienceNetworkAds;
@@ -164,7 +165,7 @@ public class PortadaDetalle extends AppCompatActivity {
         }
         if(!prefs.getBoolean("remove_fb_ads", false)) {
             AudienceNetworkAds.initialize(this);
-            //AdSettings.setTestMode(true);
+            AdSettings.setTestMode(true);
             bottomBanner = new AdView(this, "799967435028134_799969321694612", AdSize.BANNER_HEIGHT_50);
             // Find the Ad Container
             LinearLayout adContainer = findViewById(R.id.bannerContainerDetail);

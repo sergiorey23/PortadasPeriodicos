@@ -100,6 +100,7 @@ public class Portadas extends AppCompatActivity {
     private boolean dark = false;
     private boolean descargar= false;
     private Long today;
+    private String fecha;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -133,7 +134,7 @@ public class Portadas extends AppCompatActivity {
             calendar.add(Calendar.DATE, -1);
         }
         @SuppressLint("SimpleDateFormat") DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd");
-        String fecha = formatter.format(calendar.getTime());
+        fecha = formatter.format(calendar.getTime());
         String fechaPortadas = getSharedPreferences("FechasGeneral", Context.MODE_PRIVATE).getString("fechaPortadas", null);
         descargar = fechaPortadas == null || !fechaPortadas.equals(fecha);
 
@@ -221,11 +222,6 @@ public class Portadas extends AppCompatActivity {
                         MY_PERMISSIONS_REQUEST_WRITE_STORAGE);
             }
         }
-
-        datePrefs = getSharedPreferences("fecha", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = datePrefs.edit();
-        editor.remove("fecha");
-        editor.apply();
 
         if(!prefs.getBoolean("remove_fb_ads", false)) {
             AudienceNetworkAds.initialize(this);
@@ -550,19 +546,19 @@ public class Portadas extends AppCompatActivity {
             super(fm);
             if(!prefsPor.getAll().isEmpty()) {
                 categorias.add(getString(R.string.fav_tab));
-                mFragments.add(new Favoritos());
+                mFragments.add(new Favoritos(fecha));
                 favsCount = prefsPor.getAll().size();
             }
             categorias.add(getString(R.string.first_tab));
-            mFragments.add(new General());
+            mFragments.add(new General(fecha));
             categorias.add(getString(R.string.second_tab));
-            mFragments.add(new Deportes());
+            mFragments.add(new Deportes(fecha));
             categorias.add(getString(R.string.third_tab));
-            mFragments.add(new Economia());
+            mFragments.add(new Economia(fecha));
             categorias.add(getString(R.string.fourth_tab));
-            mFragments.add(new Locales());
+            mFragments.add(new Locales(fecha));
             categorias.add(getString(R.string.fifth_tab));
-            mFragments.add(new Internacional());
+            mFragments.add(new Internacional(fecha));
         }
 
         @NonNull
@@ -616,13 +612,17 @@ public class Portadas extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem menuItem) {
-        if(descargar && !isOnline()) {
-            if (alertDialogNoConn == null)
-                alertDialogNoConn = createNoConnectionDialog();
-            alertDialogNoConn.show();
-            return false;
-        }
-        if(menuItem.getItemId() == R.id.refreshFav){
+        if(menuItem.getItemId() == R.id.refresh) {
+            if (descargar && !isOnline()) {
+                if (alertDialogNoConn == null)
+                    alertDialogNoConn = createNoConnectionDialog();
+                alertDialogNoConn.show();
+                return false;
+            }
+            Fragment fragment = mSectionsPagerAdapter.getItem(tabLayout.getSelectedTabPosition());
+            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+            ft.detach(fragment).attach(fragment).commit();
+        } else if(menuItem.getItemId() == R.id.fav){
             if(!prefsPor.getAll().isEmpty()) {
                 mViewPager.setCurrentItem(0);
             }else{
@@ -631,8 +631,8 @@ public class Portadas extends AppCompatActivity {
                 sb.show();
             }
             return true;
-        } else if(menuItem.getItemId() == R.id.date){
-            if(today == null) today = MaterialDatePicker.todayInUtcMilliseconds();
+        } else if(menuItem.getItemId() == R.id.date) {
+            if (today == null) today = MaterialDatePicker.todayInUtcMilliseconds();
             MaterialDatePicker<Long> datePicker = MaterialDatePicker.Builder
                     .datePicker()
                     .setTitleText("Select date").setSelection(today)
@@ -641,23 +641,18 @@ public class Portadas extends AppCompatActivity {
             datePicker.addOnPositiveButtonClickListener(
                     aLong -> {
                         //datePicker.getHeaderText()
-                        if(aLong > new Date().getTime()){
+                        if (aLong > new Date().getTime()) {
                             Toast.makeText(this, "La fecha debe ser anterior a la actual", Toast.LENGTH_LONG).show();
                             return;
                         }
                         today = aLong;
                         DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd", Locale.US);
-                        String fecha = formatter.format(aLong);
-                        SharedPreferences.Editor editor = datePrefs.edit();
-                        editor.putString("fecha", fecha);
-                        editor.apply();
+                        this.fecha = formatter.format(aLong);
+                        ;
                         loadSectionsAdapter();
                     });
             return true;
         }
-        Fragment fragment = mSectionsPagerAdapter.getItem(tabLayout.getSelectedTabPosition());
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.detach(fragment).attach(fragment).commit();
 
         return true;
     }
@@ -716,7 +711,7 @@ public class Portadas extends AppCompatActivity {
         })
                 .setNegativeButton("Cencelar", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        alertDialog.dismiss();
+                        alertDialogNoConn.dismiss();
                     }
                 });
         alertDialogBuilder.setMessage("No hay conexión a internet. Por favor, comprueba tu conexión");
@@ -754,7 +749,7 @@ public class Portadas extends AppCompatActivity {
         if(count > 0){
             if(!mSectionsPagerAdapter.categorias.get(0).equals(getString(R.string.fav_tab))) {
                 int currentTab = tabLayout.getSelectedTabPosition()+1;
-                mSectionsPagerAdapter.addFragment(getString(R.string.fav_tab), new Favoritos());
+                mSectionsPagerAdapter.addFragment(getString(R.string.fav_tab), new Favoritos(fecha));
                 mViewPager.setAdapter(mSectionsPagerAdapter);
                 mViewPager.setCurrentItem(currentTab);
             }else if(favsCount != count){

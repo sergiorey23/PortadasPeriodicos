@@ -14,11 +14,16 @@ import androidx.fragment.app.Fragment;
 
 public class General extends Fragment {
 
+    private String fecha;
+    public General(String fecha) {
+        this.fecha = fecha;
+    }
+
     @Override
     public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
                              final Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.portada_layout, container, false);
-        GetPortadas getPortadas = new GetPortadas(rootView, getClass().getSimpleName());
+        GetPortadas getPortadas = new GetPortadas(rootView, getClass().getSimpleName(),fecha);
         getPortadas.execute(Periodicos.general);
         return getPortadas.getRootView();
     }

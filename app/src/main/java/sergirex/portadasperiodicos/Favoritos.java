@@ -15,6 +15,10 @@ import androidx.fragment.app.Fragment;
  * Nothing else to add
  */
 public class Favoritos extends Fragment {
+    private String fecha;
+    public Favoritos(String fecha) {
+        this.fecha = fecha;
+    }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -22,7 +26,7 @@ public class Favoritos extends Fragment {
         SharedPreferences prefs = rootView.getContext().getSharedPreferences("periodicos", Context.MODE_PRIVATE);
         if(prefs.getAll().isEmpty())
             return rootView;
-        GetPortadas getPortadas = new GetPortadas(rootView, getClass().getSimpleName());
+        GetPortadas getPortadas = new GetPortadas(rootView, getClass().getSimpleName(),fecha);
         String[] favPeriodicos = prefs.getAll().values().toArray(new String[0]);
         getPortadas.execute(favPeriodicos);
 
