@@ -614,9 +614,7 @@ public class Portadas extends AppCompatActivity {
                 alertDialogNoConn.show();
                 return false;
             }
-            Fragment fragment = mSectionsPagerAdapter.getItem(tabLayout.getSelectedTabPosition());
-            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-            ft.detach(fragment).attach(fragment).commit();
+            loadSectionsAdapter();
         } else if(menuItem.getItemId() == R.id.fav){
             if(!prefsPor.getAll().isEmpty()) {
                 mViewPager.setCurrentItem(0);
@@ -648,7 +646,9 @@ public class Portadas extends AppCompatActivity {
                     });
             return true;
         }
-
+        Fragment fragment = mSectionsPagerAdapter.getItem(tabLayout.getSelectedTabPosition());
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.detach(fragment).attach(fragment).commit();
         return true;
     }
 
