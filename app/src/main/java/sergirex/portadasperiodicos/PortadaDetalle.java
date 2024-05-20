@@ -26,11 +26,14 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.preference.PreferenceManager;
+import androidx.viewpager2.adapter.FragmentStateAdapter;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.facebook.ads.Ad;
 import com.facebook.ads.AdError;
-import com.facebook.ads.AdSettings;
 import com.facebook.ads.AdSize;
 import com.facebook.ads.AdView;
 import com.facebook.ads.AudienceNetworkAds;
@@ -49,7 +52,9 @@ import com.squareup.picasso.Picasso;
 import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -68,6 +73,7 @@ public class PortadaDetalle extends AppCompatActivity {
     private AdView bottomBanner;
     private InterstitialAd interstitialAd;
     private Long today;
+    private ViewPager2 mViewPager2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,6 +103,8 @@ public class PortadaDetalle extends AppCompatActivity {
         title = title.substring(0, 1).toUpperCase() + title.substring(1);
         Objects.requireNonNull(getSupportActionBar()).setTitle(title);
         toolbar.setNavigationOnClickListener(v -> onBackPressed());
+
+        loadSectionsAdapter();
         imageView = findViewById(R.id.imagen_extendida);
 
         loadContent();
@@ -218,6 +226,30 @@ public class PortadaDetalle extends AppCompatActivity {
         }
     }
 
+    private void loadSectionsAdapter() {
+        SectionsPagerAdapter mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+        mViewPager2 = findViewById(R.id.viewpager2);
+        mViewPager2.setAdapter(mSectionsPagerAdapter);
+    }
+
+    private static class SectionsPagerAdapter extends FragmentStateAdapter {
+        private final List<Fragment> mFragments = new ArrayList<>();
+        public SectionsPagerAdapter(@NonNull FragmentManager fragmentActivity) {
+            super(Objects.requireNonNull(fragmentActivity.getPrimaryNavigationFragment()));
+            mFragments.add(new PortadaDetalleFragment());
+        }
+
+        @NonNull
+        @Override
+        public Fragment createFragment(int position) {
+            return null;
+        }
+
+        @Override
+        public int getItemCount() {
+            return 0;
+        }
+    }
 
     void loadContent() {
         if (!isOnline()) {

@@ -21,12 +21,10 @@
         android:layout_weight="1"
         android:orientation="vertical">
 
-        <com.github.chrisbanes.photoview.PhotoView
-            android:id="@+id/imagen_extendida"
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/viewpager2"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:adjustViewBounds="true"
-            android:scaleType="fitCenter" />
+            android:layout_height="match_parent" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/favButton"
