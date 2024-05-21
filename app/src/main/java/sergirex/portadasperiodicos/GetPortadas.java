@@ -39,7 +39,6 @@ import java.util.Calendar;
 import java.util.Date;
 
 class GetPortadas extends AsyncTask<String, ImageButton, Boolean> {
-    static final int MY_PERMISSIONS_REQUEST_WRITE_STORAGE = 0;
     private final WeakReference<View> rootView;
     private final WeakReference<Context> context;
     private int portCont = 0;

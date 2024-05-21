@@ -1,5 +1,9 @@
 package sergirex.portadasperiodicos;
 
+import static sergirex.portadasperiodicos.Portadas.MY_PERMISSIONS_REQUEST_WRITE_STORAGE;
+import static sergirex.portadasperiodicos.Portadas.scanFile;
+import static sergirex.portadasperiodicos.SavePortada.permission;
+
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -57,10 +61,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
-
-import static sergirex.portadasperiodicos.GetPortadas.MY_PERMISSIONS_REQUEST_WRITE_STORAGE;
-import static sergirex.portadasperiodicos.Portadas.scanFile;
-import static sergirex.portadasperiodicos.SavePortada.permission;
 
 
 public class PortadaDetalle extends AppCompatActivity {

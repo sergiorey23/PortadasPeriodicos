@@ -16,15 +16,17 @@ import android.view.ViewGroup;
 
 public class Deportes extends Fragment {
 
-    private String fecha;
-    public Deportes(String fecha) {
-        this.fecha = fecha;
+    public static Deportes newInstance(String fecha) {
+        Bundle args = new Bundle();
+        args.putString("fecha", fecha);
+        Deportes d = new Deportes();
+        d.setArguments(args);
+        return d;
     }
-
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.portada_layout, container, false);
-        GetPortadas getPortadas = new GetPortadas(rootView, getClass().getSimpleName(), fecha);
+        GetPortadas getPortadas = new GetPortadas(rootView, getClass().getSimpleName(), getArguments().getString("fecha"));
             getPortadas.execute(Periodicos.deportes);
 
         return getPortadas.getRootView();

@@ -37,4 +37,6 @@
     <string name="dark">Dark</string>
     <string name="categories">Categories</string>
     <string name="removeAds">Remove ads</string>
+    <string name="notification_name">Covers</string>
+    <string name="notification_description">Check out today\'s covers!</string>
 </resources>

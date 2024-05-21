@@ -1,10 +1,11 @@
 package sergirex.portadasperiodicos;
 
-import static sergirex.portadasperiodicos.GetPortadas.MY_PERMISSIONS_REQUEST_WRITE_STORAGE;
 import static sergirex.portadasperiodicos.SavePortada.permission;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -78,7 +79,10 @@ import java.util.Locale;
 import java.util.Objects;
 
 public class Portadas extends AppCompatActivity {
+    static final int MY_PERMISSIONS_REQUEST_WRITE_STORAGE = 0;
+    static final int MY_PERMISSIONS_REQUEST_POST_NOTIFICATION = 1;
     private static final String TAG = "InAppPurchaseTag";
+    private static final String CHANNEL_ID = "26081995";
     private DrawerLayout mDrawerLayout;
     private ViewPager mViewPager;
     private AlertDialog alertDialog;
@@ -179,7 +183,7 @@ public class Portadas extends AppCompatActivity {
             else if (itemId == R.id.nav_share) {
                 Intent i = new Intent(Intent.ACTION_SEND);
                 i.setType("text/plain");
-                i.putExtra(Intent.EXTRA_SUBJECT, getResources().getString(R.string.app_name));
+                i.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.app_name));
                 String sAux = "Descarga la app de Portadas gratis!\n\nhttps://play.google.com/store/apps/details?id=" + getPackageName();
                 i.putExtra(Intent.EXTRA_TEXT, sAux);
                 startActivity(Intent.createChooser(i, null));
@@ -198,25 +202,16 @@ public class Portadas extends AppCompatActivity {
         mDrawerLayout.addDrawerListener(mDrawerToggle);
 
         mDrawerToggle.syncState();
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(this,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                    != PackageManager.PERMISSION_GRANTED) {
 
-                ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                        MY_PERMISSIONS_REQUEST_WRITE_STORAGE);
-            }
-        }else {
-            if (ContextCompat.checkSelfPermission(this,
-                    Manifest.permission.READ_MEDIA_IMAGES)
-                    != PackageManager.PERMISSION_GRANTED) {
-
-                ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.READ_MEDIA_IMAGES},
-                        MY_PERMISSIONS_REQUEST_WRITE_STORAGE);
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.POST_NOTIFICATIONS)
+                == PackageManager.PERMISSION_DENIED) {
+            if (Build.VERSION.SDK_INT > 33) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.POST_NOTIFICATIONS},
+                        MY_PERMISSIONS_REQUEST_POST_NOTIFICATION);
             }
         }
+
 
         if(!prefs.getBoolean("remove_fb_ads", false)) {
             AudienceNetworkAds.initialize(this);
@@ -236,6 +231,20 @@ public class Portadas extends AppCompatActivity {
             adContainer.addView(bottomBanner);
             bottomBanner.loadAd();
         }
+    }
+
+
+    public void startAlarmBroadcastReceiver(Context context) {
+        Intent _intent = new Intent(context, AlarmBroadcastReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, _intent, PendingIntent.FLAG_IMMUTABLE);
+        AlarmManager alarmManager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
+        alarmManager.cancel(pendingIntent);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        calendar.set(Calendar.HOUR_OF_DAY, 9);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
     }
 
     void removeFBAds(){
@@ -541,19 +550,19 @@ public class Portadas extends AppCompatActivity {
             super(fm);
             if(!prefsPor.getAll().isEmpty()) {
                 categorias.add(getString(R.string.fav_tab));
-                mFragments.add(new Favoritos(fecha));
+                mFragments.add(Favoritos.newInstance(fecha));
                 favsCount = prefsPor.getAll().size();
             }
             categorias.add(getString(R.string.first_tab));
-            mFragments.add(new General(fecha));
+            mFragments.add(General.newInstance(fecha));
             categorias.add(getString(R.string.second_tab));
-            mFragments.add(new Deportes(fecha));
+            mFragments.add(Deportes.newInstance(fecha));
             categorias.add(getString(R.string.third_tab));
-            mFragments.add(new Economia(fecha));
+            mFragments.add(Economia.newInstance(fecha));
             categorias.add(getString(R.string.fourth_tab));
-            mFragments.add(new Locales(fecha));
+            mFragments.add(Locales.newInstance(fecha));
             categorias.add(getString(R.string.fifth_tab));
-            mFragments.add(new Internacional(fecha));
+            mFragments.add(Internacional.newInstance(fecha));
         }
 
         @NonNull
@@ -689,6 +698,34 @@ public class Portadas extends AppCompatActivity {
             } else {
                 Toast.makeText(this, "Para poder compartir y guardar fotos, es necesario otorgar permisos de almacenamiento", Toast.LENGTH_LONG).show();
             }
+        } else if (requestCode == MY_PERMISSIONS_REQUEST_POST_NOTIFICATION){
+            if (grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                startAlarmBroadcastReceiver(getApplicationContext());
+            }
+            requestWritePermission();
+        }
+    }
+
+    public void requestWritePermission(){
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    != PackageManager.PERMISSION_GRANTED) {
+
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                        MY_PERMISSIONS_REQUEST_WRITE_STORAGE);
+            }
+        }else {
+            if (ContextCompat.checkSelfPermission(this,
+                    Manifest.permission.READ_MEDIA_IMAGES)
+                    != PackageManager.PERMISSION_GRANTED) {
+
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.READ_MEDIA_IMAGES},
+                        MY_PERMISSIONS_REQUEST_WRITE_STORAGE);
+            }
         }
     }
 
@@ -744,7 +781,7 @@ public class Portadas extends AppCompatActivity {
         if(count > 0){
             if(!mSectionsPagerAdapter.categorias.get(0).equals(getString(R.string.fav_tab))) {
                 int currentTab = tabLayout.getSelectedTabPosition()+1;
-                mSectionsPagerAdapter.addFragment(getString(R.string.fav_tab), new Favoritos(fecha));
+                mSectionsPagerAdapter.addFragment(getString(R.string.fav_tab), Favoritos.newInstance(fecha));
                 mViewPager.setAdapter(mSectionsPagerAdapter);
                 mViewPager.setCurrentItem(currentTab);
             }else if(favsCount != count){

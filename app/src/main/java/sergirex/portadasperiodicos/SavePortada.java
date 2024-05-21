@@ -26,7 +26,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import static sergirex.portadasperiodicos.GetPortadas.MY_PERMISSIONS_REQUEST_WRITE_STORAGE;
+import static sergirex.portadasperiodicos.Portadas.MY_PERMISSIONS_REQUEST_WRITE_STORAGE;
 import static sergirex.portadasperiodicos.Portadas.scanFile;
 
 /**
