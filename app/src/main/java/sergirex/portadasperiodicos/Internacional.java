@@ -14,16 +14,18 @@ import androidx.fragment.app.Fragment;
 
 public class Internacional extends Fragment {
 
-    private String fecha;
-    public Internacional(String fecha) {
-        this.fecha = fecha;
+    public static Internacional newInstance(String fecha) {
+        Bundle args = new Bundle();
+        args.putString("fecha", fecha);
+        Internacional i = new Internacional();
+        i.setArguments(args);
+        return i;
     }
-
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.portada_layout, container, false);
-        GetPortadas portadasAsyncTask = new GetPortadas(rootView, getClass().getSimpleName(), fecha);
+        GetPortadas portadasAsyncTask = new GetPortadas(rootView, getClass().getSimpleName(), getArguments().getString("fecha"));
         portadasAsyncTask.execute(Periodicos.internacional);
 
         return rootView.getRootView();
