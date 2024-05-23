@@ -544,10 +544,11 @@ public class Portadas extends AppCompatActivity {
      */
     private class SectionsPagerAdapter extends FragmentStateAdapter {
         private final List<Fragment> mFragments = new ArrayList<>();
-
+        private final List<Long> fragmentsIds = new ArrayList<>();
         void addFragment(String title, Fragment fragment) {
             categorias.add(title);
             mFragments.add(fragment);
+            fragmentsIds.add((long) fragment.hashCode());
         }
 
         void addFirstFragment(String title, Fragment fragment) {
@@ -556,17 +557,24 @@ public class Portadas extends AppCompatActivity {
             new TabLayoutMediator(tabLayout, mViewPager,
                     (tab, position) -> tab.setText(categorias.get(position))
             ).attach();
+            fragmentsIds.add(0,(long) fragment.hashCode());
         }
 
         @Override
         public long getItemId(int position) {
-            return mFragments.get(position).hashCode();
+            return fragmentsIds.get(position);
+        }
+
+        @Override
+        public boolean containsItem(long itemId) {
+            return fragmentsIds.contains(itemId);
         }
 
         void removeFragment() {
             tabLayout.removeTabAt(0);
             categorias.remove(0);
             mFragments.remove(0);
+            fragmentsIds.remove(0);
         }
 
         public
