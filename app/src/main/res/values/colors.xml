@@ -3,5 +3,6 @@
     <color name="colorPrimary">#00A391</color>
     <color name="colorPrimaryDark">#4A4A4A</color>
     <color name="background_footer">#90000000</color>
+    <color name="whiteAlpha">#B3FFFFFF</color>
 
 </resources>

@@ -45,7 +45,7 @@
                     android:background="?attr/colorPrimary"
                     android:contentDescription="@string/titleAppAbout"
                     app:tabMode="scrollable"
-                    app:tabSelectedTextColor="@android:color/white" />
+                    style="@style/TabLayout" />
             </com.google.android.material.appbar.AppBarLayout>
 
 
