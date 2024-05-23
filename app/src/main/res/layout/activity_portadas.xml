@@ -33,6 +33,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:background="?attr/colorPrimary"
+                        app:layout_collapseMode="pin"
                         app:titleTextAppearance="@style/ActionBar.nameText" />
 
                 </com.google.android.material.appbar.CollapsingToolbarLayout>
@@ -42,6 +43,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="?attr/colorPrimary"
+                    android:contentDescription="@string/titleAppAbout"
                     app:tabMode="scrollable"
                     app:tabSelectedTextColor="@android:color/white" />
             </com.google.android.material.appbar.AppBarLayout>
