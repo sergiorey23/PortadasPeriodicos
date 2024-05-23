@@ -6,8 +6,8 @@ android {
         applicationId "sergirex.portadasperiodicos"
         minSdkVersion 16
         targetSdkVersion 34
-        versionCode 43
-        versionName "5.0.1"
+        versionCode 45
+        versionName "5.0.6"
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled true
     }
