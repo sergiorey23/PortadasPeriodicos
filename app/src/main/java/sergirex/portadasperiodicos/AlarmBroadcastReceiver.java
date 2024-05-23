@@ -25,7 +25,7 @@ public class AlarmBroadcastReceiver extends BroadcastReceiver {
 
     public void startAlarmBroadcastReceiver(Context context, boolean forceScheduleNextDay) {
         Intent _intent = new Intent(context, AlarmBroadcastReceiver.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, _intent, PendingIntent.FLAG_IMMUTABLE);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, _intent, PendingIntent.FLAG_UPDATE_CURRENT);
         AlarmManager alarmManager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
         alarmManager.cancel(pendingIntent);
         Calendar calendar = Calendar.getInstance();
