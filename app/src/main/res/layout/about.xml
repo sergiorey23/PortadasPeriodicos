@@ -56,15 +56,18 @@
         android:layout_width="match_parent"
         android:layout_height="10dp" />
 
-    <Button
+    <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/contact"
-        style="@style/Widget.AppCompat.Button"
-        android:layout_width="322dp"
+        android:layout_width="200dp"
         android:layout_height="wrap_content"
         android:drawableStart="@drawable/ic_contact_mail_black_24dp"
         android:drawableLeft="@drawable/ic_contact_mail_black_24dp"
         android:text="@string/contact"
         android:textAppearance="@style/TextAppearance.AppCompat.SearchResult.Subtitle" />
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="20dp" />
 
     <View
         android:layout_width="match_parent"
@@ -100,6 +103,10 @@
         android:layout_height="match_parent"
         android:gravity="bottom"
         android:orientation="vertical">
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="20dp" />
 
         <TextView
             android:id="@+id/appSource"
