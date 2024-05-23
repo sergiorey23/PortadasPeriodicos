@@ -13,7 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?attr/colorPrimary"
-        app:titleTextAppearance="@style/ActionBar.nameText" />
+        app:titleTextAppearance="@style/ActionBar.detalle" />
 
     <FrameLayout
         android:layout_width="match_parent"

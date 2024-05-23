@@ -169,7 +169,9 @@ class GetPortadas extends AsyncTask<String, ImageButton, Boolean> {
 
             imageButton.setOnClickListener(view -> {
                 Intent intent = new Intent(context.get(), PortadaDetalle.class);
-                intent.putExtra("Portada", portada);
+                intent.putExtra("Portadas",params);
+                intent.putExtra("selectedPortada", portada.getTitle());
+                intent.putExtra("Fecha", fecha);
                 int adCount = prefs.getInt("adCount", 0)+1;
                 SharedPreferences.Editor edit = prefs.edit();
                 edit.putInt("adCount",adCount);

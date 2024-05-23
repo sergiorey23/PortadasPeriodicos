@@ -7,7 +7,7 @@ package sergirex.portadasperiodicos;
 class Periodicos {
     static final String [] general = {"elpais.com", "elmundo.es", "abc.es", "larazon.es", "lavanguardia.com", "elperiodico.com"};
     static final String [] deportes = {"marca.com", "as.com", "sport.es", "mundodeportivo.com", "superdeporte.es", "el9:lesportiudecatalunya.cat"};
-    static final String [] economia = {"expansion.com", "eleconomista.es", "5dias:cincodias.elpais.com", "economic:leconomic.cat"};
+    static final String [] economia = {"expansion.com", "eleconomista.es", "5dias:cincodias.elpais.com"};
     static final String [] locales = {"vozgalicia:lavozdegalicia.es", "diario_sevilla:diariodesevilla.es", "diario_informacion:informacion.es",
             /*"correo_andalucia:elcorreoweb.es",*/ "20minutos_madrid:20minutos.es/madrid", "elperiodico_mediterraneo:elperiodicomediterraneo.com",
             "levante:levante-emv.com", "diario_montanes:eldiariomontanes.es", "elcorreo:elcorreo.com", "diario_navarra:diariodenavarra.es",

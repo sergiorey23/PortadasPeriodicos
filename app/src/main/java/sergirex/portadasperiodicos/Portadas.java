@@ -27,6 +27,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -43,11 +44,11 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentPagerAdapter;
-import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.Lifecycle;
 import androidx.preference.PreferenceManager;
-import androidx.viewpager.widget.ViewPager;
+import androidx.viewpager2.adapter.FragmentStateAdapter;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.android.billingclient.api.AcknowledgePurchaseParams;
 import com.android.billingclient.api.BillingClient;
@@ -66,6 +67,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.common.collect.ImmutableList;
 
 import java.io.File;
@@ -82,9 +84,9 @@ public class Portadas extends AppCompatActivity {
     static final int MY_PERMISSIONS_REQUEST_WRITE_STORAGE = 0;
     static final int MY_PERMISSIONS_REQUEST_POST_NOTIFICATION = 1;
     private static final String TAG = "InAppPurchaseTag";
-    private static final String CHANNEL_ID = "26081995";
     private DrawerLayout mDrawerLayout;
-    private ViewPager mViewPager;
+    private ViewPager2 mViewPager;
+    private List<String> categorias;
     private AlertDialog alertDialog;
     private AlertDialog alertDialogNoConn;
     private AdView bottomBanner;
@@ -405,48 +407,60 @@ public class Portadas extends AppCompatActivity {
         });
     }
     void loadSectionsAdapter(){
-        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
         mViewPager = findViewById(R.id.viewpager);
+        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager(), getLifecycle());
+        if(!prefsPor.getAll().isEmpty()) {
+            mSectionsPagerAdapter.addFragment(getString(R.string.fav_tab),Favoritos.newInstance(fecha));
+            favsCount = prefsPor.getAll().size();
+        }
+        mSectionsPagerAdapter.addFragment(getString(R.string.first_tab),General.newInstance(fecha));
+        mSectionsPagerAdapter.addFragment(getString(R.string.second_tab),Deportes.newInstance(fecha));
+        mSectionsPagerAdapter.addFragment(getString(R.string.third_tab),Economia.newInstance(fecha));
+        mSectionsPagerAdapter.addFragment(getString(R.string.fourth_tab),Locales.newInstance(fecha));
+        mSectionsPagerAdapter.addFragment(getString(R.string.fifth_tab),Internacional.newInstance(fecha));
+
         mViewPager.setAdapter(mSectionsPagerAdapter);
-        mViewPager.setOffscreenPageLimit(mSectionsPagerAdapter.getCount()-1);
-        tabLayout.setupWithViewPager(mViewPager);
+        mViewPager.setOffscreenPageLimit(mSectionsPagerAdapter.getItemCount()-1);
+        new TabLayoutMediator(tabLayout, mViewPager,
+                (tab, position) -> tab.setText(categorias.get(position))
+        ).attach();
         String lpValue = prefs.getString("init_category", getString(R.string.first_tab));
         if(prefsPor.getAll().isEmpty()) {
             switch (lpValue.substring(0,3)) {
                 case "Dep":
                 case "Spo":
-                    mViewPager.setCurrentItem(1);
+                    mViewPager.setCurrentItem(1,false);
                     break;
                 case "Eco":
-                    mViewPager.setCurrentItem(2);
+                    mViewPager.setCurrentItem(2,false);
                     break;
                 case "Loc":
-                    mViewPager.setCurrentItem(3);
+                    mViewPager.setCurrentItem(3,false);
                     break;
                 case "Int":
-                    mViewPager.setCurrentItem(4);
+                    mViewPager.setCurrentItem(4,false);
                     break;
-                default: mViewPager.setCurrentItem(0);
+                default: mViewPager.setCurrentItem(0,false);
             }
         }else{
             switch (lpValue.substring(0,3)) {
                 case "Fav":
-                    mViewPager.setCurrentItem(0);
+                    mViewPager.setCurrentItem(0,false);
                     break;
                 case "Dep":
                 case "Spo":
-                    mViewPager.setCurrentItem(2);
+                    mViewPager.setCurrentItem(2,false);
                     break;
                 case "Eco":
-                    mViewPager.setCurrentItem(3);
+                    mViewPager.setCurrentItem(3,false);
                     break;
                 case "Loc":
-                    mViewPager.setCurrentItem(4);
+                    mViewPager.setCurrentItem(4,false);
                     break;
                 case "Int":
-                    mViewPager.setCurrentItem(5);
+                    mViewPager.setCurrentItem(5,false);
                     break;
-                default: mViewPager.setCurrentItem(1);
+                default: mViewPager.setCurrentItem(1,false);
             }
         }
     }
@@ -528,65 +542,51 @@ public class Portadas extends AppCompatActivity {
     }
 
     /**
-     * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
+     * A {@link FragmentStateAdapter} that returns a fragment corresponding to
      * one of the sections/tabs/pages.
      */
-    private class SectionsPagerAdapter extends FragmentStatePagerAdapter {
-        private final List<String> categorias = new ArrayList<>();
+    private class SectionsPagerAdapter extends FragmentStateAdapter {
         private final List<Fragment> mFragments = new ArrayList<>();
 
         void addFragment(String title, Fragment fragment) {
-            categorias.add(0, title);
-            mFragments.add(0, fragment);
+            categorias.add(title);
+            mFragments.add(fragment);
+        }
+
+        void addFirstFragment(String title, Fragment fragment) {
+            categorias.add(0,title);
+            mFragments.add(0,fragment);
+            new TabLayoutMediator(tabLayout, mViewPager,
+                    (tab, position) -> tab.setText(categorias.get(position))
+            ).attach();
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return mFragments.get(position).hashCode();
         }
 
         void removeFragment() {
+            tabLayout.removeTabAt(0);
             categorias.remove(0);
             mFragments.remove(0);
-            notifyDataSetChanged();
         }
 
-        SectionsPagerAdapter(FragmentManager fm) {
-            super(fm);
-            if(!prefsPor.getAll().isEmpty()) {
-                categorias.add(getString(R.string.fav_tab));
-                mFragments.add(Favoritos.newInstance(fecha));
-                favsCount = prefsPor.getAll().size();
-            }
-            categorias.add(getString(R.string.first_tab));
-            mFragments.add(General.newInstance(fecha));
-            categorias.add(getString(R.string.second_tab));
-            mFragments.add(Deportes.newInstance(fecha));
-            categorias.add(getString(R.string.third_tab));
-            mFragments.add(Economia.newInstance(fecha));
-            categorias.add(getString(R.string.fourth_tab));
-            mFragments.add(Locales.newInstance(fecha));
-            categorias.add(getString(R.string.fifth_tab));
-            mFragments.add(Internacional.newInstance(fecha));
+        public
+        SectionsPagerAdapter(FragmentManager fm, Lifecycle lifecycle) {
+            super(fm, lifecycle);
+            categorias = new ArrayList<>();
         }
 
         @NonNull
         @Override
-        public Fragment getItem(int position) {
+        public Fragment createFragment(int position) {
             return mFragments.get(position);
         }
 
         @Override
-        public int getCount() {
+        public int getItemCount() {
             return categorias.size();
-        }
-
-        @Override
-        public CharSequence getPageTitle(int position) {
-            return categorias.get(position);
-        }
-
-
-        @Override
-        public int getItemPosition(@NonNull Object object) {
-            if(object instanceof Favoritos)
-                return POSITION_NONE;
-            return mFragments.indexOf(object);
         }
 
     }
@@ -623,7 +623,7 @@ public class Portadas extends AppCompatActivity {
                 alertDialogNoConn.show();
                 return false;
             }
-            loadSectionsAdapter();
+            mSectionsPagerAdapter.notifyItemChanged(mViewPager.getCurrentItem());
         } else if(menuItem.getItemId() == R.id.fav){
             if(!prefsPor.getAll().isEmpty()) {
                 mViewPager.setCurrentItem(0);
@@ -655,9 +655,6 @@ public class Portadas extends AppCompatActivity {
                     });
             return true;
         }
-        Fragment fragment = mSectionsPagerAdapter.getItem(tabLayout.getSelectedTabPosition());
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.detach(fragment).attach(fragment).commit();
         return true;
     }
 
@@ -779,37 +776,22 @@ public class Portadas extends AppCompatActivity {
         }
         int count = prefsPor.getAll().size();
         if(count > 0){
-            if(!mSectionsPagerAdapter.categorias.get(0).equals(getString(R.string.fav_tab))) {
-                int currentTab = tabLayout.getSelectedTabPosition()+1;
-                mSectionsPagerAdapter.addFragment(getString(R.string.fav_tab), Favoritos.newInstance(fecha));
-                mViewPager.setAdapter(mSectionsPagerAdapter);
-                mViewPager.setCurrentItem(currentTab);
+            if(!categorias.get(0).equals(getString(R.string.fav_tab))) {
+                mSectionsPagerAdapter.addFirstFragment(getString(R.string.fav_tab), Favoritos.newInstance(fecha));
+                mSectionsPagerAdapter.notifyItemInserted(0);
+                mViewPager.setCurrentItem(0);
             }else if(favsCount != count){
-                Fragment fragment = mSectionsPagerAdapter.getItem(0);
-                getSupportFragmentManager().beginTransaction().detach(fragment).attach(fragment).commit();
+                ViewGroup viewGroup = findViewById(R.id.linearLayout);
+                viewGroup.removeAllViews();
+                FragmentTransaction tr = getSupportFragmentManager().beginTransaction();
+                tr.replace(R.id.linearLayout, Favoritos.newInstance(fecha));
+                tr.commit();
                 favsCount = count;
             }
-        }else if(mSectionsPagerAdapter.getCount() > 5) {
-            int currentTab = tabLayout.getSelectedTabPosition();
+        }else if(mSectionsPagerAdapter.getItemCount() > 5) {
             mSectionsPagerAdapter.removeFragment();
-            if(currentTab != 0){
-                mViewPager.setCurrentItem(currentTab-1);
-            }
+            mSectionsPagerAdapter.notifyItemRemoved(0);
         }
-        /*if(billingClient != null) {
-            billingClient.queryPurchasesAsync(
-                    QueryPurchasesParams.newBuilder().setProductType(BillingClient.ProductType.INAPP).build(),
-                    (billingResult, list) -> {
-                        if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
-                            for (Purchase purchase : list) {
-                                if (purchase.getPurchaseState() == Purchase.PurchaseState.PURCHASED && !purchase.isAcknowledged()) {
-                                    handlePurchase(purchase);
-                                }
-                            }
-                        }
-                    }
-            );
-        }*/
     }
     /*@Override
     protected void onPause() {
