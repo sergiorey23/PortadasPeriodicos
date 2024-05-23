@@ -8,7 +8,6 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -33,6 +32,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
@@ -170,6 +170,18 @@ public class Portadas extends AppCompatActivity {
         }
 
 
+        OnBackPressedCallback onBackPressedCallback = new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
+                    mDrawerLayout.closeDrawer(GravityCompat.START);
+                } else {
+                    moveTaskToBack(true);
+                }
+            }
+        };
+        getOnBackPressedDispatcher().addCallback(this,onBackPressedCallback);
+
         mNavigationView.setNavigationItemSelectedListener(menuItem -> {
             mDrawerLayout.closeDrawers();
             int itemId = menuItem.getItemId();
@@ -237,16 +249,8 @@ public class Portadas extends AppCompatActivity {
 
 
     public void startAlarmBroadcastReceiver(Context context) {
-        Intent _intent = new Intent(context, AlarmBroadcastReceiver.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, _intent, PendingIntent.FLAG_IMMUTABLE);
-        AlarmManager alarmManager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
-        alarmManager.cancel(pendingIntent);
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(System.currentTimeMillis());
-        calendar.set(Calendar.HOUR_OF_DAY, 9);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
+        AlarmBroadcastReceiver alarmBroadcastReceiver = new AlarmBroadcastReceiver();
+        alarmBroadcastReceiver.startAlarmBroadcastReceiver(context,false);
     }
 
     void removeFBAds(){
@@ -318,13 +322,8 @@ public class Portadas extends AppCompatActivity {
                                     .setMessage("Deshazte de la publicidad por "+price+" de por vida")
                                     .setIcon(R.mipmap.news_icon)
                                     .setNegativeButton("Cancelar", null)
-                                    .setNeutralButton("Restaurar compra",(dialog, which) -> {
-                                        restorePurchases();
-
-                                    })
-                                    .setPositiveButton("Comprar", (dialog, which) -> {
-                                        launchPurchaseFlow(productDetailsList.get(0));
-                                    }).show();
+                                    .setNeutralButton("Restaurar compra",(dialog, which) -> restorePurchases())
+                                    .setPositiveButton("Comprar", (dialog, which) -> launchPurchaseFlow(productDetailsList.get(0))).show();
                         }else{
                             Toast.makeText(this, "No products available", Toast.LENGTH_LONG).show();
                         }
@@ -592,16 +591,6 @@ public class Portadas extends AppCompatActivity {
     }
 
     @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
-            mDrawerLayout.closeDrawer(GravityCompat.START);
-        } else {
-            moveTaskToBack(true);
-        }
-    }
-
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.refresh, menu);
@@ -650,7 +639,7 @@ public class Portadas extends AppCompatActivity {
                         today = aLong;
                         DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd", Locale.US);
                         this.fecha = formatter.format(aLong);
-                        ;
+
                         loadSectionsAdapter();
                     });
             return true;
@@ -730,19 +719,13 @@ public class Portadas extends AppCompatActivity {
         final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
         alertDialogBuilder.setTitle(" Error de conexión");
         alertDialogBuilder.setIcon(R.mipmap.news_icon);
-        alertDialogBuilder.setPositiveButton("Reintentar", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                if(isOnline())
-                   loadSectionsAdapter();
-                else
-                    alertDialogBuilder.show();
-            }
+        alertDialogBuilder.setPositiveButton("Reintentar", (dialog, id) -> {
+            if(isOnline())
+               loadSectionsAdapter();
+            else
+                alertDialogBuilder.show();
         })
-                .setNegativeButton("Cencelar", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        alertDialogNoConn.dismiss();
-                    }
-                });
+                .setNegativeButton("Cencelar", (dialog, id) -> alertDialogNoConn.dismiss());
         alertDialogBuilder.setMessage("No hay conexión a internet. Por favor, comprueba tu conexión");
         return alertDialogBuilder.create();
     }
