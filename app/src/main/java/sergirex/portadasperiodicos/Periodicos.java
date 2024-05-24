@@ -16,6 +16,6 @@ class Periodicos {
             "laprovincia:laprovincia.es", "hoy_badajoz:hoy.es/extremadura","elperiodico_extremadura:elperiodicoextremadura.com",
             "latribuna_albacete:latribunadealbacete.es","latribuna_ciudadreal:latribunadeciudadreal.es", "canarias7:canarias7.es",
             "diario_mallorca:diariodemallorca.es", "diario_ibiza:diariodeibiza.es", "laverdad_murcia:laverdad.es" ,"heraldo_aragon:heraldo.es"};
-    static final String [] internacional = {"newyork_times:nytimes.com/es:us", "wsj:wsj.com:us", "ft_us:ft.com:us", "washington_post:washingtonpost.com:us",
+    static final String [] internacional = {"newyork_times:nytimes.com/es:us", "wsj:wsj.com:us", "washington_post:washingtonpost.com:us",
             "the_times:thetimes.co.uk:uk", "guardian:theguardian.com/uk:uk", "ar_clarin:clarin.com:ar", "ole:ole.com.ar:ar"};
 }

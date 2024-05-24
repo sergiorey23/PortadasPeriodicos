@@ -42,7 +42,7 @@ public class FavoritosWidget extends AppWidgetProvider {
     public int index;
     public SharedPreferences prefs;
     public SharedPreferences.Editor editor;
-    public Portada portada;
+    //public Portada portada;
     public RemoteViews views;
 
     void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
@@ -57,7 +57,7 @@ public class FavoritosWidget extends AppWidgetProvider {
         Calendar calendar = Calendar.getInstance();
         Date today = new Date();
         calendar.setTime(today);
-        if (calendar.get(Calendar.HOUR_OF_DAY) < 4) {
+        if (calendar.get(Calendar.HOUR_OF_DAY) < 7) {
             calendar.add(Calendar.DATE, -1);
         }
         @SuppressLint("SimpleDateFormat") DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd");
@@ -103,22 +103,18 @@ public class FavoritosWidget extends AppWidgetProvider {
 
         String siglaPais = "es";
         String title;
-        String webPeriodico;
         String periodico = periodicos[index];
         String[] periodicoArray = periodico.split(":");
 
         if (periodicoArray.length > 1) {
             title = periodicoArray[0];
-            webPeriodico = periodicoArray[1];
             if (periodicoArray.length == 3) {
                 siglaPais = periodicoArray[2];
             }
         } else {
             title = periodico.split("\\.")[0];
-            webPeriodico = periodico;
         }
-        String strUrl = "https://img.kiosko.net/" + fecha + "/" + siglaPais + "/" + title + ".640.jpg";
-        portada = new Portada(title, webPeriodico, strUrl.replace(".640", ""), periodico,siglaPais);
+
         File file;
         if(fecha != null && (file = new File( path+ File.separator + title + "t.png")).exists()){
             return BitmapFactory.decodeFile(file.getPath());
@@ -139,7 +135,7 @@ public class FavoritosWidget extends AppWidgetProvider {
         int count = 0;
         do {
             try {
-                strUrl = "https://img.kiosko.net/" + fecha + "/" + siglaPais + "/" + title + ".640.jpg";
+                String strUrl = "https://img.kiosko.net/" + fecha + "/" + siglaPais + "/" + title + ".640.jpg";
                 url = new URL(strUrl);
                 is = (InputStream) url.getContent();
             } catch (FileNotFoundException fne) {
@@ -201,8 +197,7 @@ public class FavoritosWidget extends AppWidgetProvider {
                         editor.apply();
                     }
                     views.setImageViewBitmap(R.id.imageViewWidget, getPortada(index, context.getCacheDir().getAbsolutePath(), fecha));
-                    Intent intentApp = new Intent(context, PortadaDetalle.class);
-                    intentApp.putExtra("Portada", portada);
+                    Intent intentApp = new Intent(context, Portadas.class);
                     PendingIntent pendingIntentAbrirApp = PendingIntent.getActivity(context, 0, intentApp, PendingIntent.FLAG_IMMUTABLE);
                     views.setOnClickPendingIntent(R.id.imageViewWidget, pendingIntentAbrirApp);
                     AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
