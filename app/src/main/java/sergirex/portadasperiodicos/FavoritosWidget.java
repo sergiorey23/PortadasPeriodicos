@@ -43,13 +43,16 @@ public class FavoritosWidget extends AppWidgetProvider {
     public SharedPreferences prefs;
     public SharedPreferences.Editor editor;
     public Portada portada;
+    public RemoteViews views;
 
     void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
                          int appWidgetId) {
         // Construct the RemoteViews object
         prefs = context.getSharedPreferences(INDEX_SP, Context.MODE_PRIVATE);
         index = prefs.getInt("index", 0);
-        RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.favoritos_widget);
+        if (views == null) {
+            views = new RemoteViews(context.getPackageName(), R.layout.favoritos_widget);
+        }
 
         Calendar calendar = Calendar.getInstance();
         Date today = new Date();
@@ -86,8 +89,7 @@ public class FavoritosWidget extends AppWidgetProvider {
 
         views.setImageViewBitmap(R.id.imageViewWidget, getPortada(index, context.getCacheDir().getAbsolutePath(), fecha));
 
-        Intent intentApp = new Intent(context, PortadaDetalle.class);
-        intentApp.putExtra("Portada", portada);
+        Intent intentApp = new Intent(context, Portadas.class);
 
         PendingIntent pendingIntentAbrirApp = PendingIntent.getActivity(context, 0, intentApp, PendingIntent.FLAG_IMMUTABLE);
 
@@ -168,15 +170,16 @@ public class FavoritosWidget extends AppWidgetProvider {
                 return;
             new Thread(() -> {
                 try {
-                    RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.favoritos_widget);
+                    if (views == null) {
+                        views = new RemoteViews(context.getPackageName(), R.layout.favoritos_widget);
+                    }
                     if (prefs != null) {
                         editor = prefs.edit();
                         editor.putInt("index", --index);
                         editor.apply();
                     }
                     views.setImageViewBitmap(R.id.imageViewWidget, getPortada(index, context.getCacheDir().getAbsolutePath(), fecha));
-                    Intent intentApp = new Intent(context, PortadaDetalle.class);
-                    intentApp.putExtra("Portada", portada);
+                    Intent intentApp = new Intent(context, Portadas.class);
                     PendingIntent pendingIntentAbrirApp = PendingIntent.getActivity(context, 0, intentApp, PendingIntent.FLAG_IMMUTABLE);
                     views.setOnClickPendingIntent(R.id.imageViewWidget, pendingIntentAbrirApp);
                     AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
