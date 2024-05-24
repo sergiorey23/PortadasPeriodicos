@@ -227,7 +227,7 @@ public class PortadaDetalle extends AppCompatActivity {
             alertDialogNoConn.show();
         }else {
             mViewPager2 = findViewById(R.id.viewpager2);
-            String[] portadas = (String[]) getIntent().getSerializableExtra("Portadas");
+            String[] portadas = getIntent().getStringArrayExtra("Portadas");
             String fecha = getIntent().getStringExtra("Fecha");
             mSectionsPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager(), getLifecycle());
             int pos = 0;

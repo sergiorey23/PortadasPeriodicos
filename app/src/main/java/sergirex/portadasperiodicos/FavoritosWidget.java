@@ -90,7 +90,6 @@ public class FavoritosWidget extends AppWidgetProvider {
         views.setImageViewBitmap(R.id.imageViewWidget, getPortada(index, context.getCacheDir().getAbsolutePath(), fecha));
 
         Intent intentApp = new Intent(context, Portadas.class);
-
         PendingIntent pendingIntentAbrirApp = PendingIntent.getActivity(context, 0, intentApp, PendingIntent.FLAG_IMMUTABLE);
 
         views.setOnClickPendingIntent(R.id.imageViewWidget, pendingIntentAbrirApp);
@@ -102,10 +101,9 @@ public class FavoritosWidget extends AppWidgetProvider {
     public Bitmap getPortada(int index, String path, String fecha) {
 
         String siglaPais = "es";
-        String title;
         String periodico = periodicos[index];
         String[] periodicoArray = periodico.split(":");
-
+        String title;
         if (periodicoArray.length > 1) {
             title = periodicoArray[0];
             if (periodicoArray.length == 3) {
@@ -190,7 +188,9 @@ public class FavoritosWidget extends AppWidgetProvider {
                 return;
             new Thread(() -> {
                 try {
-                    RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.favoritos_widget);
+                    if (views == null) {
+                        views = new RemoteViews(context.getPackageName(), R.layout.favoritos_widget);
+                    }
                     if (prefs != null) {
                         editor = prefs.edit();
                         editor.putInt("index", ++index);
