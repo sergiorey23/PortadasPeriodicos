@@ -48,7 +48,6 @@
             android:layout_marginBottom="15dp"
             android:clickable="true"
             android:focusable="true"
-            android:onClick="onClickWebBtn"
             android:src="@drawable/ic_language_black_24dp"
             android:tooltipText="Página web"
             ads:fabCustomSize="50dp"

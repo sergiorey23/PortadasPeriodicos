@@ -62,6 +62,7 @@ import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -103,6 +104,13 @@ public class PortadaDetalle extends AppCompatActivity {
         toolbar.setNavigationOnClickListener(v -> onBackPressed());
 
         prefsPer = getSharedPreferences("periodicos", Context.MODE_PRIVATE);
+
+        FloatingActionButton fabWeb = findViewById(R.id.httpButton);
+        fabWeb.setOnClickListener(v -> {
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(Uri.parse("http://www." + portada.getWebPeriodico()));
+            startActivity(intent);
+        });
 
         FloatingActionButton fabfav = findViewById(R.id.favButton);
         fabfav.setOnDragListener((view, dragEvent) -> false);
@@ -319,12 +327,6 @@ public class PortadaDetalle extends AppCompatActivity {
             dark = true;
             recreate();
         }*/
-    }
-
-    public void onClickWebBtn(View view) {
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setData(Uri.parse("http://www." + portada.getWebPeriodico()));
-        startActivity(intent);
     }
 
     @Override

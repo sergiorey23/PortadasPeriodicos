@@ -73,8 +73,8 @@ public class PortadaDetalleFragment extends Fragment {
         ProgressDialog pd = new ProgressDialog(rootView.getContext());
         pd.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         pd.setCancelable(false);
-        pd.show();
         pd.setIndeterminate(true);
+        pd.show();
         Picasso.get().load(url)
                 .into(imageView, new com.squareup.picasso.Callback() {
                     @Override
