@@ -31,27 +31,43 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
-            android:layout_margin="15dp"
+            android:layout_marginBottom="150dp"
             android:clickable="true"
             android:focusable="true"
             android:src="@drawable/ic_favorite_border_black_24dp"
+            android:tooltipText="@string/action_fav"
+            android:visibility="invisible"
             ads:fabCustomSize="50dp"
-            ads:maxImageSize="30dp" />
+            ads:maxImageSize="30dp"
+            android:contentDescription="@string/action_fav"
+            android:layout_marginRight="19dp" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/httpButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
-            android:layout_marginEnd="75dp"
-            android:layout_marginBottom="15dp"
+            android:layout_marginBottom="85dp"
             android:clickable="true"
             android:focusable="true"
             android:src="@drawable/ic_language_black_24dp"
+            android:tooltipText="Página web"
+            android:visibility="invisible"
             ads:fabCustomSize="50dp"
             ads:maxImageSize="40dp"
-            tools:targetApi="lollipop"
-            android:layout_marginRight="75dp" />
+            android:contentDescription="Página web"
+            android:layout_marginRight="19dp" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/addFab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="15dp"
+            android:layout_gravity="bottom|end"
+            android:focusable="true"
+            android:clickable="true"
+            ads:srcCompat="@drawable/baseline_add_24"
+            android:contentDescription="Add" />
 
     </FrameLayout>
     <LinearLayout

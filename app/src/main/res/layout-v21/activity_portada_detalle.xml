@@ -25,33 +25,50 @@
         <androidx.viewpager2.widget.ViewPager2
             android:id="@+id/viewpager2"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent" >
+
+        </androidx.viewpager2.widget.ViewPager2>
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/favButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
-            android:layout_margin="15dp"
+            android:layout_marginBottom="150dp"
+            android:layout_marginEnd="15dp"
             android:clickable="true"
             android:focusable="true"
             android:src="@drawable/ic_favorite_border_black_24dp"
             android:tooltipText="@string/action_fav"
-            ads:fabCustomSize="50dp"
-            ads:maxImageSize="30dp" />
+            android:visibility="invisible"
+            ads:maxImageSize="40dp"
+            android:contentDescription="@string/action_fav" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/httpButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
-            android:layout_marginEnd="75dp"
-            android:layout_marginBottom="15dp"
+            android:layout_marginBottom="85dp"
+            android:layout_marginEnd="15dp"
             android:clickable="true"
             android:focusable="true"
             android:src="@drawable/ic_language_black_24dp"
             android:tooltipText="Página web"
-            ads:fabCustomSize="50dp"
-            ads:maxImageSize="40dp" />
+            android:visibility="invisible"
+            ads:maxImageSize="40dp"
+            android:contentDescription="Página web" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/addFab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="15dp"
+            android:layout_gravity="bottom|end"
+            android:focusable="true"
+            android:clickable="true"
+            ads:srcCompat="@drawable/baseline_add_24"
+            android:contentDescription="Add" />
 
     </FrameLayout>
 

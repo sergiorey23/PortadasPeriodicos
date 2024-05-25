@@ -23,6 +23,8 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -79,6 +81,7 @@ public class PortadaDetalle extends AppCompatActivity {
     private Long today;
     private ViewPager2 mViewPager2;
     private ViewPagerAdapter mSectionsPagerAdapter;
+    private boolean clicked = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -105,6 +108,11 @@ public class PortadaDetalle extends AppCompatActivity {
 
         prefsPer = getSharedPreferences("periodicos", Context.MODE_PRIVATE);
 
+        Animation rotateOpen = AnimationUtils.loadAnimation(this, R.anim.rotate_open_anim);
+        Animation rotateClose = AnimationUtils.loadAnimation(this, R.anim.rotate_close_anim);
+        Animation fromBottom = AnimationUtils.loadAnimation(this, R.anim.from_bottom_anim);
+        Animation toBottom = AnimationUtils.loadAnimation(this, R.anim.to_bottom_anim);
+
         FloatingActionButton fabWeb = findViewById(R.id.httpButton);
         fabWeb.setOnClickListener(v -> {
             Intent intent = new Intent(Intent.ACTION_VIEW);
@@ -112,18 +120,40 @@ public class PortadaDetalle extends AppCompatActivity {
             startActivity(intent);
         });
 
-        FloatingActionButton fabfav = findViewById(R.id.favButton);
-        fabfav.setOnDragListener((view, dragEvent) -> false);
-        fabfav.setOnClickListener(view -> {
+        FloatingActionButton favfab = findViewById(R.id.favButton);
+        favfab.setOnDragListener((view, dragEvent) -> false);
+        favfab.setOnClickListener(view -> {
             SharedPreferences.Editor editor = prefsPer.edit();
             if (prefsPer.contains(portada.getWebPeriodico())) {
                 editor.remove(portada.getWebPeriodico());
-                fabfav.setImageResource(R.drawable.ic_favorite_border_black_24dp);
+                favfab.setImageResource(R.drawable.ic_favorite_border_black_24dp);
             } else {
                 editor.putString(portada.getWebPeriodico(), portada.getPeriodico());
-                fabfav.setImageResource(R.drawable.ic_favorite_black_24dp);
+                favfab.setImageResource(R.drawable.ic_favorite_black_24dp);
             }
             editor.apply();
+        });
+
+        FloatingActionButton addFab = findViewById(R.id.addFab);
+        addFab.setOnClickListener(v -> {
+            if(!clicked){
+                fabWeb.setVisibility(View.VISIBLE);
+                favfab.setVisibility(View.VISIBLE);
+                fabWeb.startAnimation(fromBottom);
+                favfab.startAnimation(fromBottom);
+                addFab.startAnimation(rotateOpen);
+                fabWeb.setClickable(true);
+                favfab.setClickable(true);
+            }else{
+                fabWeb.setVisibility(View.INVISIBLE);
+                favfab.setVisibility(View.INVISIBLE);
+                fabWeb.startAnimation(toBottom);
+                favfab.startAnimation(toBottom);
+                addFab.startAnimation(rotateClose);
+                fabWeb.setClickable(false);
+                favfab.setClickable(false);
+            }
+            clicked = !clicked;
         });
 
         loadSectionsAdapter();
