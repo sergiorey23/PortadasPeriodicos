@@ -25,6 +25,7 @@ import androidx.appcompat.view.menu.MenuBuilder;
 import androidx.appcompat.view.menu.MenuPopupHelper;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.preference.PreferenceManager;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -48,12 +49,16 @@ class GetPortadas extends AsyncTask<String, ImageButton, Boolean> {
     private final SharedPreferences prefs;
     private String fecha;
 
-    GetPortadas(View rootView, String simpleName, String fecha) {
+    @SuppressLint("StaticFieldLeak")
+    private final SwipeRefreshLayout swipeRefreshLayout;
+
+    GetPortadas(View rootView, String simpleName, String fecha, SwipeRefreshLayout swipeRefreshLayout) {
         this.rootView = new WeakReference<>(rootView);
         context = new WeakReference<>(rootView.getContext());
         fechasSP = context.get().getSharedPreferences("Fechas" + simpleName, MODE_PRIVATE);
         prefs = PreferenceManager.getDefaultSharedPreferences(context.get());
         this.fecha = fecha;
+        this.swipeRefreshLayout = swipeRefreshLayout;
     }
 
     View getRootView() {
@@ -252,6 +257,9 @@ class GetPortadas extends AsyncTask<String, ImageButton, Boolean> {
     protected void onPostExecute(Boolean aBoolean) {
         if (ly.get() != null) {
             ly.get().removeView(pb.get());
+        }
+        if(swipeRefreshLayout != null){
+            swipeRefreshLayout.setRefreshing(false);
         }
         super.onPostExecute(aBoolean);
     }

@@ -45,6 +45,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.Lifecycle;
 import androidx.preference.PreferenceManager;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
 
@@ -599,7 +600,7 @@ public class Portadas extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.refresh, menu);
+        inflater.inflate(R.menu.menu, menu);
         /*MenuItem shareItem = menu.findItem(R.id.date);
 
         if (dark) {
@@ -611,15 +612,7 @@ public class Portadas extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem menuItem) {
-        if(menuItem.getItemId() == R.id.refresh) {
-            if (descargar && !isOnline()) {
-                if (alertDialogNoConn == null)
-                    alertDialogNoConn = createNoConnectionDialog();
-                alertDialogNoConn.show();
-                return false;
-            }
-            mSectionsPagerAdapter.notifyItemChanged(mViewPager.getCurrentItem());
-        } else if(menuItem.getItemId() == R.id.fav){
+        if(menuItem.getItemId() == R.id.fav){
             if(!prefsPor.getAll().isEmpty()) {
                 mViewPager.setCurrentItem(0);
             }else{
@@ -770,11 +763,9 @@ public class Portadas extends AppCompatActivity {
                 mSectionsPagerAdapter.notifyItemInserted(0);
                 mViewPager.setCurrentItem(0);
             }else if(favsCount != count){
-                ViewGroup viewGroup = findViewById(R.id.linearLayout);
-                viewGroup.removeAllViews();
-                FragmentTransaction tr = getSupportFragmentManager().beginTransaction();
-                tr.replace(R.id.linearLayout, Favoritos.newInstance(fecha));
-                tr.commit();
+                mSectionsPagerAdapter.removeFragment();
+                mSectionsPagerAdapter.addFirstFragment(getString(R.string.fav_tab),Favoritos.newInstance(fecha));
+                mSectionsPagerAdapter.notifyItemChanged(0);
                 favsCount = count;
             }
         }else if(mSectionsPagerAdapter.getItemCount() > 5) {
