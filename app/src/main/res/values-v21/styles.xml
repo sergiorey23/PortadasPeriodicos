@@ -20,8 +20,8 @@
         <item name="android:windowAnimationStyle">@style/WindowAnimationTransition</item>
         <item name="colorPrimary">@color/background_material_dark</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorPrimary</item>
-        <item name="colorPrimaryContainer">@color/colorPrimary</item>
+        <item name="colorPrimaryContainer">@android:color/holo_green_dark</item>
+        <item name="colorAccent">@android:color/holo_green_light</item>
         <item name="textColorAlertDialogListItem">@android:color/white</item>
 
         <item name="android:textColorPrimary">@android:color/white</item>

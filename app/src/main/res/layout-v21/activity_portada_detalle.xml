@@ -42,6 +42,7 @@
             android:tooltipText="@string/action_fav"
             android:visibility="invisible"
             ads:maxImageSize="40dp"
+            app:tint="?attr/actionMenuTextColor"
             android:contentDescription="@string/action_fav" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -49,26 +50,29 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
-            android:layout_marginBottom="85dp"
             android:layout_marginEnd="15dp"
+            android:layout_marginBottom="85dp"
             android:clickable="true"
+            android:contentDescription="Página web"
             android:focusable="true"
             android:src="@drawable/ic_language_black_24dp"
             android:tooltipText="Página web"
+            app:tint="?attr/actionMenuTextColor"
             android:visibility="invisible"
-            ads:maxImageSize="40dp"
-            android:contentDescription="Página web" />
+            ads:maxImageSize="40dp" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/addFab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="15dp"
             android:layout_gravity="bottom|end"
-            android:focusable="true"
+            android:layout_margin="15dp"
             android:clickable="true"
+            android:contentDescription="Add"
+            android:focusable="true"
+            ads:maxImageSize="30dp"
             ads:srcCompat="@drawable/baseline_add_24"
-            android:contentDescription="Add" />
+            app:tint="?attr/actionMenuTextColor" />
 
     </FrameLayout>
 

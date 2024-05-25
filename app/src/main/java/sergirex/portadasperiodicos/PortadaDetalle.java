@@ -12,6 +12,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -98,7 +99,7 @@ public class PortadaDetalle extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_portada_detalle);
 
-        initialPortada = (String) getIntent().getStringExtra("selectedPortada");
+        initialPortada = getIntent().getStringExtra("selectedPortada");
         int showAd = getIntent().getIntExtra("showAd",0);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
