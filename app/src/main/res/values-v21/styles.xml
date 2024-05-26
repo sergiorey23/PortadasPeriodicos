@@ -75,4 +75,18 @@
         <item name="tabSelectedTextColor">@android:color/white</item>
     </style>
 
+    <style name="DialogCustom" parent="ThemeOverlay.MaterialComponents.Dialog">
+        <item name="android:textSize">18sp</item>
+    </style>
+
+    <style name="ButtonText" parent="Widget.MaterialComponents.TextView">
+        <item name="android:textSize">15sp</item>
+        <item name="android:textColor">@android:color/black</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:shadowColor">@android:color/white</item>
+        <item name="android:shadowDx">6</item>
+        <item name="android:shadowDy">6</item>
+        <item name="android:shadowRadius">6</item>
+    </style>
+
 </resources>

@@ -8,28 +8,27 @@ import java.io.Serializable;
  */
 
 class Portada implements Serializable{
-    private String title;
-    private String webPeriodico;
-    private String urlPortada;
-    private String periodico;
-    private String siglaPais;
+    private final String periodico;
+    private final String title;
+    private final String fecha;
+    private final String webPeriodico;
+    private final String siglaPais;
 
-    Portada(String title, String webPeriodico, String urlPortada, String periodico, String siglaPais) {
-        this.title = title;
-        this.webPeriodico = webPeriodico;
-        this.urlPortada = urlPortada;
+    Portada(String periodico, String title, String fecha, String webPeriodico, String siglaPais) {
         this.periodico = periodico;
+        this.title = title;
+        this.fecha = fecha;
+        this.webPeriodico = webPeriodico;
         this.siglaPais = siglaPais;
     }
 
-    String getTitle() {
+    public String getTitle() {
         return title;
     }
 
-    String getPeriodico() { return periodico; }
+    public String getPeriodico() { return periodico; }
 
-    String getWebPeriodico() { return webPeriodico; }
-    String getUrlPortada() { return urlPortada; }
-    void setUrlPortada(String url) { this.urlPortada = url; }
-    String getSiglaPais() { return siglaPais; }
+    public String getWebPeriodico() { return webPeriodico; }
+    public String getSiglaPais() { return siglaPais; }
+    public String getFecha() { return fecha; }
 }

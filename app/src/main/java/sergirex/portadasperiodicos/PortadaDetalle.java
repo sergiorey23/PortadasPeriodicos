@@ -288,9 +288,8 @@ public class PortadaDetalle extends AppCompatActivity {
                     if (title.equals(initialPortada)){
                         pos = i;
                     }
-                    String urlPortada = "https://img.kiosko.net/" + fecha + "/" + siglaPais + "/" + title + ".jpg";
-                    mSectionsPagerAdapter.addFragment(PortadaDetalleFragment.newInstance(title, urlPortada));
-                    Portada p = new Portada(title,webPeriodico,urlPortada,portadas[i],siglaPais);
+                    mSectionsPagerAdapter.addFragment(PortadaDetalleFragment.newInstance(title, siglaPais, fecha));
+                    Portada p = new Portada(portadas[i],title,fecha,webPeriodico,siglaPais);
                     mSectionsPagerAdapter.addPortada(p);
                 }
             }
@@ -390,9 +389,7 @@ public class PortadaDetalle extends AppCompatActivity {
                         String fecha = formatter.format(aLong);
                         mSectionsPagerAdapter.fragments.clear();
                         for (Portada p: mSectionsPagerAdapter.portadas) {
-                            String strUrl = "https://img.kiosko.net/" + fecha + "/" + p.getSiglaPais() + "/" + p.getTitle() + ".jpg";
-                            p.setUrlPortada(strUrl);
-                            mSectionsPagerAdapter.addFragment(PortadaDetalleFragment.newInstance(p.getTitle(), p.getUrlPortada()));
+                            mSectionsPagerAdapter.addFragment(PortadaDetalleFragment.newInstance(p.getTitle(), p.getSiglaPais(),fecha));
                         }
                         mSectionsPagerAdapter.notifyDataSetChanged();
                     });

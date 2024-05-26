@@ -22,6 +22,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * Implementation of App Widget functionality.
@@ -60,7 +61,7 @@ public class FavoritosWidget extends AppWidgetProvider {
         if (calendar.get(Calendar.HOUR_OF_DAY) < 7) {
             calendar.add(Calendar.DATE, -1);
         }
-        @SuppressLint("SimpleDateFormat") DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd");
+        DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd", Locale.FRANCE);
         String fecha = formatter.format(calendar.getTime());
 
         String fechaPortadas = context.getSharedPreferences("FechasGeneral", Context.MODE_PRIVATE).getString("fechaPortadas", null);
@@ -124,7 +125,7 @@ public class FavoritosWidget extends AppWidgetProvider {
         if (calendar.get(Calendar.HOUR_OF_DAY) < 4) {
             calendar.add(Calendar.DATE, -1);
         }
-        @SuppressLint("SimpleDateFormat") DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd");
+        DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd", Locale.FRANCE);
         fecha = formatter.format(calendar.getTime());
 
 

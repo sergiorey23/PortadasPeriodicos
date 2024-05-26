@@ -4,6 +4,7 @@ import static sergirex.portadasperiodicos.SavePortada.permission;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
@@ -25,8 +26,10 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -94,8 +97,8 @@ public class Portadas extends AppCompatActivity {
     private SharedPreferences prefs;
     private SharedPreferences prefsPor;
     private BillingClient billingClient;
-    private Handler handler;
     private List <ProductDetails> productDetailsList;
+    private Handler handler;
     private int favsCount = 0;
     private boolean dark = false;
     private boolean descargar= false;
@@ -133,7 +136,7 @@ public class Portadas extends AppCompatActivity {
         if(calendar.get(Calendar.HOUR_OF_DAY) < 4){
             calendar.add(Calendar.DATE, -1);
         }
-        @SuppressLint("SimpleDateFormat") DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd");
+        DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd", Locale.FRANCE);
         fecha = formatter.format(calendar.getTime());
         String fechaPortadas = getSharedPreferences("FechasGeneral", Context.MODE_PRIVATE).getString("fechaPortadas", null);
         descargar = fechaPortadas == null || !fechaPortadas.equals(fecha);
@@ -252,7 +255,15 @@ public class Portadas extends AppCompatActivity {
         alarmBroadcastReceiver.startAlarmBroadcastReceiver(context,false);
     }
 
+
+    private ProgressDialog pd;
     void removeFBAds(){
+        pd = new ProgressDialog(mDrawerLayout.getContext(),R.style.DialogCustom);
+        pd.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        pd.setMessage(getString(R.string.loading));
+        pd.setCancelable(false);
+        pd.setIndeterminate(true);
+        pd.show();
         billingClient = BillingClient.newBuilder(this)
                 .enablePendingPurchases()
                 .setListener(
@@ -309,11 +320,14 @@ public class Portadas extends AppCompatActivity {
                 (billingResult, prodDetailsList) -> {
                     // Process the result
                     productDetailsList.clear();
+
                     handler.postDelayed(() -> {
+                        pd.cancel();
+                        pd.dismiss();
                         productDetailsList.addAll(prodDetailsList);
                         if (!productDetailsList.isEmpty()) {
                             productDetailsList.addAll(prodDetailsList);
-                            Log.d(TAG, productDetailsList.size() + " number of products");
+                            //Log.d(TAG, productDetailsList.size() + " number of products");
                             String price = Objects.requireNonNull(productDetailsList.get(0).getOneTimePurchaseOfferDetails()).getFormattedPrice();
                             String productName = productDetailsList.get(0).getName();
                             new MaterialAlertDialogBuilder(this,R.style.Theme_MyApp_Dialog_Alert)
@@ -326,7 +340,7 @@ public class Portadas extends AppCompatActivity {
                         }else{
                             Toast.makeText(this, "No products available", Toast.LENGTH_LONG).show();
                         }
-                    }, 1000);
+                    }, 1500);
 
                 }
         );
@@ -389,11 +403,11 @@ public class Portadas extends AppCompatActivity {
                                         SharedPreferences.Editor editor = prefs.edit();
                                         editor.putBoolean("remove_fb_ads",true);
                                         editor.apply();
-                                        sb = Snackbar.make(mDrawerLayout, "Successfully restored", Snackbar.LENGTH_SHORT);
+                                        sb = Snackbar.make(findViewById(R.id.drawerLayout), "Successfully restored", Snackbar.LENGTH_LONG);
                                         bottomBanner.removeAllViews();
                                     } else {
                                         Log.d(TAG, "Oops, No purchase found.");
-                                        sb = Snackbar.make(mDrawerLayout, "No purchase found", Snackbar.LENGTH_SHORT);
+                                        sb = Snackbar.make(findViewById(R.id.drawerLayout), "No purchase found", Snackbar.LENGTH_LONG);
                                         //prefs.setIsRemoveAd(false); // set false to de-activate remove ad feature
                                     }
                                     sb.setAnimationMode(Snackbar.ANIMATION_MODE_FADE);

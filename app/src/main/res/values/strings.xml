@@ -44,7 +44,7 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="notification_name">Portadas</string>
     <string name="notification_description">Echa un vistazo a las portadas de hoy!</string>
+    <string name="loading">Cargando...</string>
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>
