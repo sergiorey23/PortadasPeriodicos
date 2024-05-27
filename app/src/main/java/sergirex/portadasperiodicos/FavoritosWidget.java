@@ -58,7 +58,7 @@ public class FavoritosWidget extends AppWidgetProvider {
         Calendar calendar = Calendar.getInstance();
         Date today = new Date();
         calendar.setTime(today);
-        if (calendar.get(Calendar.HOUR_OF_DAY) < 7) {
+        if (calendar.get(Calendar.HOUR_OF_DAY) < 6) {
             calendar.add(Calendar.DATE, -1);
         }
         DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd", Locale.FRANCE);

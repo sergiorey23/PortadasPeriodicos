@@ -1,9 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".PortadaDetalleFragment">
+
+    <com.github.chrisbanes.photoview.PhotoView
+        android:id="@+id/imagen_extendida"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:adjustViewBounds="true"
+        android:scaleType="fitCenter"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true" />
 
     <TextView
         android:id="@+id/fechaPortada"
@@ -11,6 +22,8 @@
         android:layout_height="40dp"
         android:gravity="center"
         android:textSize="20sp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
         android:shadowDy="6"
         android:shadowDx="6"
         android:shadowRadius="6"
@@ -18,11 +31,4 @@
         android:layout_gravity="center_horizontal"
         android:textStyle="bold" />
 
-    <com.github.chrisbanes.photoview.PhotoView
-        android:id="@+id/imagen_extendida"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:adjustViewBounds="true"
-        android:scaleType="fitCenter" />
-
-</FrameLayout>
+</RelativeLayout>

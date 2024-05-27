@@ -88,7 +88,7 @@ class GetPortadas extends AsyncTask<String, Button, Boolean> {
         Calendar calendar = Calendar.getInstance();
         Date today = new Date();
         calendar.setTime(today);
-        if (calendar.get(Calendar.HOUR_OF_DAY) < 7) {
+        if (calendar.get(Calendar.HOUR_OF_DAY) < 6) {
             calendar.add(Calendar.DATE, -1);
         }
 
@@ -181,9 +181,6 @@ class GetPortadas extends AsyncTask<String, Button, Boolean> {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     imageButton.setTextAppearance(R.style.ButtonText);
                 }
-            }
-
-            if (count > 0) {
                 calendar.setTime(today);
                 fecha = formatter.format(calendar.getTime());
                 count = 0;
@@ -230,7 +227,7 @@ class GetPortadas extends AsyncTask<String, Button, Boolean> {
                         String url1 = portada.getWebPeriodico();
                         menuItem.setTitle(menuItem.getTitle() + url1);
                         Intent i = new Intent(Intent.ACTION_VIEW);
-                        i.setData(Uri.parse("http://www." + url1));
+                        i.setData(Uri.parse("https://www." + url1));
                         context.get().startActivity(i);
                     }
                     return true;

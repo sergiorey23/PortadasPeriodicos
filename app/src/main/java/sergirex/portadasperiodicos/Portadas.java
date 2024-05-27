@@ -25,11 +25,8 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -45,10 +42,8 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.Lifecycle;
 import androidx.preference.PreferenceManager;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
 
@@ -101,7 +96,6 @@ public class Portadas extends AppCompatActivity {
     private Handler handler;
     private int favsCount = 0;
     private boolean dark = false;
-    private boolean descargar= false;
     private Long today;
     private String fecha;
 
@@ -139,7 +133,7 @@ public class Portadas extends AppCompatActivity {
         DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd", Locale.FRANCE);
         fecha = formatter.format(calendar.getTime());
         String fechaPortadas = getSharedPreferences("FechasGeneral", Context.MODE_PRIVATE).getString("fechaPortadas", null);
-        descargar = fechaPortadas == null || !fechaPortadas.equals(fecha);
+        boolean descargar = fechaPortadas == null || !fechaPortadas.equals(fecha);
 
         setContentView(R.layout.activity_portadas);
 
@@ -225,6 +219,10 @@ public class Portadas extends AppCompatActivity {
             if (Build.VERSION.SDK_INT > 33) {
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.POST_NOTIFICATIONS},
                         MY_PERMISSIONS_REQUEST_POST_NOTIFICATION);
+            }
+        }else{
+            if (Build.VERSION.SDK_INT <= 33) {
+                startAlarmBroadcastReceiver(this);
             }
         }
 

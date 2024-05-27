@@ -117,7 +117,7 @@ public class PortadaDetalle extends AppCompatActivity {
         FloatingActionButton fabWeb = findViewById(R.id.httpButton);
         fabWeb.setOnClickListener(v -> {
             Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.setData(Uri.parse("http://www." + portada.getWebPeriodico()));
+            intent.setData(Uri.parse("https://www." + portada.getWebPeriodico()));
             startActivity(intent);
         });
 

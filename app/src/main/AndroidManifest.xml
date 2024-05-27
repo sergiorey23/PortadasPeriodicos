@@ -74,11 +74,10 @@
                 android:resource="@xml/favoritos_widget_info" />
         </receiver>
 
-        <receiver android:name=".AlarmBroadcastReceiver" >
-            android:exported="true"
+        <receiver android:name=".AlarmBroadcastReceiver" android:exported="true" >
             <intent-filter>
                 <action android:name="android.intent.action.NOTIFY" />
-            </intent-filter
+            </intent-filter>
         </receiver>
     </application>
 
