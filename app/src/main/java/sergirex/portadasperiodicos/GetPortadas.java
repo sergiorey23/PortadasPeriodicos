@@ -264,10 +264,10 @@ class GetPortadas extends AsyncTask<String, Button, Boolean> {
             if (linearLayout.get() != null) {
                 Button button = (Button) linearLayout.get().getChildAt(0);
                 LinearLayout.LayoutParams paramsly = (LinearLayout.LayoutParams) button.getLayoutParams();
-                if(paramsly.height > ib[0].getHeight()){
+                if(paramsly.height > ib[0].getLayoutParams().height){
                     ib[0].setLayoutParams(paramsly);
                 }else{
-                    paramsly.height = ib[0].getHeight();
+                    paramsly.height = ib[0].getLayoutParams().height;
                     button.setLayoutParams(paramsly);
                 }
                 linearLayout.get().addView(ib[0]);
