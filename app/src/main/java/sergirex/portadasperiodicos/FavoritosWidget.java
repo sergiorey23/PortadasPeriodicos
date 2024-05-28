@@ -82,8 +82,8 @@ public class FavoritosWidget extends AppWidgetProvider {
         intentRightBtn.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
         intentRightBtn.putExtra("fecha",fecha);
 
-        PendingIntent pendingIntentLeftBtn = PendingIntent.getBroadcast(context, 0, intentLeftBtn, PendingIntent.FLAG_IMMUTABLE);
-        PendingIntent pendingIntentRightBtn = PendingIntent.getBroadcast(context, 0, intentRightBtn, PendingIntent.FLAG_IMMUTABLE);
+        PendingIntent pendingIntentLeftBtn = PendingIntent.getService(context, 0, intentLeftBtn, PendingIntent.FLAG_IMMUTABLE);
+        PendingIntent pendingIntentRightBtn = PendingIntent.getService(context, 0, intentRightBtn, PendingIntent.FLAG_IMMUTABLE);
 
         views.setOnClickPendingIntent(R.id.leftBtn, pendingIntentLeftBtn);
         views.setOnClickPendingIntent(R.id.rightBtn, pendingIntentRightBtn);
