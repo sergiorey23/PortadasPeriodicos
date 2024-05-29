@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Portadas</string>
+    <string name="app_name">Portadas Peródicos</string>
     <string name="fav_tab">Favoritos</string>
     <string name="first_tab" translatable="false">General</string>
     <string name="second_tab">Deportes</string>
