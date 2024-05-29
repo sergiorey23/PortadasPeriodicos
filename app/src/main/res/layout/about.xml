@@ -26,7 +26,7 @@
             android:layout_height="match_parent"
             android:layout_weight="5"
             android:gravity="center"
-            android:text="@string/titleAppAbout"
+            android:text="@string/app_full_name"
             android:textAllCaps="false"
             android:textAppearance="@style/ActionBar.nameText" />
     </LinearLayout>

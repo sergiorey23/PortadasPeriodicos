@@ -446,10 +446,10 @@ public class PortadaDetalle extends AppCompatActivity {
         alertDialogBuilder.setIcon(R.mipmap.news_icon);
         alertDialogBuilder.setOnCancelListener(dialogInterface -> onBackPressed());
         alertDialogBuilder.setPositiveButton("Reintentar", (dialog, id) -> {
-            /*if (isOnline())
-                loadContent();
+            if (isOnline())
+                loadSectionsAdapter();
             else
-                alertDialogBuilder.show();*/
+                alertDialogBuilder.show();
         })
                 .setNegativeButton("Cancelar", (dialog, id) -> onBackPressed());
         alertDialogBuilder.setMessage("No hay conexión a internet. Por favor, comprueba tu conexión");
