@@ -138,7 +138,7 @@ public class Portadas extends AppCompatActivity {
         setContentView(R.layout.activity_portadas);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
-        toolbar.setTitle(R.string.covers);
+        //toolbar.setTitle(R.string.covers);
         setSupportActionBar(toolbar);
 
         mDrawerLayout = findViewById(R.id.drawerLayout);

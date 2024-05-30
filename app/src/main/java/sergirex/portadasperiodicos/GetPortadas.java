@@ -128,7 +128,7 @@ class GetPortadas extends AsyncTask<String, Button, Boolean> {
                 webPeriodico = periodico;
             }
             Bitmap portadaBM;
-            if (!descargar && fechasSP.getString(title, null) != null && (portadaBM = savePortada.getThumbFile(title + 't')) != null) {
+            if (!descargar && swipeRefreshLayout == null && fechasSP.getString(title, null) != null && (portadaBM = savePortada.getThumbFile(title + 't')) != null) {
                 fecha = fechasSP.getString(title, fecha);
                 strUrl = "https://img.kiosko.net/" + fecha + "/" + siglaPais + "/" + title + ".jpg";
             } else {
