@@ -207,7 +207,7 @@ public class PortadaDetalle extends AppCompatActivity {
         if(!prefs.getBoolean("remove_fb_ads", false)) {
             AudienceNetworkAds.initialize(this);
             //AdSettings.setTestMode(true);
-            AdView bottomBanner = new AdView(this, "799967435028134_799969321694612", AdSize.BANNER_HEIGHT_50);
+            AdView bottomBanner = new AdView(this, "799967435028134_814221240269420", AdSize.BANNER_HEIGHT_50);
             // Find the Ad Container
             LinearLayout adContainer = findViewById(R.id.bannerContainerDetail);
             adContainer.addView(bottomBanner);
