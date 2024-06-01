@@ -59,6 +59,8 @@ import com.android.billingclient.api.QueryPurchasesParams;
 import com.facebook.ads.AdSize;
 import com.facebook.ads.AdView;
 import com.facebook.ads.AudienceNetworkAds;
+import com.google.android.material.datepicker.CalendarConstraints;
+import com.google.android.material.datepicker.DateValidatorPointBackward;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.navigation.NavigationView;
@@ -638,16 +640,15 @@ public class Portadas extends AppCompatActivity {
             if (today == null) today = MaterialDatePicker.todayInUtcMilliseconds();
             MaterialDatePicker<Long> datePicker = MaterialDatePicker.Builder
                     .datePicker()
+                    .setCalendarConstraints(new CalendarConstraints.Builder()
+                            .setValidator(
+                                    DateValidatorPointBackward.now()).build())
                     .setTitleText("Select date").setSelection(today)
                     .build();
             datePicker.show(getSupportFragmentManager(), "MATERIAL_DATE_PICKER");
             datePicker.addOnPositiveButtonClickListener(
                     aLong -> {
                         //datePicker.getHeaderText()
-                        if (aLong > new Date().getTime()) {
-                            Toast.makeText(this, "La fecha debe ser anterior a la actual", Toast.LENGTH_LONG).show();
-                            return;
-                        }
                         today = aLong;
                         DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd", Locale.US);
                         this.fecha = formatter.format(aLong);
