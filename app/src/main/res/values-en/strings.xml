@@ -42,4 +42,6 @@
     <string name="loading">Loading...</string>
     <string name="covers">Covers</string>
     <string name="app_full_name">Newspaper covers</string>
+    <string name="mas_apps">More apps:</string>
+    <string name="portadas_revistas">Magazines Covers</string>
 </resources>

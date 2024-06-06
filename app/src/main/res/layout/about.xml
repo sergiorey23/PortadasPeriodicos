@@ -69,38 +69,71 @@
         android:layout_width="match_parent"
         android:layout_height="20dp" />
 
+
+    <TextView
+        android:id="@+id/mas_apps"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:layout_marginBottom="16dp"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+        android:text="@string/mas_apps" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/portadas_revistas"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:drawableStart="@mipmap/magazines_icon"
+        android:drawableLeft="@mipmap/magazines_icon"
+        android:paddingRight="12dp"
+        android:paddingStart="8dp"
+        android:backgroundTint="@color/cardview_light_background"
+        android:text="@string/portadas_revistas"
+        android:textAppearance="@style/TextAppearance.AppCompat.SearchResult.Subtitle"
+        android:fontFamily="cursive"
+        android:textStyle="bold"
+        android:textColor="@android:color/black"
+        android:paddingEnd="12dp"
+        android:paddingLeft="8dp" />
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="20dp" />
+
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="?android:attr/listDivider" />
 
-<!--    <TextView-->
-<!--        android:id="@+id/textView2"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:layout_marginLeft="16dp"-->
-<!--        android:layout_marginTop="16dp"-->
-<!--        android:layout_marginRight="16dp"-->
-<!--        android:layout_marginBottom="8dp"-->
-<!--        android:gravity="center_horizontal"-->
-<!--        android:lineSpacingExtra="4sp"-->
-<!--        android:text="@string/freeApp"-->
-<!--        android:textAllCaps="false"-->
-<!--        android:textAppearance="@style/TextAppearance.AppCompat.Body1" />-->
+    <!--    <TextView-->
+    <!--        android:id="@+id/textView2"-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:layout_marginLeft="16dp"-->
+    <!--        android:layout_marginTop="16dp"-->
+    <!--        android:layout_marginRight="16dp"-->
+    <!--        android:layout_marginBottom="8dp"-->
+    <!--        android:gravity="center_horizontal"-->
+    <!--        android:lineSpacingExtra="4sp"-->
+    <!--        android:text="@string/freeApp"-->
+    <!--        android:textAllCaps="false"-->
+    <!--        android:textAppearance="@style/TextAppearance.AppCompat.Body1" />-->
 
-<!--    <Button-->
-<!--        android:id="@+id/paypal"-->
-<!--        style="@style/Widget.AppCompat.Button"-->
-<!--        android:layout_width="322dp"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:drawableStart="@drawable/paypal"-->
-<!--        android:drawableLeft="@drawable/paypal"-->
-<!--        android:text="@string/supportDeveloper"-->
-<!--        android:textAppearance="@style/TextAppearance.AppCompat.SearchResult.Subtitle" />-->
+    <!--    <Button-->
+    <!--        android:id="@+id/paypal"-->
+    <!--        style="@style/Widget.AppCompat.Button"-->
+    <!--        android:layout_width="322dp"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:drawableStart="@drawable/paypal"-->
+    <!--        android:drawableLeft="@drawable/paypal"-->
+    <!--        android:text="@string/supportDeveloper"-->
+    <!--        android:textAppearance="@style/TextAppearance.AppCompat.SearchResult.Subtitle" />-->
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_gravity="center_horizontal"
+        android:gravity="center_horizontal"
         android:orientation="vertical">
 
         <Space
@@ -110,11 +143,11 @@
         <TextView
             android:id="@+id/appSource"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
             android:layout_marginLeft="16dp"
             android:layout_marginRight="16dp"
             android:layout_marginBottom="8dp"
-            android:gravity="center_horizontal"
+            android:gravity="center_horizontal|center_vertical"
             android:lineSpacingExtra="4sp"
             android:text="@string/appSource"
             android:textAllCaps="false"
@@ -136,18 +169,18 @@
         <TextView
             android:id="@+id/privacy_policy"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
             android:layout_marginLeft="16dp"
             android:layout_marginTop="4dp"
             android:layout_marginRight="16dp"
-            android:layout_marginBottom="16dp"
             android:autoLink="web"
-            android:gravity="center_horizontal"
+            android:gravity="center_horizontal|center_vertical"
             android:lineSpacingExtra="4sp"
             android:linksClickable="true"
             android:text="@string/privacy_policy"
             android:textAllCaps="false"
             android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
+
 
     </LinearLayout>
 

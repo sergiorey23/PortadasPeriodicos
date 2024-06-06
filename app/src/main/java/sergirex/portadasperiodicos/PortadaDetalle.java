@@ -166,7 +166,7 @@ public class PortadaDetalle extends AppCompatActivity {
         int rate = prefs.getInt("rate",0);
         if(rate == 0 && showAd%2==0) {
             SharedPreferences.Editor editor = prefs.edit();
-            new MaterialAlertDialogBuilder(this,R.style.Theme_MyApp_Dialog_Alert)
+            new MaterialAlertDialogBuilder(this)
                     .setTitle(R.string.rateTitle)
                     .setMessage(R.string.rateDescription)
                     .setIcon(R.mipmap.news_icon)
@@ -386,7 +386,7 @@ public class PortadaDetalle extends AppCompatActivity {
             datePicker.addOnPositiveButtonClickListener(
                     aLong -> {
                         today = aLong;
-                        DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd", Locale.US);
+                        DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd", Locale.FRANCE);
                         String fecha = formatter.format(aLong);
                         mSectionsPagerAdapter.fragments.clear();
                         for (Portada p: mSectionsPagerAdapter.portadas) {

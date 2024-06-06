@@ -46,6 +46,8 @@
     <string name="notification_description">Echa un vistazo a las portadas de hoy!</string>
     <string name="loading">Cargando...</string>
     <string name="app_full_name">Portadas Periódicos</string>
+    <string name="mas_apps">Más apps:</string>
+    <string name="portadas_revistas">Portadas Revistas</string>
     <!-- TODO: Remove or change this placeholder text -->
 
 </resources>

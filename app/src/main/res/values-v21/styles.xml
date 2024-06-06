@@ -8,9 +8,15 @@
         <item name="android:navigationBarColor">@android:color/background_light</item>
         <item name="android:statusBarColor">@color/colorPrimary</item>
         <item name="android:windowContentTransitions">true</item>
+
+        <item name="buttonBarNegativeButtonStyle">@style/Widget.MaterialComponents.Button</item>
+        <item name="buttonBarPositiveButtonStyle">@style/Widget.MaterialComponents.Button</item>
+        <item name="buttonBarNeutralButtonStyle">@style/Widget.MaterialComponents.Button</item>
+
+        <item name="materialAlertDialogTheme">@style/MaterialAlertDialog</item>
         <item name="materialCalendarStyle">@style/Widget.MaterialComponents.MaterialCalendar</item>
         <item name="materialCalendarFullscreenTheme">@style/ThemeOverlay.MaterialComponents.MaterialCalendar.Fullscreen</item>
-        <item name="materialCalendarTheme">@style/ThemeOverlay.MaterialComponents.MaterialCalendar</item>
+        <item name="materialCalendarTheme">@style/MaterialCalendarThemeLight</item>
         <item name="android:windowActionBar">false</item>
         <item name="android:windowAnimationStyle">@style/WindowAnimationTransition</item>
         <item name="windowNoTitle">true</item>
@@ -32,6 +38,7 @@
         <item name="colorOnSurfaceVariant">@android:color/white</item>
         <item name="titleTextColor">@android:color/white</item>
 
+        <item name="materialAlertDialogTheme">@style/MaterialAlertDialogDark</item>
         <item name="android:navigationBarColor">@color/background_material_dark</item>
         <item name="android:statusBarColor">@color/background_material_dark</item>
         <item name="materialCalendarStyle">@style/Widget.MaterialComponents.MaterialCalendar</item>
@@ -43,22 +50,31 @@
         <item name="android:windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>
-    <style name="Theme.MyApp.Dialog.Alert" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
-        <item name="materialAlertDialogTitleTextStyle">@style/MaterialAlertDialogTitleText</item>
-        <item name="materialAlertDialogBodyTextStyle">@style/MaterialAlertDialogBodyText</item>
-        <item name="android:background">@android:color/white</item>
+    <style name="MaterialAlertDialog" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+        <item name="buttonBarPositiveButtonStyle">@style/Widget.MaterialComponents.Button</item>
     </style>
-    <style name="MaterialAlertDialogTitleText" parent="@style/MaterialAlertDialog.MaterialComponents.Title.Text">
-        <item name="android:textColor">@android:color/background_dark</item>
+    <style name="MaterialAlertDialogDark" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+        <item name="buttonBarPositiveButtonStyle">@style/Widget.MaterialComponents.Button</item>
+        <item name="buttonBarNegativeButtonStyle">@style/MaterialAlertDialogButtonText</item>
+        <item name="buttonBarNeutralButtonStyle">@style/MaterialAlertDialogButtonText</item>
     </style>
-    <style name="MaterialAlertDialogBodyText" parent="@style/MaterialAlertDialog.MaterialComponents.Body.Text">
-        <item name="android:textColor">@android:color/background_dark</item>
+    <style name="MaterialAlertDialogButtonText" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
+        <item name="android:textColor">@color/whiteAlpha</item>
     </style>
     <style name="MaterialCalendarTheme" parent="ThemeOverlay.MaterialComponents.MaterialCalendar">
         <!-- Buttons -->
         <item name="buttonBarPositiveButtonStyle">@style/TextButton</item>
         <item name="buttonBarNegativeButtonStyle">@style/TextButton</item>
 
+    </style>
+    <style name="MaterialCalendarThemeLight" parent="ThemeOverlay.MaterialComponents.MaterialCalendar">
+        <!-- Buttons -->
+        <item name="buttonBarPositiveButtonStyle">@style/TextButtonLight</item>
+        <item name="buttonBarNegativeButtonStyle">@style/Widget.MaterialComponents.Button</item>
+
+    </style>
+    <style name="TextButtonLight" parent="Widget.MaterialComponents.Button">
+        <item name="android:layout_marginLeft">20dp</item>
     </style>
     <style name="TextButton" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
         <item name="android:textColor">@android:color/white</item>
