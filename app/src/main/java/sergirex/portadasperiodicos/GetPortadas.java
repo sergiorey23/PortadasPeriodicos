@@ -56,7 +56,6 @@ class GetPortadas extends AsyncTask<String, Button, Boolean> {
     private final SharedPreferences fechasSP;
     private final SharedPreferences prefs;
     private String fecha;
-    private String strUrl = null;
 
     @SuppressLint("StaticFieldLeak")
     private final SwipeRefreshLayout swipeRefreshLayout;
@@ -128,9 +127,11 @@ class GetPortadas extends AsyncTask<String, Button, Boolean> {
                 webPeriodico = periodico;
             }
             Bitmap portadaBM;
+            String strUrl = "";
+
             if (!descargar && swipeRefreshLayout == null && fechasSP.getString(title, null) != null && (portadaBM = savePortada.getThumbFile(title + 't')) != null) {
                 fecha = fechasSP.getString(title, fecha);
-                strUrl = "https://img.kiosko.net/" + fecha + "/" + siglaPais + "/" + title + ".jpg";
+                strUrl = "https://img.kiosko.net/" + fecha + "/" + siglaPais + "/" + title + ".640.jpg";
             } else {
                 do {
                     try {
@@ -161,7 +162,6 @@ class GetPortadas extends AsyncTask<String, Button, Boolean> {
                 if (editor != null) {
                     editor.putString(title, fecha);
                 }
-                strUrl = strUrl.replace(".640", "");
             }
 
             Portada portada = new Portada(periodico,title,fecha,webPeriodico,siglaPais);
@@ -198,6 +198,7 @@ class GetPortadas extends AsyncTask<String, Button, Boolean> {
                 intent.putExtra("showAd", adCount);
                 context.get().startActivity(intent);
             });
+            String finalStrUrl = strUrl.replace(".640", "");
             imageButton.setOnLongClickListener(view -> {
                 PopupMenu popup = new PopupMenu(view.getContext(), view);
                 popup.getMenuInflater().inflate(R.menu.menu_portada_list, popup.getMenu());
@@ -206,7 +207,7 @@ class GetPortadas extends AsyncTask<String, Button, Boolean> {
                         if (savePortada.isExternalStorageWritable()) {
                             if (!savePortada.checkPermissions())
                                 return false;
-                            new DownloadPortada(context.get(), savePortada, portada.getTitle()).execute(strUrl);
+                            new DownloadPortada(context.get(), savePortada, portada.getTitle()).execute(finalStrUrl);
                         }
                     } else if (menuItem.getItemId() == R.id.save) {
                         if (savePortada.isExternalStorageWritable()) {
@@ -217,9 +218,8 @@ class GetPortadas extends AsyncTask<String, Button, Boolean> {
                                 Toast.makeText(context.get(), "Ya se ha guardado la portada.", Toast.LENGTH_LONG).show();
                                 return true;
                             }
-                            String urlperiodico = strUrl;
                             DownloadPortada dp = new DownloadPortada(context.get(), file);
-                            dp.execute(urlperiodico);
+                            dp.execute(finalStrUrl);
                         } else {
                             Toast.makeText(context.get(), "Internal Storage unreadable", Toast.LENGTH_LONG).show();
                         }

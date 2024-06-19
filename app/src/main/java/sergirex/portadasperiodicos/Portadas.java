@@ -129,7 +129,7 @@ public class Portadas extends AppCompatActivity {
         Calendar calendar = Calendar.getInstance();
         Date today = new Date();
         calendar.setTime(today);
-        if(calendar.get(Calendar.HOUR_OF_DAY) < 4){
+        if(calendar.get(Calendar.HOUR_OF_DAY) < 6){
             calendar.add(Calendar.DATE, -1);
         }
         DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd", Locale.FRANCE);
@@ -667,7 +667,7 @@ public class Portadas extends AppCompatActivity {
                         //datePicker.getHeaderText()
                         today = aLong;
                         DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd", Locale.FRANCE);
-                        this.fecha = formatter.format(aLong);
+                        this.fecha = formatter.format(new Date(aLong));
 
                         loadSectionsAdapter();
                     });
