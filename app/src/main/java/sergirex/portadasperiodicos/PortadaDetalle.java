@@ -276,7 +276,7 @@ public class PortadaDetalle extends AppCompatActivity {
                 for (int i = 0; i < portadas.length; i++) {
                     String[] periodicoArray = portadas[i].split(":");
                     String siglaPais = "es";
-                    String title, webPeriodico = "";
+                    String title, webPeriodico;
                     if (periodicoArray.length > 1) {
                         title = periodicoArray[0];
                         webPeriodico = periodicoArray[1];

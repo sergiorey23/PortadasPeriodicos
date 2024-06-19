@@ -9,8 +9,6 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
-import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -20,13 +18,10 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.content.res.AppCompatResources;
 import androidx.appcompat.view.menu.MenuBuilder;
 import androidx.appcompat.view.menu.MenuPopupHelper;
 import androidx.appcompat.widget.PopupMenu;
@@ -41,6 +36,7 @@ import java.lang.ref.WeakReference;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -84,30 +80,17 @@ class GetPortadas extends AsyncTask<String, Button, Boolean> {
 
         final SavePortada savePortada = new SavePortada(context.get());
 
-        Calendar calendar = Calendar.getInstance();
-        Date today = new Date();
-        calendar.setTime(today);
-        if (calendar.get(Calendar.HOUR_OF_DAY) < 6) {
-            calendar.add(Calendar.DATE, -1);
-        }
-
-        DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd", Locale.FRANCE);
-
-        if(fecha == null){
-            fecha = formatter.format(calendar.getTime());
-        }
-
         String fechaAux = fecha;
         SharedPreferences.Editor editor = null;
-        String fechaPortadas = fechasSP.getString("fechaPortadas", null);
-        boolean descargar = fechaPortadas == null || !fechaPortadas.equals(fecha);
+        String fechaPortadas = fechasSP.getString("fechaPortadas", "");
+        boolean descargar = !fechaPortadas.equals(fecha);
 
         if(descargar){
             editor = fechasSP.edit();
         }
 
         String siglaPais = "es";
-        int count = 0;
+
         for (String periodico : params) {
 
             URL url;
@@ -128,19 +111,29 @@ class GetPortadas extends AsyncTask<String, Button, Boolean> {
             }
             Bitmap portadaBM;
             String strUrl = "";
+            String date = fecha;
 
             if (!descargar && swipeRefreshLayout == null && fechasSP.getString(title, null) != null && (portadaBM = savePortada.getThumbFile(title + 't')) != null) {
-                fecha = fechasSP.getString(title, fecha);
-                strUrl = "https://img.kiosko.net/" + fecha + "/" + siglaPais + "/" + title + ".640.jpg";
+                date = fechasSP.getString(title, fecha);
+                strUrl = "https://img.kiosko.net/" + date + "/" + siglaPais + "/" + title + ".640.jpg";
             } else {
+                Calendar calendar = Calendar.getInstance();
+                DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd", Locale.FRANCE);
+                try {
+                    calendar.setTime(Objects.requireNonNull(formatter.parse(fecha)));
+                } catch (ParseException e) {
+                    calendar.setTime(new Date());
+                }
+                int count = 0;
+
                 do {
                     try {
-                        strUrl = "https://img.kiosko.net/" + fecha + "/" + siglaPais + "/" + title + ".640.jpg";
+                        strUrl = "https://img.kiosko.net/" + date + "/" + siglaPais + "/" + title + ".640.jpg";
                         url = new URL(strUrl);
                         is = (InputStream) url.getContent();
                     } catch (FileNotFoundException fne) {
                         calendar.add(Calendar.DATE, -1);
-                        fecha = formatter.format(calendar.getTime());
+                        date = formatter.format(calendar.getTime());
                         count++;
                     } catch (MalformedURLException e) {
                         e.printStackTrace();
@@ -152,15 +145,12 @@ class GetPortadas extends AsyncTask<String, Button, Boolean> {
                 } while (is == null && count < 20);
 
                 if (is == null) {
-                    calendar.setTime(today);
-                    fecha = formatter.format(calendar.getTime());
-                    count = 0;
                     continue;
                 }
                 portadaBM = BitmapFactory.decodeStream(is);
                 savePortada.saveFile(context.get().getCacheDir(),title + "t", portadaBM);
                 if (editor != null) {
-                    editor.putString(title, fecha);
+                    editor.putString(title, date);
                 }
             }
 
@@ -175,15 +165,12 @@ class GetPortadas extends AsyncTask<String, Button, Boolean> {
             imageButton.setBackground(drawable);
             imageButton.setLayoutParams(paramsly);
 
-            if(!fechaAux.equals(fecha)){
-                String[] date = fecha.split("/");
-                imageButton.setText(String.format("%s/%s/%s", date[2], date[1], date[0]));
+            if(!fechaAux.equals(date)){
+                String[] arrayDate = date.split("/");
+                imageButton.setText(String.format("%s/%s/%s", arrayDate[2], arrayDate[1], arrayDate[0]));
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     imageButton.setTextAppearance(R.style.ButtonText);
                 }
-                calendar.setTime(today);
-                fecha = formatter.format(calendar.getTime());
-                count = 0;
             }
 
             imageButton.setOnClickListener(view -> {
