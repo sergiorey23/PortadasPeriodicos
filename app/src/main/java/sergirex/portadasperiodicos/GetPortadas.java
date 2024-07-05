@@ -3,6 +3,7 @@ package sergirex.portadasperiodicos;
 import static android.content.Context.MODE_PRIVATE;
 
 import android.annotation.SuppressLint;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -25,6 +26,8 @@ import android.widget.Toast;
 import androidx.appcompat.view.menu.MenuBuilder;
 import androidx.appcompat.view.menu.MenuPopupHelper;
 import androidx.appcompat.widget.PopupMenu;
+import androidx.browser.customtabs.CustomTabColorSchemeParams;
+import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.preference.PreferenceManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
@@ -211,11 +214,28 @@ class GetPortadas extends AsyncTask<String, Button, Boolean> {
                             Toast.makeText(context.get(), "Internal Storage unreadable", Toast.LENGTH_LONG).show();
                         }
                     } else if (menuItem.getItemId() == R.id.web) {
-                        String url1 = portada.getWebPeriodico();
-                        menuItem.setTitle(menuItem.getTitle() + url1);
-                        Intent i = new Intent(Intent.ACTION_VIEW);
-                        i.setData(Uri.parse("https://www." + url1));
-                        context.get().startActivity(i);
+                        int colorResId;
+                        if(context.get().getTheme().toString().contains("style/AppThemeDark")){
+                            colorResId = R.color.colorPrimaryDark;
+                        }else{
+                            colorResId = R.color.colorPrimary;
+                        }
+                        try {
+                            String urlPortada = "https://www." + portada.getWebPeriodico();
+                            CustomTabColorSchemeParams customTabColorSchemeParams = new CustomTabColorSchemeParams.Builder()
+                                    .setToolbarColor(context.get().getResources().getColor(colorResId)).build();
+                            CustomTabsIntent intent = new CustomTabsIntent.Builder()
+                                    .setShowTitle(true)
+                                    .setDefaultColorSchemeParams(customTabColorSchemeParams)
+                                    .build();
+                            intent.launchUrl(context.get(), Uri.parse(urlPortada));
+                        }catch (ActivityNotFoundException e){
+                            Intent intent = new Intent(Intent.ACTION_VIEW);
+                            intent.setData(Uri.parse("https://www." + portada.getWebPeriodico()));
+                            context.get().startActivity(intent);
+                        }catch (Exception e){
+                            e.printStackTrace();
+                        }
                     }
                     return true;
                 });

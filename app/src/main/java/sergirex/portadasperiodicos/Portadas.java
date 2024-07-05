@@ -688,15 +688,10 @@ public class Portadas extends AppCompatActivity {
         MediaScannerConnection
                 .scanFile(ctxt, new String[] {f.getAbsolutePath()},
                         new String[] {mimeType}, null);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            final Intent scanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-            final Uri contentUri = Uri.fromFile(f);
-            scanIntent.setData(contentUri);
-            ctxt.sendBroadcast(scanIntent);
-        } else {
-            final Intent intent = new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.parse("file://" + Environment.getExternalStorageDirectory()));
-            ctxt.sendBroadcast(intent);
-        }
+        final Intent scanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+        final Uri contentUri = Uri.fromFile(f);
+        scanIntent.setData(contentUri);
+        ctxt.sendBroadcast(scanIntent);
 
     }
 

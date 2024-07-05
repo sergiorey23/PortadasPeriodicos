@@ -96,7 +96,7 @@ public class PortadaDetalleFragment extends Fragment {
 
     private int tries = 0;
     public void getCover(View rootView){
-        if (tries < 10) {
+        if (tries < 20) {
             ImageView imageView = rootView.findViewById(R.id.imagen_extendida);
             String url = "https://img.kiosko.net/" + fecha + "/" + siglaPais + "/" + title + ".jpg";
             Picasso.get().load(url)
@@ -142,6 +142,8 @@ public class PortadaDetalleFragment extends Fragment {
                     });
         }else{
             Toast.makeText(getActivity(), "Couldn't find any cover", Toast.LENGTH_LONG).show();
+            pd.cancel();
+            pd.dismiss();
         }
     }
 

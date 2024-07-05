@@ -20,6 +20,7 @@
     </style>
     <style name="AppThemeDark" parent="Theme.Material3.Dark">
         <!-- Customize your theme here. -->
+
         <item name="android:windowAnimationStyle">@style/WindowAnimationTransition</item>
         <item name="colorPrimary">@color/background_material_dark</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>

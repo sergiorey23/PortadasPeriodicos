@@ -5,14 +5,12 @@ import static sergirex.portadasperiodicos.Portadas.scanFile;
 import static sergirex.portadasperiodicos.SavePortada.permission;
 
 import android.annotation.SuppressLint;
-import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -34,18 +32,18 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.browser.customtabs.CustomTabColorSchemeParams;
+import androidx.browser.customtabs.CustomTabsIntent;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.lifecycle.Lifecycle;
-import androidx.lifecycle.LifecycleObserver;
 import androidx.preference.PreferenceManager;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.facebook.ads.Ad;
 import com.facebook.ads.AdError;
-import com.facebook.ads.AdSettings;
 import com.facebook.ads.AdSize;
 import com.facebook.ads.AdView;
 import com.facebook.ads.AudienceNetworkAds;
@@ -61,17 +59,13 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.android.play.core.review.ReviewInfo;
 import com.google.android.play.core.review.ReviewManager;
 import com.google.android.play.core.review.ReviewManagerFactory;
-import com.squareup.picasso.Picasso;
 
 import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 
 
 public class PortadaDetalle extends AppCompatActivity {
@@ -85,18 +79,22 @@ public class PortadaDetalle extends AppCompatActivity {
     private ViewPager2 mViewPager2;
     private ViewPagerAdapter mSectionsPagerAdapter;
     private boolean clicked = false;
+    @SuppressLint("SetJavaScriptEnabled")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         String theme = prefs.getString("theme","default");
+        boolean isDark = false;
         switch (theme) {
             case "default":
                 if ((getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES) {
                     setTheme(R.style.AppThemeDark);
+                    isDark = true;
                 }
                 break;
             case "dark":
                 setTheme(R.style.AppThemeDark);
+                isDark = true;
         }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_portada_detalle);
@@ -117,10 +115,30 @@ public class PortadaDetalle extends AppCompatActivity {
         Animation toBottom = AnimationUtils.loadAnimation(this, R.anim.to_bottom_anim);
 
         FloatingActionButton fabWeb = findViewById(R.id.httpButton);
+        boolean finalIsDark = isDark;
         fabWeb.setOnClickListener(v -> {
-            Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.setData(Uri.parse("https://www." + portada.getWebPeriodico()));
-            startActivity(intent);
+            try {
+                int colorResId;
+                if(finalIsDark){
+                    colorResId = R.color.colorPrimaryDark;
+                }else{
+                    colorResId = R.color.colorPrimary;
+                }
+                String url = "https://www." + portada.getWebPeriodico();
+                CustomTabColorSchemeParams customTabColorSchemeParams = new CustomTabColorSchemeParams.Builder()
+                        .setToolbarColor(getResources().getColor(colorResId)).build();
+                CustomTabsIntent intent = new CustomTabsIntent.Builder()
+                        .setShowTitle(true)
+                        .setDefaultColorSchemeParams(customTabColorSchemeParams)
+                        .build();
+                intent.launchUrl(PortadaDetalle.this, Uri.parse(url));
+            }catch (ActivityNotFoundException e){
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setData(Uri.parse("https://www." + portada.getWebPeriodico()));
+                startActivity(intent);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
         });
 
         FloatingActionButton favfab = findViewById(R.id.favButton);
