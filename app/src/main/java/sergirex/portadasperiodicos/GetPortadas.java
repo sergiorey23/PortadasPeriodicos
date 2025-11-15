@@ -13,8 +13,10 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,8 +47,10 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-class GetPortadas extends AsyncTask<String, Button, Boolean> {
+class GetPortadas {
     private final WeakReference<View> rootView;
     private final WeakReference<Context> context;
     private int portCont = 0;
@@ -58,6 +62,9 @@ class GetPortadas extends AsyncTask<String, Button, Boolean> {
 
     @SuppressLint("StaticFieldLeak")
     private final SwipeRefreshLayout swipeRefreshLayout;
+
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private final Handler handler = new Handler(Looper.getMainLooper());
 
     GetPortadas(View rootView, String simpleName, String fecha, SwipeRefreshLayout swipeRefreshLayout) {
         this.rootView = new WeakReference<>(rootView);
@@ -78,8 +85,24 @@ class GetPortadas extends AsyncTask<String, Button, Boolean> {
         ly.get().addView(pb.get());
     }
 
-    @Override
-    protected Boolean doInBackground(String... params) {
+    protected void onPostExecute() {
+        if (ly.get() != null) {
+            ly.get().removeView(pb.get());
+        }
+        if (swipeRefreshLayout != null) {
+            swipeRefreshLayout.setRefreshing(false);
+        }
+    }
+
+    public void execute(String... params) {
+        onPreExecute();
+        executor.execute(() -> {
+            doInBackground(params);
+            handler.post(this::onPostExecute);
+        });
+    }
+
+    private void doInBackground(String... params) {
 
         final SavePortada savePortada = new SavePortada(context.get());
 
@@ -88,7 +111,7 @@ class GetPortadas extends AsyncTask<String, Button, Boolean> {
         String fechaPortadas = fechasSP.getString("fechaPortadas", "");
         boolean descargar = !fechaPortadas.equals(fecha);
 
-        if(descargar){
+        if (descargar) {
             editor = fechasSP.edit();
         }
 
@@ -151,13 +174,13 @@ class GetPortadas extends AsyncTask<String, Button, Boolean> {
                     continue;
                 }
                 portadaBM = BitmapFactory.decodeStream(is);
-                savePortada.saveFile(context.get().getCacheDir(),title + "t", portadaBM);
+                savePortada.saveFile(context.get().getCacheDir(), title + "t", portadaBM);
                 if (editor != null) {
                     editor.putString(title, date);
                 }
             }
 
-            Portada portada = new Portada(periodico,title,fecha,webPeriodico,siglaPais);
+            Portada portada = new Portada(periodico, title, fecha, webPeriodico, siglaPais);
 
             LinearLayout.LayoutParams paramsly = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 
@@ -168,7 +191,7 @@ class GetPortadas extends AsyncTask<String, Button, Boolean> {
             imageButton.setBackground(drawable);
             imageButton.setLayoutParams(paramsly);
 
-            if(!fechaAux.equals(date)){
+            if (!fechaAux.equals(date)) {
                 String[] arrayDate = date.split("/");
                 imageButton.setText(String.format("%s/%s/%s", arrayDate[2], arrayDate[1], arrayDate[0]));
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -178,12 +201,12 @@ class GetPortadas extends AsyncTask<String, Button, Boolean> {
 
             imageButton.setOnClickListener(view -> {
                 Intent intent = new Intent(context.get(), PortadaDetalle.class);
-                intent.putExtra("Portadas",params);
+                intent.putExtra("Portadas", params);
                 intent.putExtra("selectedPortada", portada.getTitle());
                 intent.putExtra("Fecha", fecha);
-                int adCount = prefs.getInt("adCount", 0)+1;
+                int adCount = prefs.getInt("adCount", 0) + 1;
                 SharedPreferences.Editor edit = prefs.edit();
-                edit.putInt("adCount",adCount);
+                edit.putInt("adCount", adCount);
                 edit.apply();
                 intent.putExtra("showAd", adCount);
                 context.get().startActivity(intent);
@@ -214,26 +237,23 @@ class GetPortadas extends AsyncTask<String, Button, Boolean> {
                             Toast.makeText(context.get(), "Internal Storage unreadable", Toast.LENGTH_LONG).show();
                         }
                     } else if (menuItem.getItemId() == R.id.web) {
-                        int colorResId;
-                        if(context.get().getTheme().toString().contains("style/AppThemeDark")){
-                            colorResId = R.color.colorPrimaryDark;
-                        }else{
-                            colorResId = R.color.colorPrimary;
-                        }
                         try {
                             String urlPortada = "https://www." + portada.getWebPeriodico();
+                            TypedValue typedValue = new TypedValue();
+                            context.get().getTheme().resolveAttribute(R.attr.colorPrimary, typedValue, true);
+                            int color = typedValue.data;
                             CustomTabColorSchemeParams customTabColorSchemeParams = new CustomTabColorSchemeParams.Builder()
-                                    .setToolbarColor(context.get().getResources().getColor(colorResId)).build();
+                                    .setToolbarColor(color).build();
                             CustomTabsIntent intent = new CustomTabsIntent.Builder()
                                     .setShowTitle(true)
                                     .setDefaultColorSchemeParams(customTabColorSchemeParams)
                                     .build();
                             intent.launchUrl(context.get(), Uri.parse(urlPortada));
-                        }catch (ActivityNotFoundException e){
+                        } catch (ActivityNotFoundException e) {
                             Intent intent = new Intent(Intent.ACTION_VIEW);
                             intent.setData(Uri.parse("https://www." + portada.getWebPeriodico()));
                             context.get().startActivity(intent);
-                        }catch (Exception e){
+                        } catch (Exception e) {
                             e.printStackTrace();
                         }
                     }
@@ -251,51 +271,40 @@ class GetPortadas extends AsyncTask<String, Button, Boolean> {
             editor.putString("fechaPortadas", fechaAux);
             editor.apply();
         }
-        return true;
     }
 
 
     private WeakReference<LinearLayout> linearLayout;
     private int lycount = 0;
 
-    protected void onProgressUpdate(Button... ib) {
-        if (portCont % 2 == 0) {
-            linearLayout = new WeakReference<>(new LinearLayout(context.get()));
-            linearLayout.get().setOrientation(LinearLayout.HORIZONTAL);
-            linearLayout.get().setHorizontalGravity(Gravity.CENTER_HORIZONTAL);
-            linearLayout.get().addView(ib[0]);
-            if (ly.get() != null)
-                ly.get().addView(linearLayout.get(), lycount);
-            lycount++;
-        } else {
-            if (linearLayout.get() != null) {
-                Button button = (Button) linearLayout.get().getChildAt(0);
-                LinearLayout.LayoutParams paramsly = (LinearLayout.LayoutParams) button.getLayoutParams();
-                if(paramsly.height > ib[0].getLayoutParams().height){
-                    ib[0].setLayoutParams(paramsly);
-                }else{
-                    paramsly.height = ib[0].getLayoutParams().height;
-                    button.setLayoutParams(paramsly);
-                }
+    protected void publishProgress(Button... ib) {
+        handler.post(() -> {
+            if (portCont % 2 == 0) {
+                linearLayout = new WeakReference<>(new LinearLayout(context.get()));
+                linearLayout.get().setOrientation(LinearLayout.HORIZONTAL);
+                linearLayout.get().setHorizontalGravity(Gravity.CENTER_HORIZONTAL);
                 linearLayout.get().addView(ib[0]);
+                if (ly.get() != null)
+                    ly.get().addView(linearLayout.get(), lycount);
+                lycount++;
+            } else {
+                if (linearLayout.get() != null) {
+                    Button button = (Button) linearLayout.get().getChildAt(0);
+                    LinearLayout.LayoutParams paramsly = (LinearLayout.LayoutParams) button.getLayoutParams();
+                    if (paramsly.height > ib[0].getLayoutParams().height) {
+                        ib[0].setLayoutParams(paramsly);
+                    } else {
+                        paramsly.height = ib[0].getLayoutParams().height;
+                        button.setLayoutParams(paramsly);
+                    }
+                    linearLayout.get().addView(ib[0]);
+                }
             }
-        }
-        portCont++;
-    }
-
-    @Override
-    protected void onPostExecute(Boolean aBoolean) {
-        if (ly.get() != null) {
-            ly.get().removeView(pb.get());
-        }
-        if(swipeRefreshLayout != null){
-            swipeRefreshLayout.setRefreshing(false);
-        }
-        super.onPostExecute(aBoolean);
+            portCont++;
+        });
     }
 
     private static int getHalfScreenWidth() {
         return Resources.getSystem().getDisplayMetrics().widthPixels / 2;
     }
 }
-

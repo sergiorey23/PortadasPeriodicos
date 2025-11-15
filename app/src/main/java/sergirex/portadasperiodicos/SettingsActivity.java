@@ -36,7 +36,7 @@ public class SettingsActivity extends AppCompatActivity {
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
             setPreferencesFromResource(R.xml.preferences, rootKey);
 
-            androidx.preference.ListPreference modesLP = (androidx.preference.ListPreference) findPreference("theme");
+            androidx.preference.ListPreference modesLP = findPreference("theme");
             modesLP.setSummary(modesLP.getEntry());
             modesLP.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
@@ -50,7 +50,7 @@ public class SettingsActivity extends AppCompatActivity {
                     return true;
                 }
             });
-            androidx.preference.ListPreference categoriesLP = (androidx.preference.ListPreference) findPreference("init_category");
+            androidx.preference.ListPreference categoriesLP = findPreference("init_category");
             categoriesLP.setSummary(categoriesLP.getValue());
             categoriesLP.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override

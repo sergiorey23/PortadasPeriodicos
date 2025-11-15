@@ -1,8 +1,6 @@
 package sergirex.portadasperiodicos;
 
 import static sergirex.portadasperiodicos.Portadas.MY_PERMISSIONS_REQUEST_WRITE_STORAGE;
-import static sergirex.portadasperiodicos.Portadas.scanFile;
-import static sergirex.portadasperiodicos.SavePortada.permission;
 
 import android.annotation.SuppressLint;
 import android.content.ActivityNotFoundException;
@@ -10,21 +8,19 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
-import android.graphics.drawable.BitmapDrawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -34,7 +30,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.browser.customtabs.CustomTabColorSchemeParams;
 import androidx.browser.customtabs.CustomTabsIntent;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Lifecycle;
@@ -55,7 +50,6 @@ import com.google.android.material.datepicker.DateValidatorPointBackward;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.android.play.core.review.ReviewInfo;
 import com.google.android.play.core.review.ReviewManager;
 import com.google.android.play.core.review.ReviewManagerFactory;
@@ -64,6 +58,7 @@ import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -82,20 +77,6 @@ public class PortadaDetalle extends AppCompatActivity {
     @SuppressLint("SetJavaScriptEnabled")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        String theme = prefs.getString("theme","default");
-        boolean isDark = false;
-        switch (theme) {
-            case "default":
-                if ((getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES) {
-                    setTheme(R.style.AppThemeDark);
-                    isDark = true;
-                }
-                break;
-            case "dark":
-                setTheme(R.style.AppThemeDark);
-                isDark = true;
-        }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_portada_detalle);
 
@@ -115,18 +96,14 @@ public class PortadaDetalle extends AppCompatActivity {
         Animation toBottom = AnimationUtils.loadAnimation(this, R.anim.to_bottom_anim);
 
         FloatingActionButton fabWeb = findViewById(R.id.httpButton);
-        boolean finalIsDark = isDark;
         fabWeb.setOnClickListener(v -> {
             try {
-                int colorResId;
-                if(finalIsDark){
-                    colorResId = R.color.colorPrimaryDark;
-                }else{
-                    colorResId = R.color.colorPrimary;
-                }
+                TypedValue typedValue = new TypedValue();
+                getTheme().resolveAttribute(R.attr.colorPrimary, typedValue, true);
+                int color = typedValue.data;
                 String url = "https://www." + portada.getWebPeriodico();
                 CustomTabColorSchemeParams customTabColorSchemeParams = new CustomTabColorSchemeParams.Builder()
-                        .setToolbarColor(getResources().getColor(colorResId)).build();
+                        .setToolbarColor(color).build();
                 CustomTabsIntent intent = new CustomTabsIntent.Builder()
                         .setShowTitle(true)
                         .setDefaultColorSchemeParams(customTabColorSchemeParams)
@@ -180,7 +157,7 @@ public class PortadaDetalle extends AppCompatActivity {
         loadSectionsAdapter();
 
 
-        prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         int rate = prefs.getInt("rate",0);
         if(rate == 0 && showAd%2==0) {
             SharedPreferences.Editor editor = prefs.edit();
@@ -320,79 +297,117 @@ public class PortadaDetalle extends AppCompatActivity {
     }
 
     public class ViewPagerAdapter extends FragmentStateAdapter {
-        private final List<Fragment> fragments = new ArrayList<>();
-        private final List<Portada> portadas = new ArrayList<>();
+        private final List<Fragment> mFragments = new ArrayList<>();
+        private final List<Portada> mPortadas = new ArrayList<>();
 
-        public ViewPagerAdapter(@NonNull FragmentManager fm,@NonNull Lifecycle lifecycle) {
-            super(fm, lifecycle);
-            fm.registerFragmentLifecycleCallbacks(new FragmentManager.FragmentLifecycleCallbacks() {
-                @Override
-                public void onFragmentResumed(@NonNull FragmentManager fm, @NonNull Fragment f) {
-                    super.onFragmentResumed(fm, f);
-                    portada = getPortada(mViewPager2.getCurrentItem());
-                    FloatingActionButton fabfav = findViewById(R.id.favButton);
-                    if (prefsPer.contains(portada.getWebPeriodico())) {
-                        fabfav.setImageResource(R.drawable.ic_favorite_black_24dp);
-                    }else{
-                        fabfav.setImageResource(R.drawable.ic_favorite_border_black_24dp);
-                    }
-
-                }
-            },true);
+        public ViewPagerAdapter(@NonNull FragmentManager fragmentManager, @NonNull Lifecycle lifecycle) {
+            super(fragmentManager, lifecycle);
         }
 
-        public void addFragment(Fragment fragment)
-        {
-            fragments.add(fragment);
+        public void addFragment(Fragment fragment) {
+            mFragments.add(fragment);
         }
-        public void addPortada(Portada portada)
-        {
-            portadas.add(portada);
+
+        void addFragmentAt(int position, Fragment fragment) {
+            mFragments.add(position, fragment);
+        }
+
+        public void addPortada(Portada p) {
+            mPortadas.add(p);
+        }
+
+        public void removeFragment(int position){
+            mFragments.remove(position);
         }
 
         @NonNull
         @Override
         public Fragment createFragment(int position) {
-            return fragments.get(position);
+            return mFragments.get(position);
         }
 
-        @Override
-        public long getItemId(int position) {
-            return fragments.get(position).hashCode();
-        }
         @Override
         public int getItemCount() {
-            return fragments.size();
-        }
-
-        public Portada getPortada(int pos){
-            return portadas.get(pos);
+            return mFragments.size();
         }
     }
 
+    public boolean isOnline() {
+        ConnectivityManager cm =
+                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        assert cm != null;
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        return netInfo != null && netInfo.isConnectedOrConnecting();
+    }
+
+    public AlertDialog createNoConnectionDialog() {
+        final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+        alertDialogBuilder.setTitle(" Error de conexión");
+        alertDialogBuilder.setIcon(R.mipmap.news_icon);
+        alertDialogBuilder.setPositiveButton("Reintentar", (dialog, id) -> {
+            if(isOnline())
+                loadSectionsAdapter();
+            else
+                alertDialogBuilder.show();
+        })
+                .setNegativeButton("Cencelar", (dialog, id) -> alertDialogNoConn.dismiss());
+        alertDialogBuilder.setMessage("No hay conexión a internet. Por favor, comprueba tu conexión");
+        return alertDialogBuilder.create();
+    }
+
     @Override
-    protected void onResume() {
-        super.onResume();
-        /*if (prefs.getBoolean("switch_preference", false) && !dark) {
-            dark = true;
-            recreate();
-        }*/
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == MY_PERMISSIONS_REQUEST_WRITE_STORAGE) {// If request is cancelled, the result arrays are empty.
+            if (grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (permission == 1) {
+                    Toast.makeText(this, "Permiso concedido. Vuelva a relizar la operacíon", Toast.LENGTH_LONG).show();
+                }
+            } else {
+                Toast.makeText(this, "Para poder compartir y guardar fotos, es necesario otorgar permisos de almacenamiento", Toast.LENGTH_LONG).show();
+            }
+        }
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_portada, menu);
+        inflater.inflate(R.menu.menu_portada,
+                menu);
         return true;
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        int position = mViewPager2.getCurrentItem();
+        portada = mSectionsPagerAdapter.mPortadas.get(position);
+
+        String url = "https://kiosko.net/" + portada.getFecha() + "/" + portada.getSiglaPais() + "/" + portada.getTitle() + ".html";
+
         SavePortada savePortada = new SavePortada(this);
-        int itemId = item.getItemId();
-        if (itemId == R.id.date) {
-            if(today == null) today = MaterialDatePicker.todayInUtcMilliseconds();
+        if(item.getItemId() == R.id.share){
+            if (savePortada.isExternalStorageWritable()) {
+                if (savePortada.checkPermissions()) {
+                    new DownloadPortada(this, savePortada, portada.getTitle()).execute(url);
+                }
+            }
+        } else if (item.getItemId() == R.id.save) {
+            if (savePortada.isExternalStorageWritable()) {
+                if (savePortada.checkPermissions()) {
+                    File file;
+                    if ((file = new File(savePortada.getAlbumStorageDir() + File.separator + portada.getTitle() + "_" + (portada.getFecha() != null ? portada.getFecha().replace("/", "") : "") + ".jpg")).exists()) {
+                        Toast.makeText(this, "Ya se ha guardado la portada.", Toast.LENGTH_LONG).show();
+                        return true;
+                    }
+                    DownloadPortada dp = new DownloadPortada(this, file);
+                    dp.execute(url);
+                }
+            } else {
+                Toast.makeText(this, "Internal Storage unreadable", Toast.LENGTH_LONG).show();
+            }
+        }else if(item.getItemId() == R.id.date){
+            if (today == null) today = MaterialDatePicker.todayInUtcMilliseconds();
             MaterialDatePicker<Long> datePicker = MaterialDatePicker.Builder
                     .datePicker()
                     .setCalendarConstraints(new CalendarConstraints.Builder()
@@ -403,95 +418,27 @@ public class PortadaDetalle extends AppCompatActivity {
             datePicker.show(getSupportFragmentManager(), "MATERIAL_DATE_PICKER");
             datePicker.addOnPositiveButtonClickListener(
                     aLong -> {
+                        //datePicker.getHeaderText()
                         today = aLong;
                         DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd", Locale.FRANCE);
-                        String fecha = formatter.format(aLong);
-                        mSectionsPagerAdapter.fragments.clear();
-                        for (Portada p: mSectionsPagerAdapter.portadas) {
-                            mSectionsPagerAdapter.addFragment(PortadaDetalleFragment.newInstance(p.getTitle(), p.getSiglaPais(),fecha));
-                        }
-                        mSectionsPagerAdapter.notifyDataSetChanged();
+                        String fecha = formatter.format(new Date(aLong));
+                        mSectionsPagerAdapter.removeFragment(position);
+                        mSectionsPagerAdapter.addFragmentAt(position, PortadaDetalleFragment.newInstance(portada.getTitle(), portada.getSiglaPais(), fecha));
+                        mSectionsPagerAdapter.notifyItemChanged(position);
                     });
-
-        } else if (itemId == R.id.share) {
-            ImageView imageView = mSectionsPagerAdapter.createFragment(mViewPager2.getCurrentItem()).requireActivity().findViewById(R.id.imagen_extendida);
-            Uri fileURI = savePortada.saveFile(portada.getTitle(), ((BitmapDrawable) imageView.getDrawable()).getBitmap());
-            Intent i = new Intent(Intent.ACTION_SEND);
-            i.putExtra(Intent.EXTRA_STREAM, fileURI);
-            i.putExtra(Intent.EXTRA_TEXT, "https://play.google.com/store/apps/details?id=" + getPackageName());
-            i.setType("image/jpeg");
-            Intent chooser = Intent.createChooser(i, "Compartir portada");
-            startActivity(chooser);
-            return true;
-        } else if (itemId == R.id.save) {
-            if (savePortada.isExternalStorageWritable()) {
-                if (!savePortada.checkPermissions())
-                    return false;
-                File file;
-                if ((file = new File(savePortada.getAlbumStorageDir() + File.separator + portada.getTitle() + ".jpg")).exists()) {
-                    Snackbar sb = Snackbar.make(findViewById(R.id.imagen_extendida), "Ya se ha guardado la portada", Snackbar.LENGTH_SHORT);
-                    sb.setAnimationMode(Snackbar.ANIMATION_MODE_FADE);
-                    sb.show();
-                    return true;
-                }
-                ImageView imageView = mSectionsPagerAdapter.createFragment(mViewPager2.getCurrentItem()).requireActivity().findViewById(R.id.imagen_extendida);
-                savePortada.saveFile(savePortada.getAlbumStorageDir(), portada.getTitle(), ((BitmapDrawable) imageView.getDrawable()).getBitmap());
-
-                scanFile(this, file, "images/jp" +
-                        "eg");
-
-                Snackbar sb = Snackbar.make(findViewById(R.id.imagen_extendida), "Portada guarda correctamente en " + file.getAbsolutePath(), Snackbar.LENGTH_SHORT);
-                sb.setAnimationMode(Snackbar.ANIMATION_MODE_FADE);
-                sb.show();
-            } else {
-                Toast.makeText(this, "Internal Storage unreadable", Toast.LENGTH_LONG).show();
-            }
-            return true;
         }
 
-        return false;
-    }
-
-    public boolean isOnline() {
-        ConnectivityManager cm =
-                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo netInfo = cm.getActiveNetworkInfo();
-        return netInfo != null && netInfo.isConnectedOrConnecting();
-    }
-
-    public AlertDialog createNoConnectionDialog() {
-        final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-        alertDialogBuilder.setTitle("Error de conexión");
-        alertDialogBuilder.setIcon(R.mipmap.news_icon);
-        alertDialogBuilder.setOnCancelListener(dialogInterface -> onBackPressed());
-        alertDialogBuilder.setPositiveButton("Reintentar", (dialog, id) -> {
-            if (isOnline())
-                loadSectionsAdapter();
-            else
-                alertDialogBuilder.show();
-        })
-                .setNegativeButton("Cancelar", (dialog, id) -> onBackPressed());
-        alertDialogBuilder.setMessage("No hay conexión a internet. Por favor, comprueba tu conexión");
-        return alertDialogBuilder.create();
+        return true;
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == MY_PERMISSIONS_REQUEST_WRITE_STORAGE) {// If request is cancelled, the result arrays are empty.
-            if (grantResults.length > 0
-                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                if (permission == 1) {
-                    Snackbar sb = Snackbar.make(findViewById(R.id.imagen_extendida), "Permiso concedido. Vuelva a relizar la operacíon", Snackbar.LENGTH_LONG);
-                    sb.setAnimationMode(Snackbar.ANIMATION_MODE_FADE);
-                    sb.show();
-                }
-            } else {
-                Snackbar sb = Snackbar.make(findViewById(R.id.imagen_extendida), "Para poder compartir y guardar fotos, es necesario otorgar permisos de almacenamiento", Snackbar.LENGTH_LONG);
-                sb.setAnimationMode(Snackbar.ANIMATION_MODE_FADE);
-                sb.show();
-            }
+    protected void onResume() {
+        super.onResume();
+        int position = mViewPager2.getCurrentItem();
+        if(mSectionsPagerAdapter.mPortadas.size() > 0) {
+            portada = mSectionsPagerAdapter.mPortadas.get(position);
+            if (portada != null && getSupportActionBar() != null)
+                getSupportActionBar().setTitle(portada.getTitle());
         }
     }
 
