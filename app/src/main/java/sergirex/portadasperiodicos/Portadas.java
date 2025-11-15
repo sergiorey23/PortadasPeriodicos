@@ -7,6 +7,7 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.media.MediaScannerConnection;
 import android.net.ConnectivityManager;
@@ -275,7 +276,18 @@ public class Portadas extends AppCompatActivity implements BillingManager.Billin
         TextView appSource = aboutLayout.findViewById(R.id.appSource);
         TextView tv = aboutLayout.findViewById(R.id.appVersion);
 
-        tv.setText("v".concat(BuildConfig.VERSION_NAME));
+
+        try {
+            PackageInfo packageInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+            String versionName = packageInfo.versionName;
+
+            if(versionName != null)
+                tv.setText("v".concat(versionName));
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+            tv.setText("v".concat("N/A"));
+        }
+
         appSource.setOnClickListener(view -> {
             Intent intent = new Intent(Intent.ACTION_VIEW);
             intent.setData(Uri.parse("https://www.lasportadas.es/"));

@@ -1,11 +1,8 @@
 package sergirex.portadasperiodicos;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
-import android.view.View;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -18,12 +15,10 @@ import com.android.billingclient.api.BillingResult;
 import com.android.billingclient.api.PendingPurchasesParams;
 import com.android.billingclient.api.ProductDetails;
 import com.android.billingclient.api.Purchase;
-import com.android.billingclient.api.PurchasesUpdatedListener;
 import com.android.billingclient.api.QueryProductDetailsParams;
 import com.android.billingclient.api.QueryPurchasesParams;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
-import com.google.common.collect.ImmutableList;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +30,7 @@ public class BillingManager {
     private final BillingClient billingClient;
     private final Activity activity;
     private final SharedPreferences prefs;
-    private List<ProductDetails> productDetailsList = new ArrayList<>();
+    private final List<ProductDetails> productDetailsList = new ArrayList<>();
     private final BillingListener listener;
 
     public interface BillingListener {
@@ -47,20 +42,20 @@ public class BillingManager {
         this.prefs = prefs;
         this.listener = listener;
 
-        PurchasesUpdatedListener purchasesUpdatedListener = (billingResult, purchases) -> {
-            if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK && purchases != null) {
-                for (Purchase purchase : purchases) {
-                    handlePurchase(purchase);
-                }
-            }
-        };
-
         billingClient = BillingClient.newBuilder(activity)
-                .setListener(purchasesUpdatedListener)
+                .setListener(this::handlePurchases)
                 .enablePendingPurchases(PendingPurchasesParams.newBuilder().enableOneTimeProducts().build())
                 .build();
 
         establishConnection();
+    }
+
+    private void handlePurchases(BillingResult billingResult, List<Purchase> purchases) {
+        if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK && purchases != null) {
+            for (Purchase purchase : purchases) {
+                handlePurchase(purchase);
+            }
+        }
     }
 
     private void establishConnection() {
@@ -81,7 +76,7 @@ public class BillingManager {
     }
 
     private void queryProducts() {
-        ImmutableList<QueryProductDetailsParams.Product> productList = ImmutableList.of(
+        List<QueryProductDetailsParams.Product> productList = List.of(
                 QueryProductDetailsParams.Product.newBuilder()
                         .setProductId("remove_ads_id")
                         .setProductType(BillingClient.ProductType.INAPP)
@@ -119,8 +114,8 @@ public class BillingManager {
 
 
     private void launchPurchaseFlow(ProductDetails productDetails) {
-        ImmutableList<BillingFlowParams.ProductDetailsParams> productDetailsParamsList =
-                ImmutableList.of(
+        List<BillingFlowParams.ProductDetailsParams> productDetailsParamsList =
+                List.of(
                         BillingFlowParams.ProductDetailsParams.newBuilder()
                                 .setProductDetails(productDetails)
                                 .build()

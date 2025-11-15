@@ -1,6 +1,7 @@
 package sergirex.portadasperiodicos;
 
 import static sergirex.portadasperiodicos.Portadas.MY_PERMISSIONS_REQUEST_WRITE_STORAGE;
+import static sergirex.portadasperiodicos.SavePortada.permission;
 
 import android.annotation.SuppressLint;
 import android.content.ActivityNotFoundException;

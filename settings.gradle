@@ -1,4 +1,19 @@
-plugins {
-    id 'org.gradle.toolchains.foojay-resolver-convention' version '0.8.0'
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
 }
-include ':app', ':sample'
+// Esta es la forma moderna de reemplazar el bloque 'allprojects'.
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+rootProject.name = "PortadasPeriodicos"
+// ATENCIÓN: He eliminado el módulo ':sample'. Si realmente tienes ese módulo, vuelve a añadirlo.
+include ':app'
