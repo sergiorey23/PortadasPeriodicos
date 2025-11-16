@@ -1,157 +1,174 @@
-package sergirex.portadasperiodicos;
+package sergirex.portadasperiodicos
 
-import android.app.ProgressDialog;
-import android.media.Image;
-import android.os.Bundle;
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
+import com.squareup.picasso.Picasso
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import sergirex.portadasperiodicos.databinding.FragmentPortadaDetalleBinding
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
+class PortadaDetalleFragment : Fragment() {
 
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
-import android.widget.Toast;
+    // Use View Binding for safe and efficient view access
+    private var _binding: FragmentPortadaDetalleBinding? = null
+    private val binding get() = _binding!!
 
-import com.squareup.picasso.Picasso;
+    // Properties to hold fragment arguments
+    private var newspaperTitle: String? = null
+    private var countryCode: String? = null
+    private var initialDate: String? = null
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Locale;
-import java.util.Objects;
-
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link PortadaDetalleFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
-public class PortadaDetalleFragment extends Fragment {
-
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_TITLE = "title";
-    private static final String ARG_SIGLA_PAIS = "sigla_pais";
-    private static final String ARG_FECHA = "fecha";
-
-    // TODO: Rename and change types of parameters
-    private String title;
-    private String siglaPais;
-    private String fecha;
-    //private ImageView imageView;
-    private ProgressDialog pd;
-
-    public PortadaDetalleFragment() {
-        // Required empty public constructor
-    }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param title Parameter 1.
-     * @param siglaPais Parameter 2.
-     * @param fecha Parameter 3.
-     * @return A new instance of fragment PortadaDetalleFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static PortadaDetalleFragment newInstance(String title, String siglaPais, String fecha) {
-        PortadaDetalleFragment fragment = new PortadaDetalleFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_TITLE, title);
-        args.putString(ARG_SIGLA_PAIS, siglaPais);
-        args.putString(ARG_FECHA, fecha);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            title = getArguments().getString(ARG_TITLE);
-            siglaPais = getArguments().getString(ARG_SIGLA_PAIS);
-            fecha = getArguments().getString(ARG_FECHA);
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        // Retrieve arguments passed to the fragment
+        arguments?.let {
+            newspaperTitle = it.getString(ARG_TITLE)
+            countryCode = it.getString(ARG_SIGLA_PAIS)
+            initialDate = it.getString(ARG_FECHA)
         }
     }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        View rootView = inflater.inflate(R.layout.fragment_portada_detalle, container, false);
-
-        pd = new ProgressDialog(rootView.getContext(),R.style.DialogCustom);
-        pd.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        pd.setCancelable(false);
-        pd.setMessage(getString(R.string.loading));
-        pd.setIndeterminate(true);
-        pd.show();
-        getCover(rootView);
-        return rootView;
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        // Inflate the layout using View Binding
+        _binding = FragmentPortadaDetalleBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
-    private int tries = 0;
-    public void getCover(View rootView){
-        if (tries < 20) {
-            ImageView imageView = rootView.findViewById(R.id.imagen_extendida);
-            String url = "https://img.kiosko.net/" + fecha + "/" + siglaPais + "/" + title + ".jpg";
-            Picasso.get().load(url)
-                    .into(imageView, new com.squareup.picasso.Callback() {
-                        @Override
-                        public void onSuccess() {
-                            pd.cancel();
-                            pd.dismiss();
-                            Calendar calendar = Calendar.getInstance();
-                            Date today = new Date();
-                            calendar.setTime(today);
-                            if (calendar.get(Calendar.HOUR_OF_DAY) < 6) {
-                                calendar.add(Calendar.DATE, -1);
-                            }
-                            DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd", Locale.FRANCE);
-                            if(!Objects.equals(fecha, formatter.format(calendar.getTime()))){
-                                TextView textView = rootView.findViewById(R.id.fechaPortada);
-                                String[] dateStr = fecha.split("/");
-                                textView.setText(String.format("%s/%s/%s", dateStr[2], dateStr[1], dateStr[0]));
-                                textView.setVisibility(View.VISIBLE);
-                            }
-                        }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
-                        @Override
-                        public void onError(Exception e) {
-                            tries++;
-                            DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd", Locale.FRANCE);
-                            try {
-                                Date date = formatter.parse(fecha);
-                                if(date == null){
-                                    throw new ParseException(e.getMessage(),0);
-                                }
-                                Calendar calendar = Calendar.getInstance();
-                                calendar.setTime(date);
-                                calendar.add(Calendar.DATE, -1);
-                                fecha = formatter.format(calendar.getTime());
-                                getCover(rootView);
-                            } catch (ParseException ex) {
-                                Toast.makeText(getActivity(), ex.getMessage(), Toast.LENGTH_LONG).show();
-                                tries = 10;
-                            }
-                        }
-                    });
-        }else{
-            Toast.makeText(getActivity(), "Couldn't find any cover", Toast.LENGTH_LONG).show();
-            pd.cancel();
-            pd.dismiss();
+        // Launch a coroutine to fetch the cover image in the background
+        viewLifecycleOwner.lifecycleScope.launch {
+            getCover()
         }
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        String title = this.title.replace("_", " ");
-        title = title.substring(0, 1).toUpperCase() + title.substring(1);
-        Objects.requireNonNull(((AppCompatActivity) requireActivity()).getSupportActionBar()).setTitle(title);
+    private suspend fun getCover() {
+        // Ensure we have the necessary data to proceed
+        if (newspaperTitle == null || countryCode == null || initialDate == null) {
+            showError("Información insuficiente para cargar la portada.")
+            return
+        }
+
+        val formatter = SimpleDateFormat("yyyy/MM/dd", Locale.FRANCE)
+        val calendar = Calendar.getInstance()
+        try {
+            calendar.time = formatter.parse(initialDate!!)!!
+        } catch (e: Exception) {
+            showError("Fecha inválida.")
+            return
+        }
+
+        var coverFound = false
+        var finalDate: String? = null
+
+        // Try to find the cover, going back up to 20 days
+        for (i in 0 until 20) {
+            val currentDate = formatter.format(calendar.time)
+            val url = "https://img.kiosko.net/$currentDate/$countryCode/$newspaperTitle.jpg"
+
+            // Run the network request on a background thread
+            val success = withContext(Dispatchers.IO) {
+                loadImageWithPicasso(url)
+            }
+
+            if (success) {
+                coverFound = true
+                finalDate = currentDate
+                break // Exit the loop as soon as the cover is found
+            } else {
+                // If not found, go to the previous day
+                calendar.add(Calendar.DATE, -1)
+            }
+        }
+
+        // Update the UI on the main thread
+        binding.loadingProgressBar.visibility = View.GONE
+        if (coverFound && finalDate != null) {
+            showDateIfNotToday(finalDate)
+            binding.imagenExtendida.visibility = View.VISIBLE
+        } else {
+            showError("No se pudo encontrar ninguna portada.")
+        }
+    }
+
+    // A helper suspend function to wrap Picasso's callback in a coroutine
+    private suspend fun loadImageWithPicasso(url: String): Boolean = suspendCoroutine { continuation ->
+        Picasso.get().load(url).into(binding.imagenExtendida, object : com.squareup.picasso.Callback {
+            override fun onSuccess() {
+                continuation.resume(true) // Resume coroutine with success
+            }
+
+            override fun onError(e: Exception?) {
+                continuation.resume(false) // Resume coroutine with failure
+            }
+        })
+    }
+
+    private fun showDateIfNotToday(coverDate: String) {
+        val formatter = SimpleDateFormat("yyyy/MM/dd", Locale.FRANCE)
+        val todayCalendar = Calendar.getInstance()
+        if (todayCalendar.get(Calendar.HOUR_OF_DAY) < 6) {
+            todayCalendar.add(Calendar.DATE, -1)
+        }
+        val todayDate = formatter.format(todayCalendar.time)
+
+        if (coverDate != todayDate) {
+            val dateStr = coverDate.split("/")
+            binding.fechaPortada.text = "${dateStr[2]}/${dateStr[1]}/${dateStr[0]}"
+            binding.fechaPortada.visibility = View.VISIBLE
+        }
+    }
+
+    private fun showError(message: String) {
+        binding.loadingProgressBar.visibility = View.GONE
+        Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
+        // Optionally, navigate back or show an error image
+        parentFragmentManager.popBackStack()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Set the ActionBar title
+        val formattedTitle = newspaperTitle?.replace("_", " ")?.replaceFirstChar { it.uppercase() }
+        (activity as? AppCompatActivity)?.supportActionBar?.title = formattedTitle
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        // Avoid memory leaks by nullifying the binding reference
+        _binding = null
+    }
+
+    // Companion object to provide a factory method for creating the fragment
+    companion object {
+        private const val ARG_TITLE = "title"
+        private const val ARG_SIGLA_PAIS = "sigla_pais"
+        private const val ARG_FECHA = "fecha"
+
+        @JvmStatic
+        fun newInstance(title: String, siglaPais: String, fecha: String) =
+            PortadaDetalleFragment().apply {
+                arguments = Bundle().apply {
+                    putString(ARG_TITLE, title)
+                    putString(ARG_SIGLA_PAIS, siglaPais)
+                    putString(ARG_FECHA, fecha)
+                }
+            }
     }
 }

@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'org.jetbrains.kotlin.android'
 
 android {
     compileSdk = 36
@@ -18,11 +19,17 @@ android {
                     'proguard-rules.pro'
         }
     }
+    buildFeatures {
+        viewBinding = true
+    }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
     namespace 'sergirex.portadasperiodicos'
+    kotlinOptions {
+        jvmTarget = '17'
+    }
     /*lint {
         disable 'RestrictedApi'
     }*/
@@ -43,6 +50,9 @@ dependencies {
     implementation 'com.android.billingclient:billing:8.1.0'
     implementation 'com.google.android.play:review:2.0.2'
     implementation 'androidx.activity:activity:1.11.0'
+    implementation 'androidx.core:core-ktx:1.17.0'
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.9.4'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.9.4'
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.7.0'
     implementation 'com.facebook.android:audience-network-sdk:6.21.0'

@@ -1,47 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Newspapers</string>
-    <string name="help">Help</string>
-    <string name="rate">Rate</string>
-    <string name="action_share">Share</string>
-    <string name="help_description">Press and hold on the cover to share it, save it or visit its website.</string>
-    <string name="about">About</string>
-    <string name="rate_app">If you like the app, please leave a feedback</string>
-    <string name="second_tab">Sports</string>
-    <string name="third_tab">Economy</string>
-    <string name="fifth_tab">International</string>
-    <string name="close">Close</string>
-    <string name="fourth_tab">Local</string>
-    <string name="contact">Contact</string>
-    <string name="save">Save</string>
-    <string name="refresh">Refresh</string>
-    <string name="settings">Settings</string>
-    <string name="mode">Night mode</string>
-    <string name="tema">Theme</string>
-    <string name="action_fav">Add to favourites</string>
-    <string name="fav_tab">Favorites</string>
-    <string name="help_description2">You can also see the covers in the home screen widget.</string>
-    <string name="about_desc">\tDo you have any suggestion? Is it any cover left?\n\tDon\'t hesitate to tell me!</string>
-    <string name="copyright">"All images are copyrighted to their respective owners. "</string>
-    <string name="freeApp">This app is free of adds. I wouold apprecieate so much if you invite me a coffe</string>
-    <string name="appSource">An app from lasportadas.es</string>
-    <string name="supportDeveloper">Inviteme a coffe</string>
-    <string name="privacy_policy">Privacy Policy</string>
-    <string name="date">Date</string>
-    <string name="rateTitle">Rate Portadas</string>
-    <string name="rateDescription">If you are enjoying the app. Would you mind rating it on the Play Store?</string>
-    <string name="later">Later</string>
-    <string name="sure">Sure!</string>
-    <string name="default_system">Default system</string>
-    <string name="light">Light</string>
-    <string name="dark">Dark</string>
-    <string name="categories">Categories</string>
-    <string name="removeAds">Remove ads</string>
-    <string name="notification_name">Covers</string>
-    <string name="notification_description">Check out today\'s covers!</string>
-    <string name="loading">Loading...</string>
-    <string name="covers">Covers</string>
-    <string name="app_full_name">Newspaper covers</string>
-    <string name="mas_apps">More apps:</string>
-    <string name="portadas_revistas">Magazines Covers</string>
+    <string name="app_name">Newspaper Covers</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_portada_detalle">Cover</string>
+    <string name="title_activity_settings">Settings</string>
+
+    <!-- Strings related to Settings -->
+    <string name="pref_header_general">General</string>
+
+    <string name="pref_portadas_default_title">View in app</string>
+    <string name="pref_portadas_default_summary">Open covers in the application instead of the browser</string>
+
+    <string-array name="pref_example_list_titles">
+        <item>Always</item>
+        <item>When possible</item>
+        <item>Never</item>
+    </string-array>
+
+    <string name="pref_images_hd_title">HD Images</string>
+    <string name="pref_images_hd_summary">Load covers in high resolution (slower)</string>
+
+    <string name="pref_update_only_wifi_title">Update only on Wi-Fi</string>
+
+    <string name="pref_cache_delete_title">Clear cache</string>
+    <string name="pref_cache_delete_summary">Delete all images saved on the device\'s memory</string>
+    <string name="pref_cache_deleted_message">Cache cleared</string>
+
+    <string name="pref_header_about">About</string>
+
+    <string name="pref_app_version_title">Version</string>
+
+    <string name="pref_contact_title">Contact</string>
+    <string name="pref_contact_summary">Send an email with questions or suggestions</string>
+    <string name="pref_contact_subject">Newspaper Covers</string>
+    <string name="pref_contact_chooser_title">Send email…</string>
+
+    <string name="pref_rate_title">Rate</string>
+    <string name="pref_rate_summary">Rate the application on Google Play</string>
+
+    <string name="pref_share_title">Share</string>
+    <string name="pref_share_summary">Share the application with your friends</string>
+    <string name="pref_share_text">Download this app to see the newspaper covers every day! https://play.google.com/store/apps/details?id=sergirex.portadasperiodicos</string>
+    <string name="portada">Cover</string>
+
+    <!-- Tab Titles -->
+    <string name="tab_general">General</string>
+    <string name="tab_deportes">Sports</string>
+    <string name="tab_economia">Economy</string>
+    <string name="tab_locales">Local</string>
+    <string name="tab_internacional">International</string>
+    <string name="tab_favoritos">Favorites</string>
+    <string name="loading">Loading&#8230;</string>
+
 </resources>

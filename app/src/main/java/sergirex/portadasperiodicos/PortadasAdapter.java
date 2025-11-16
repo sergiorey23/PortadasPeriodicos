@@ -60,7 +60,7 @@ public class PortadasAdapter extends RecyclerView.Adapter<PortadasAdapter.Portad
         notifyItemRangeRemoved(0, size);
     }
 
-    static class PortadaViewHolder extends RecyclerView.ViewHolder {
+    public static class PortadaViewHolder extends RecyclerView.ViewHolder {
         ImageView portadaImageView;
 
         public PortadaViewHolder(@NonNull View itemView) {

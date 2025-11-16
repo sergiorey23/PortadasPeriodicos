@@ -1,453 +1,391 @@
-package sergirex.portadasperiodicos;
+package sergirex.portadasperiodicos
 
-import static sergirex.portadasperiodicos.Portadas.MY_PERMISSIONS_REQUEST_WRITE_STORAGE;
-import static sergirex.portadasperiodicos.SavePortada.permission;
+import android.content.ActivityNotFoundException
+import android.content.Context
+import android.content.Intent
+import android.content.SharedPreferences
+import android.content.pm.PackageManager
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.net.Uri
+import android.os.Bundle
+import android.util.Log
+import android.util.TypedValue
+import android.view.Menu
+import android.view.MenuItem
+import android.view.View
+import android.view.animation.Animation
+import android.view.animation.AnimationUtils
+import android.widget.Toast
+import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
+import androidx.browser.customtabs.CustomTabColorSchemeParams
+import androidx.browser.customtabs.CustomTabsIntent
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
+import androidx.lifecycle.Lifecycle
+import androidx.preference.PreferenceManager
+import androidx.viewpager2.adapter.FragmentStateAdapter
+import androidx.viewpager2.widget.ViewPager2
+import com.facebook.ads.*
+import com.google.android.material.datepicker.CalendarConstraints
+import com.google.android.material.datepicker.DateValidatorPointBackward
+import com.google.android.material.datepicker.MaterialDatePicker
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.play.core.review.ReviewManagerFactory
+import sergirex.portadasperiodicos.databinding.ActivityPortadaDetalleBinding
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.*
 
-import android.annotation.SuppressLint;
-import android.content.ActivityNotFoundException;
-import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.net.Uri;
-import android.os.Build;
-import android.os.Bundle;
-import android.util.Log;
-import android.util.TypedValue;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.widget.LinearLayout;
-import android.widget.Toast;
+class PortadaDetalle : AppCompatActivity() {
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.browser.customtabs.CustomTabColorSchemeParams;
-import androidx.browser.customtabs.CustomTabsIntent;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.lifecycle.Lifecycle;
-import androidx.preference.PreferenceManager;
-import androidx.viewpager2.adapter.FragmentStateAdapter;
-import androidx.viewpager2.widget.ViewPager2;
+    // Using View Binding to replace findViewById
+    private lateinit var binding: ActivityPortadaDetalleBinding
 
-import com.facebook.ads.Ad;
-import com.facebook.ads.AdError;
-import com.facebook.ads.AdSize;
-import com.facebook.ads.AdView;
-import com.facebook.ads.AudienceNetworkAds;
-import com.facebook.ads.InterstitialAd;
-import com.facebook.ads.InterstitialAdListener;
-import com.google.android.gms.tasks.Task;
-import com.google.android.material.datepicker.CalendarConstraints;
-import com.google.android.material.datepicker.DateValidatorPointBackward;
-import com.google.android.material.datepicker.MaterialDatePicker;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.play.core.review.ReviewInfo;
-import com.google.android.play.core.review.ReviewManager;
-import com.google.android.play.core.review.ReviewManagerFactory;
+    // Using ViewModel to store UI state and survive configuration changes
+    private val viewModel: PortadaDetalleViewModel by viewModels()
 
-import java.io.File;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
+    private lateinit var prefsPer: SharedPreferences
+    private lateinit var mSectionsPagerAdapter: ViewPagerAdapter
 
+    private var interstitialAd: InterstitialAd? = null
 
-public class PortadaDetalle extends AppCompatActivity {
+    // Animations are loaded once
+    private val rotateOpen: Animation by lazy { AnimationUtils.loadAnimation(this, R.anim.rotate_open_anim) }
+    private val rotateClose: Animation by lazy { AnimationUtils.loadAnimation(this, R.anim.rotate_close_anim) }
+    private val fromBottom: Animation by lazy { AnimationUtils.loadAnimation(this, R.anim.from_bottom_anim) }
+    private val toBottom: Animation by lazy { AnimationUtils.loadAnimation(this, R.anim.to_bottom_anim) }
 
-    private String initialPortada;
-    private Portada portada;
-    private SharedPreferences prefsPer;
-    private AlertDialog alertDialogNoConn;
-    private InterstitialAd interstitialAd;
-    private Long today;
-    private ViewPager2 mViewPager2;
-    private ViewPagerAdapter mSectionsPagerAdapter;
-    private boolean clicked = false;
-    @SuppressLint("SetJavaScriptEnabled")
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_portada_detalle);
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = ActivityPortadaDetalleBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        initialPortada = getIntent().getStringExtra("selectedPortada");
-        int showAd = getIntent().getIntExtra("showAd",0);
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        prefsPer = getSharedPreferences("periodicos", Context.MODE_PRIVATE)
 
-        toolbar.setNavigationIcon(R.drawable.ic_arrow_back_black_24dp);
-        toolbar.setNavigationOnClickListener(v -> onBackPressed());
-
-        prefsPer = getSharedPreferences("periodicos", Context.MODE_PRIVATE);
-
-        Animation rotateOpen = AnimationUtils.loadAnimation(this, R.anim.rotate_open_anim);
-        Animation rotateClose = AnimationUtils.loadAnimation(this, R.anim.rotate_close_anim);
-        Animation fromBottom = AnimationUtils.loadAnimation(this, R.anim.from_bottom_anim);
-        Animation toBottom = AnimationUtils.loadAnimation(this, R.anim.to_bottom_anim);
-
-        FloatingActionButton fabWeb = findViewById(R.id.httpButton);
-        fabWeb.setOnClickListener(v -> {
-            try {
-                TypedValue typedValue = new TypedValue();
-                getTheme().resolveAttribute(R.color.colorPrimary, typedValue, true);
-                int color = typedValue.data;
-                String url = "https://www." + portada.webPeriodico();
-                CustomTabColorSchemeParams customTabColorSchemeParams = new CustomTabColorSchemeParams.Builder()
-                        .setToolbarColor(color).build();
-                CustomTabsIntent intent = new CustomTabsIntent.Builder()
-                        .setShowTitle(true)
-                        .setDefaultColorSchemeParams(customTabColorSchemeParams)
-                        .build();
-                intent.launchUrl(PortadaDetalle.this, Uri.parse(url));
-            }catch (ActivityNotFoundException e){
-                Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setData(Uri.parse("https://www." + portada.webPeriodico()));
-                startActivity(intent);
-            }catch (Exception e){
-                e.printStackTrace();
-            }
-        });
-
-        FloatingActionButton favfab = findViewById(R.id.favButton);
-        favfab.setOnDragListener((view, dragEvent) -> false);
-        favfab.setOnClickListener(view -> {
-            SharedPreferences.Editor editor = prefsPer.edit();
-            if (prefsPer.contains(portada.webPeriodico())) {
-                editor.remove(portada.webPeriodico());
-                favfab.setImageResource(R.drawable.ic_favorite_border_black_24dp);
-            } else {
-                editor.putString(portada.webPeriodico(), portada.periodico());
-                favfab.setImageResource(R.drawable.ic_favorite_black_24dp);
-            }
-            editor.apply();
-        });
-
-        FloatingActionButton addFab = findViewById(R.id.addFab);
-        addFab.setOnClickListener(v -> {
-            if(!clicked){
-                fabWeb.setVisibility(View.VISIBLE);
-                favfab.setVisibility(View.VISIBLE);
-                fabWeb.startAnimation(fromBottom);
-                favfab.startAnimation(fromBottom);
-                addFab.startAnimation(rotateOpen);
-                fabWeb.setClickable(true);
-                favfab.setClickable(true);
-            }else{
-                fabWeb.setVisibility(View.INVISIBLE);
-                favfab.setVisibility(View.INVISIBLE);
-                fabWeb.startAnimation(toBottom);
-                favfab.startAnimation(toBottom);
-                addFab.startAnimation(rotateClose);
-                fabWeb.setClickable(false);
-                favfab.setClickable(false);
-            }
-            clicked = !clicked;
-        });
-
-        loadSectionsAdapter();
-
-
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        int rate = prefs.getInt("rate",0);
-        if(rate == 0 && showAd%2==0) {
-            SharedPreferences.Editor editor = prefs.edit();
-            new MaterialAlertDialogBuilder(this)
-                    .setTitle(R.string.rateTitle)
-                    .setMessage(R.string.rateDescription)
-                    .setIcon(R.mipmap.news_icon)
-                    .setNeutralButton("No", (dialog, which) -> {
-                        editor.putInt("rate", 1);
-                        editor.apply();
-                    }).setNegativeButton(R.string.later, (dialog, which) -> {
-                        editor.putInt("rate", 2);
-                        editor.apply();
-                    }).setPositiveButton(R.string.sure, (dialog, which) -> {
-                        editor.putInt("rate", 1);
-                        editor.apply();
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                            ReviewManager manager = ReviewManagerFactory.create(this);
-                            Task<ReviewInfo> request = manager.requestReviewFlow();
-                            request.addOnCompleteListener(task -> {
-                                if (task.isSuccessful()) {
-                                    // We can get the ReviewInfo object
-                                    ReviewInfo reviewInfo = task.getResult();
-                                    Task<Void> flow = manager.launchReviewFlow(this, reviewInfo);
-                                    flow.addOnCompleteListener(t -> {
-                                        Toast.makeText(this, "¡Gracias!", Toast.LENGTH_LONG).show();
-                                    });
-                                } else {
-                                    // There was some problem, log or handle the error code.
-                                    Log.e("Review Error", task.getException().getMessage());
-                                }
-                            });
-                        }else {
-                            Uri uri = Uri.parse("market://details?id=" + getPackageName());
-                            Intent myAppLinkToMarket = new Intent(Intent.ACTION_VIEW, uri);
-                            try {
-                                startActivity(myAppLinkToMarket);
-                            } catch (ActivityNotFoundException e) {
-                                Toast.makeText(this, " unable to find market app", Toast.LENGTH_LONG).show();
-                            }
-                        }
-                    }).show();
-        }
-        if(!prefs.getBoolean("remove_fb_ads", false)) {
-            AudienceNetworkAds.initialize(this);
-            //AdSettings.setTestMode(true);
-            AdView bottomBanner = new AdView(this, "799967435028134_814221240269420", AdSize.BANNER_HEIGHT_50);
-            // Find the Ad Container
-            LinearLayout adContainer = findViewById(R.id.bannerContainerDetail);
-            adContainer.addView(bottomBanner);
-            bottomBanner.loadAd();
-            if (showAd%3==0) {
-                interstitialAd = new InterstitialAd(this, "799967435028134_801174748240736");
-                String TAG = "AD";
-                InterstitialAdListener interstitialAdListener = new InterstitialAdListener() {
-
-                    @Override
-                    public void onInterstitialDisplayed(Ad ad) {
-                        // Interstitial ad displayed callback
-                    }
-
-                    @Override
-                    public void onInterstitialDismissed(Ad ad) {
-                        // Interstitial dismissed callback
-                    }
-
-                    @Override
-                    public void onError(Ad ad, AdError adError) {
-                        // Ad error callback
-                        Log.e(TAG, "Interstitial ad failed to load: " + adError.getErrorMessage());
-                    }
-
-                    @Override
-                    public void onAdLoaded(Ad ad) {
-                        // Interstitial ad is loaded and ready to be displayed
-                        Log.d(TAG, "Interstitial ad is loaded and ready to be displayed!");
-                        // Show the ad
-                        interstitialAd.show();
-                    }
-
-                    @Override
-                    public void onAdClicked(Ad ad) {
-                        // Ad clicked callback
-                    }
-
-                    @Override
-                    public void onLoggingImpression(Ad ad) {
-                        // Ad impression logged callback
-                    }
-                };
-
-                interstitialAd.loadAd(interstitialAd.buildLoadAdConfig()
-                        .withAdListener(interstitialAdListener)
-                        .build());
-            }
-        }
+        setupToolbar()
+        setupFabs()
+        loadSectionsAdapter()
+        setupAdsAndReview()
     }
 
-    private void loadSectionsAdapter() {
-        if (!isOnline()) {
-            if (alertDialogNoConn == null)
-                alertDialogNoConn = createNoConnectionDialog();
-            alertDialogNoConn.show();
-        }else {
-            mViewPager2 = findViewById(R.id.viewpager2);
-            String[] portadas = getIntent().getStringArrayExtra("Portadas");
-            String fecha = getIntent().getStringExtra("Fecha");
-            mSectionsPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager(), getLifecycle());
-            int pos = 0;
-            if (portadas != null) {
-                for (int i = 0; i < portadas.length; i++) {
-                    String[] periodicoArray = portadas[i].split(":");
-                    String siglaPais = "es";
-                    String title, webPeriodico;
-                    if (periodicoArray.length > 1) {
-                        title = periodicoArray[0];
-                        webPeriodico = periodicoArray[1];
-                        if (periodicoArray.length == 3) {
-                            siglaPais = periodicoArray[2];
-                        }
-                    } else {
-                        title = portadas[i].split("\\.")[0];
-                        webPeriodico = portadas[i];
-                    }
-                    if (title.equals(initialPortada)){
-                        pos = i;
-                    }
-                    mSectionsPagerAdapter.addFragment(PortadaDetalleFragment.newInstance(title, siglaPais, fecha));
-                    Portada p = new Portada(portadas[i],title,fecha,webPeriodico,siglaPais);
-                    mSectionsPagerAdapter.addPortada(p);
-                }
+    private fun setupToolbar() {
+        setSupportActionBar(binding.toolbar)
+        binding.toolbar.setNavigationIcon(R.drawable.ic_arrow_back_black_24dp)
+        binding.toolbar.setNavigationOnClickListener { onBackPressed() }
+    }
+
+    private fun setupFabs() {
+        binding.addFab.setOnClickListener {
+            val isExpanded = viewModel.areFabsExpanded.value ?: false
+            viewModel.areFabsExpanded.value = !isExpanded
+        }
+
+        // Observe the state from the ViewModel to update the UI
+        viewModel.areFabsExpanded.observe(this) { isExpanded ->
+            toggleFabs(isExpanded)
+        }
+
+        binding.httpButton.setOnClickListener { openNewspaperWebsite() }
+        binding.favButton.setOnClickListener { toggleFavorite() }
+
+        // Set initial state based on ViewModel (handles rotation)
+        toggleFabs(viewModel.areFabsExpanded.value ?: false, animate = false)
+    }
+
+    private fun toggleFabs(isExpanded: Boolean, animate: Boolean = true) {
+        val visibility = if (isExpanded) View.VISIBLE else View.INVISIBLE
+        val clickable = isExpanded
+
+        if (animate) {
+            binding.httpButton.startAnimation(if (isExpanded) fromBottom else toBottom)
+            binding.favButton.startAnimation(if (isExpanded) fromBottom else toBottom)
+            binding.addFab.startAnimation(if (isExpanded) rotateOpen else rotateClose)
+        }
+
+        binding.httpButton.visibility = visibility
+        binding.favButton.visibility = visibility
+        binding.httpButton.isClickable = clickable
+        binding.favButton.isClickable = clickable
+    }
+
+    private fun loadSectionsAdapter() {
+        if (!isNetworkAvailable(this)) {
+            showNoConnectionDialog()
+            return
+        }
+
+        val portadas = intent.getStringArrayExtra("Portadas")
+        val initialPortada = intent.getStringExtra("selectedPortada")
+        val fecha = intent.getStringExtra("Fecha")
+
+        mSectionsPagerAdapter = ViewPagerAdapter(supportFragmentManager, lifecycle)
+
+        val portadaList = portadas?.mapNotNull {
+            val parts = it.split(":")
+            val title = if (parts.size > 1) parts[0] else it.split(".")[0]
+            val web = if (parts.size > 1) parts[1] else it
+            val country = if (parts.size > 2) parts[2] else "es"
+            Portada(it, title, fecha, web, country)
+        } ?: emptyList()
+
+        mSectionsPagerAdapter.setPortadas(portadaList)
+
+        binding.viewpager2.adapter = mSectionsPagerAdapter
+
+        // Set initial position
+        val initialPosition = portadaList.indexOfFirst { it.title == initialPortada }
+        if (initialPosition != -1) {
+            binding.viewpager2.setCurrentItem(initialPosition, false)
+        }
+
+        // Use a callback to react to page changes
+        binding.viewpager2.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                super.onPageSelected(position)
+                updateUiForPage(position)
             }
-
-            mViewPager2.setAdapter(mSectionsPagerAdapter);
-            mViewPager2.setCurrentItem(pos,false);
-        }
-    }
-
-    public static class ViewPagerAdapter extends FragmentStateAdapter {
-        private final List<Fragment> mFragments = new ArrayList<>();
-        private final List<Portada> mPortadas = new ArrayList<>();
-
-        public ViewPagerAdapter(@NonNull FragmentManager fragmentManager, @NonNull Lifecycle lifecycle) {
-            super(fragmentManager, lifecycle);
-        }
-
-        public void addFragment(Fragment fragment) {
-            mFragments.add(fragment);
-        }
-
-        void addFragmentAt(int position, Fragment fragment) {
-            mFragments.add(position, fragment);
-        }
-
-        public void addPortada(Portada p) {
-            mPortadas.add(p);
-        }
-
-        public void removeFragment(int position){
-            mFragments.remove(position);
-        }
-
-        @NonNull
-        @Override
-        public Fragment createFragment(int position) {
-            return mFragments.get(position);
-        }
-
-        @Override
-        public int getItemCount() {
-            return mFragments.size();
-        }
-    }
-
-    public boolean isOnline() {
-        ConnectivityManager cm =
-                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        assert cm != null;
-        NetworkInfo netInfo = cm.getActiveNetworkInfo();
-        return netInfo != null && netInfo.isConnectedOrConnecting();
-    }
-
-    public AlertDialog createNoConnectionDialog() {
-        final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-        alertDialogBuilder.setTitle(" Error de conexión");
-        alertDialogBuilder.setIcon(R.mipmap.news_icon);
-        alertDialogBuilder.setPositiveButton("Reintentar", (dialog, id) -> {
-            if(isOnline())
-                loadSectionsAdapter();
-            else
-                alertDialogBuilder.show();
         })
-                .setNegativeButton("Cencelar", (dialog, id) -> alertDialogNoConn.dismiss());
-        alertDialogBuilder.setMessage("No hay conexión a internet. Por favor, comprueba tu conexión");
-        return alertDialogBuilder.create();
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == MY_PERMISSIONS_REQUEST_WRITE_STORAGE) {// If request is cancelled, the result arrays are empty.
-            if (grantResults.length > 0
-                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                if (permission == 1) {
-                    Toast.makeText(this, "Permiso concedido. Vuelva a relizar la operacíon", Toast.LENGTH_LONG).show();
-                }
-            } else {
-                Toast.makeText(this, "Para poder compartir y guardar fotos, es necesario otorgar permisos de almacenamiento", Toast.LENGTH_LONG).show();
-            }
+    private fun updateUiForPage(position: Int) {
+        val portada = mSectionsPagerAdapter.getPortadaAt(position) ?: return
+        supportActionBar?.title = portada.title
+        val isFavorite = prefsPer.contains(portada.webPeriodico)
+        binding.favButton.setImageResource(if (isFavorite) R.drawable.ic_favorite_black_24dp else R.drawable.ic_favorite_border_black_24dp)
+    }
+
+    private fun setupAdsAndReview() {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+        val showAd = intent.getIntExtra("showAd", 0)
+
+        if (prefs.getInt("rate", 0) == 0 && showAd % 2 == 0) {
+            showInAppReviewPrompt(prefs)
+        }
+
+        if (!prefs.getBoolean("remove_fb_ads", false)) {
+            loadFacebookAds(showAd)
         }
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_portada,
-                menu);
-        return true;
+    private fun loadFacebookAds(showAd: Int) {
+        AudienceNetworkAds.initialize(this)
+        // Banner Ad
+        val bottomBanner = AdView(this, "799967435028134_814221240269420", AdSize.BANNER_HEIGHT_50)
+        binding.bannerContainerDetail.addView(bottomBanner)
+        bottomBanner.loadAd()
+
+        // Interstitial Ad
+        if (showAd % 3 == 0) {
+            interstitialAd = InterstitialAd(this, "799967435028134_801174748240736")
+            val interstitialAdListener = object : InterstitialAdListener {
+                override fun onInterstitialDisplayed(ad: Ad) {}
+                override fun onInterstitialDismissed(ad: Ad) {}
+                override fun onError(ad: Ad, adError: AdError) {
+                    Log.e("AD_ERROR", "Interstitial ad failed to load: " + adError.errorMessage)
+                }
+                override fun onAdLoaded(ad: Ad) {
+                    interstitialAd?.show()
+                }
+                override fun onAdClicked(ad: Ad) {}
+                override fun onLoggingImpression(ad: Ad) {}
+            }
+            interstitialAd?.loadAd(
+                interstitialAd?.buildLoadAdConfig()
+                    ?.withAdListener(interstitialAdListener)
+                    ?.build()
+            )
+        }
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int position = mViewPager2.getCurrentItem();
-        portada = mSectionsPagerAdapter.mPortadas.get(position);
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_portada, menu)
+        return true
+    }
 
-        String url = "https://kiosko.net/" + portada.fecha() + "/" + portada.siglaPais() + "/" + portada.title() + ".html";
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        val position = binding.viewpager2.currentItem
+        val portada = mSectionsPagerAdapter.getPortadaAt(position) ?: return false
+        val url = "https://kiosko.net/${portada.fecha}/${portada.siglaPais}/${portada.title}.html"
+        val savePortada = SavePortada(this)
 
-        SavePortada savePortada = new SavePortada(this);
-        if(item.getItemId() == R.id.share){
-            if (savePortada.isExternalStorageWritable()) {
-                if (savePortada.checkPermissions()) {
-                    new DownloadPortada(this, savePortada, portada.title()).execute(url);
+        when (item.itemId) {
+            R.id.share -> {
+                if (savePortada.isExternalStorageWritable && savePortada.checkPermissions()) {
+                    // Pass the root view for the Snackbar
+                    DownloadPortada(this, binding.root, savePortada, portada.title).execute(url)
                 }
             }
-        } else if (item.getItemId() == R.id.save) {
-            if (savePortada.isExternalStorageWritable()) {
-                if (savePortada.checkPermissions()) {
-                    File file;
-                    if ((file = new File(savePortada.getAlbumStorageDir() + File.separator + portada.title() + "_" + (portada.fecha() != null ? portada.fecha().replace("/", "") : "") + ".jpg")).exists()) {
-                        Toast.makeText(this, "Ya se ha guardado la portada.", Toast.LENGTH_LONG).show();
-                        return true;
+            R.id.save -> {
+                if (savePortada.isExternalStorageWritable && savePortada.checkPermissions()) {
+                    val file = File(savePortada.albumStorageDir, "${portada.title}_${portada.fecha?.replace("/", "")}.jpg")
+                    if (file.exists()) {
+                        Toast.makeText(this, "Ya se ha guardado la portada.", Toast.LENGTH_LONG).show()
+                    } else {
+                        // Pass the root view for the Snackbar
+                        DownloadPortada(this, binding.root, file).execute(url)
                     }
-                    DownloadPortada dp = new DownloadPortada(this, file);
-                    dp.execute(url);
+                }
+            }
+            R.id.date -> showDatePicker()
+        }
+        return true
+    }
+
+    private fun showDatePicker() {
+        val today = viewModel.lastSelectedDateMillis ?: MaterialDatePicker.todayInUtcMilliseconds()
+        val datePicker = MaterialDatePicker.Builder.datePicker()
+            .setTitleText("Seleccionar fecha")
+            .setSelection(today)
+            .setCalendarConstraints(
+                CalendarConstraints.Builder()
+                    .setValidator(DateValidatorPointBackward.now())
+                    .build()
+            )
+            .build()
+
+        datePicker.addOnPositiveButtonClickListener { selection ->
+            viewModel.lastSelectedDateMillis = selection
+            val formatter = SimpleDateFormat("yyyy/MM/dd", Locale.FRANCE)
+            val newDate = formatter.format(Date(selection))
+
+            val currentPosition = binding.viewpager2.currentItem
+            mSectionsPagerAdapter.updateDateForPortada(currentPosition, newDate)
+
+            // Find the current fragment and tell it to reload
+            val currentFragment = supportFragmentManager.findFragmentByTag("f$currentPosition")
+            (currentFragment as? PortadaDetalleFragment)?.reloadWithDate(newDate)
+        }
+
+        datePicker.show(supportFragmentManager, "MATERIAL_DATE_PICKER")
+    }
+
+    private fun openNewspaperWebsite() {
+        val portada = mSectionsPagerAdapter.getPortadaAt(binding.viewpager2.currentItem) ?: return
+        val url = "https://www.${portada.webPeriodico}"
+        try {
+            val typedValue = TypedValue()
+            theme.resolveAttribute(com.google.android.material.R.attr.colorPrimary, typedValue, true)
+            val color = typedValue.data
+
+            val intent = CustomTabsIntent.Builder()
+                .setShowTitle(true)
+                .setDefaultColorSchemeParams(
+                    CustomTabColorSchemeParams.Builder().setToolbarColor(color).build()
+                )
+                .build()
+            intent.launchUrl(this, Uri.parse(url))
+        } catch (e: ActivityNotFoundException) {
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun toggleFavorite() {
+        val portada = mSectionsPagerAdapter.getPortadaAt(binding.viewpager2.currentItem) ?: return
+        val editor = prefsPer.edit()
+        if (prefsPer.contains(portada.webPeriodico)) {
+            editor.remove(portada.webPeriodico)
+            binding.favButton.setImageResource(R.drawable.ic_favorite_border_black_24dp)
+        } else {
+            editor.putString(portada.webPeriodico, portada.periodico)
+            binding.favButton.setImageResource(R.drawable.ic_favorite_black_24dp)
+        }
+        editor.apply()
+    }
+
+    // Check for network connectivity
+    private fun isNetworkAvailable(context: Context): Boolean {
+        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
+        // For modern Android versions
+        val network = connectivityManager.activeNetwork ?: return false
+        val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
+
+        return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
+                capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+    }
+
+    private fun showNoConnectionDialog() {
+        MaterialAlertDialogBuilder(this)
+            .setTitle("Error de conexión")
+            .setIcon(R.mipmap.news_icon)
+            .setMessage("No hay conexión a internet. Por favor, comprueba tu conexión.")
+            .setPositiveButton("Reintentar") { dialog, _ ->
+                dialog.dismiss()
+                loadSectionsAdapter() // Retry loading
+            }
+            .setNegativeButton("Cancelar") { dialog, _ -> dialog.dismiss() }
+            .show()
+    }
+
+    override fun onDestroy() {
+        interstitialAd?.destroy()
+        interstitialAd = null
+        super.onDestroy()
+    }
+
+    private fun showInAppReviewPrompt(prefs: SharedPreferences) {
+        val reviewManager = ReviewManagerFactory.create(this)
+        val request = reviewManager.requestReviewFlow()
+        request.addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val reviewInfo = task.result
+                val flow = reviewManager.launchReviewFlow(this, reviewInfo)
+                flow.addOnCompleteListener { _ ->
+                    // The review flow has finished. The API does not indicate whether the user
+                    // reviewed or not, or even if the review dialog was shown. Thus, no matter
+                    // the result, we update the shared preferences to avoid asking again.
+                    prefs.edit().putInt("rate", 1).apply()
                 }
             } else {
-                Toast.makeText(this, "Internal Storage unreadable", Toast.LENGTH_LONG).show();
+                // There was some error, log it.
+                Log.e("InAppReview", "Review flow request failed.", task.exception)
             }
-        }else if(item.getItemId() == R.id.date){
-            if (today == null) today = MaterialDatePicker.todayInUtcMilliseconds();
-            MaterialDatePicker<Long> datePicker = MaterialDatePicker.Builder
-                    .datePicker()
-                    .setCalendarConstraints(new CalendarConstraints.Builder()
-                            .setValidator(
-                                    DateValidatorPointBackward.now()).build())
-                    .setTitleText("Select date").setSelection(today)
-                    .build();
-            datePicker.show(getSupportFragmentManager(), "MATERIAL_DATE_PICKER");
-            datePicker.addOnPositiveButtonClickListener(
-                    aLong -> {
-                        //datePicker.getHeaderText()
-                        today = aLong;
-                        DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd", Locale.FRANCE);
-                        String fecha = formatter.format(new Date(aLong));
-                        mSectionsPagerAdapter.removeFragment(position);
-                        mSectionsPagerAdapter.addFragmentAt(position, PortadaDetalleFragment.newInstance(portada.title(), portada.siglaPais(), fecha));
-                        mSectionsPagerAdapter.notifyItemChanged(position);
-                    });
-        }
-
-        return true;
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        int position = mViewPager2.getCurrentItem();
-        if(mSectionsPagerAdapter.mPortadas.size() > 0) {
-            portada = mSectionsPagerAdapter.mPortadas.get(position);
-            if (portada != null && getSupportActionBar() != null)
-                getSupportActionBar().setTitle(portada.title());
         }
     }
 
-    @Override
-    protected void onDestroy() {
-        if (interstitialAd != null) {
-            interstitialAd.destroy();
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        when (requestCode) {
+            PortadasUtils.MY_PERMISSIONS_REQUEST_WRITE_STORAGE -> {
+                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                    Toast.makeText(this, "Permiso concedido. Por favor, intente la acción de nuevo.", Toast.LENGTH_LONG).show()
+                } else {
+                    Toast.makeText(this, "Permiso denegado. No se puede guardar ni compartir la portada.", Toast.LENGTH_LONG).show()
+                }
+                return
+            }
+            else -> {
+                // Ignore all other requests.
+            }
         }
-        super.onDestroy();
+    }
+
+    // --- Inner Adapter Class ---
+    class ViewPagerAdapter(fm: FragmentManager, lifecycle: Lifecycle) : FragmentStateAdapter(fm, lifecycle) {
+        private var portadas: List<Portada> = emptyList()
+
+        fun setPortadas(portadaList: List<Portada>) {
+            this.portadas = portadaList
+            notifyDataSetChanged()
+        }
+
+
+
+        fun getPortadaAt(position: Int): Portada? = portadas.getOrNull(position)
+
+        fun updateDateForPortada(position: Int, newDate: String) {
+            portadas.getOrNull(position)?.fecha = newDate
+        }
+
+        override fun getItemCount(): Int = portadas.size
+
+        override fun createFragment(position: Int): Fragment {
+            val portada = portadas[position]
+            return PortadaDetalleFragment.newInstance(portada.title, portada.siglaPais, portada.fecha)
+        }
     }
 }

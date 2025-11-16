@@ -2,7 +2,6 @@ package sergirex.portadasperiodicos;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -17,6 +16,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 import androidx.core.app.ActivityCompat;
@@ -28,13 +28,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.MalformedURLException;
+import java.lang.ref.WeakReference;
 import java.net.URL;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static sergirex.portadasperiodicos.Portadas.MY_PERMISSIONS_REQUEST_WRITE_STORAGE;
-import static sergirex.portadasperiodicos.Portadas.scanFile;
+import static sergirex.portadasperiodicos.PortadasUtils.MY_PERMISSIONS_REQUEST_WRITE_STORAGE;
+import static sergirex.portadasperiodicos.PortadasUtils.scanFile;
+
+import com.google.android.material.snackbar.Snackbar;
 
 /**
  * Created by Sergio on 20/06/2017.
@@ -118,94 +120,134 @@ class SavePortada {
 
 class DownloadPortada {
 
-    private ProgressDialog pd;
-    private File file;
-    private final Context ctx;
-    private SavePortada sp;
-    private String fileName;
+    // CHANGED: Removed the ProgressDialog.
+    // We now use a weak reference to the context and view to prevent memory leaks.
+    private final WeakReference<Context> contextRef;
+    private final WeakReference<View> viewRef; // NEW: Needed for the Snackbar
+
+    private final File file; // Used when saving to gallery
+    private final SavePortada sp; // Used when sharing
+    private final String fileName; // Used when sharing
 
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private final Handler handler = new Handler(Looper.getMainLooper());
 
-    DownloadPortada(Context ctx, SavePortada sp, String fileName) {
-        this.ctx = ctx;
-        this.sp = sp;
-        this.fileName = fileName;
+    // NEW: Updated constructor for saving to gallery
+    DownloadPortada(Context context, View view, File file) {
+        this.contextRef = new WeakReference<>(context);
+        this.viewRef = new WeakReference<>(view);
+        this.file = file;
+        this.sp = null;
+        this.fileName = null;
     }
 
-    DownloadPortada(Context ctx, File file) {
-        this.ctx = ctx;
-        this.file = file;
+    // NEW: Updated constructor for sharing
+    DownloadPortada(Context context, View view, SavePortada sp, String fileName) {
+        this.contextRef = new WeakReference<>(context);
+        this.viewRef = new WeakReference<>(view);
+        this.sp = sp;
+        this.fileName = fileName;
+        this.file = null;
     }
+
 
     public void execute(String... urlPortada) {
         onPreExecute();
         executor.execute(() -> {
-            boolean success = doInBackground(urlPortada);
-            handler.post(() -> onPostExecute(success));
+            // The result now contains the Uri of the saved file if successful
+            DownloadResult result = doInBackground(urlPortada);
+            handler.post(() -> onPostExecute(result));
         });
     }
 
     private void onPreExecute() {
-        pd = new ProgressDialog(ctx);
-        pd.setCancelable(true);
-        pd.setMessage("Descargando...");
-        pd.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        pd.show();
+        Context context = contextRef.get();
+        if (context == null) return;
+
+        // CHANGED: Show a simple, non-blocking Toast instead of a ProgressDialog.
+        if (file != null) { // Only show toast if we are saving
+            Toast.makeText(context, "Iniciando descarga...", Toast.LENGTH_SHORT).show();
+        }
     }
 
-    private boolean doInBackground(String... urlPortada) {
+    private DownloadResult doInBackground(String... urlPortada) {
+        Context context = contextRef.get();
+        if (context == null) {
+            return new DownloadResult(false, null); // Abort if context is gone
+        }
+
         try {
             URL url = new URL(urlPortada[0]);
             InputStream is = (InputStream) url.getContent();
             Bitmap portadaBM = BitmapFactory.decodeStream(is);
-            if (portadaBM == null) return false;
+            if (portadaBM == null) return new DownloadResult(false, null);
 
             if (file != null) { // Save to gallery
+                Uri imageUri = null;
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    saveBitmapToMediaStore(ctx, portadaBM, file.getName());
+                    imageUri = saveBitmapToMediaStore(context, portadaBM, file.getName());
                 } else {
                     try (FileOutputStream fos = new FileOutputStream(file)) {
                         portadaBM.compress(Bitmap.CompressFormat.JPEG, 100, fos);
                     }
-                    scanFile(ctx, file, "image/jpeg");
+                    scanFile(context, file);
+                    // For older devices, get a content URI for the Snackbar action
+                    imageUri = FileProvider.getUriForFile(context, "sergirex.portadasperiodicos.fileprovider", file);
                 }
-                return true;
+                return new DownloadResult(true, imageUri);
             } else { // Share
                 Uri fileURI = sp.saveFile(fileName, portadaBM);
-                if (fileURI == null)
-                    return false;
+                if (fileURI == null) {
+                    return new DownloadResult(false, null);
+                }
                 Intent i = new Intent(Intent.ACTION_SEND);
                 i.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 i.putExtra(Intent.EXTRA_STREAM, fileURI);
-                i.putExtra(Intent.EXTRA_TEXT, "https://play.google.com/store/apps/details?id=" + ctx.getPackageName());
+                i.putExtra(Intent.EXTRA_TEXT, "https://play.google.com/store/apps/details?id=" + context.getPackageName());
                 i.setType("image/jpeg");
-                handler.post(() -> ctx.startActivity(Intent.createChooser(i, "Compartir portada")));
-                return true;
+                // Post the intent action back to the main thread
+                handler.post(() -> context.startActivity(Intent.createChooser(i, "Compartir portada")));
+                return new DownloadResult(true, null); // Success, but no URI needed for Snackbar
             }
         } catch (IOException e) {
             e.printStackTrace();
-            return false;
+            return new DownloadResult(false, null);
         }
     }
 
-    private void onPostExecute(boolean success) {
-        pd.cancel();
-        pd.dismiss();
-        if (file != null) { // Only show toast if we were saving.
-            if (success) {
-                String message = "Portada guardada correctamente en la galería.";
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q && file != null) {
-                    message = "Portada guardada correctamente en " + file.getAbsolutePath();
-                }
-                Toast.makeText(ctx, message, Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(ctx, "No se pudo guardar la portada.", Toast.LENGTH_SHORT).show();
+    private void onPostExecute(DownloadResult result) {
+        Context context = contextRef.get();
+        View view = viewRef.get();
+
+        // Don't show any UI feedback if the view or context is gone
+        if (context == null || view == null || file == null) {
+            return;
+        }
+
+        if (result.success()) {
+            String message = "Portada guardada en la galería";
+            Snackbar snackbar = Snackbar.make(view, message, Snackbar.LENGTH_LONG);
+
+            // NEW: Add an "Open" action to the Snackbar if we have a valid URI
+            if (result.imageUri() != null) {
+                snackbar.setAction("ABRIR", v -> {
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setDataAndType(result.imageUri(), "image/jpeg");
+                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    try {
+                        context.startActivity(intent);
+                    } catch (Exception e) {
+                        Toast.makeText(context, "No se encontró una app para abrir la imagen.", Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
+            snackbar.show();
+        } else {
+            Snackbar.make(view, "No se pudo guardar la portada.", Snackbar.LENGTH_LONG).show();
         }
     }
 
-    private void saveBitmapToMediaStore(Context context, Bitmap bitmap, String fileName) throws IOException {
+    private Uri saveBitmapToMediaStore(Context context, Bitmap bitmap, String fileName) throws IOException {
         ContentResolver resolver = context.getContentResolver();
         ContentValues contentValues = new ContentValues();
         contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, fileName);
@@ -226,6 +268,10 @@ class DownloadPortada {
                 throw new IOException("Failed to open output stream for " + imageUri);
             }
         }
+        return imageUri;
     }
 
+    // NEW: A simple helper class to return multiple values from doInBackground
+        private record DownloadResult(boolean success, Uri imageUri) {
+    }
 }

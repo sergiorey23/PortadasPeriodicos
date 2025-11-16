@@ -36,7 +36,7 @@
 
     <string name="pref_contact_title">Contacto</string>
     <string name="pref_contact_summary">Enviar correo con dudas o sugerencias</string>
-    <string name="pref_contact_email">sergirex@gmail.com</string>
+    <string name="pref_contact_email" translatable="false">sssergiooo23@gmail.com</string>
     <string name="pref_contact_subject">Portadas de prensa</string>
     <string name="pref_contact_chooser_title">Enviar correo…</string>
 
@@ -47,5 +47,14 @@
     <string name="pref_share_summary">Compartir la aplicación con tus amigos</string>
     <string name="pref_share_text">¡Descarga esta app para ver las portadas de los periódicos cada día! https://play.google.com/store/apps/details?id=sergirex.portadasperiodicos</string>
     <string name="portada">Portada</string>
+
+    <!-- Tab Titles -->
+    <string name="tab_general">General</string>
+    <string name="tab_deportes">Deportes</string>
+    <string name="tab_economia">Economía</string>
+    <string name="tab_locales">Locales</string>
+    <string name="tab_internacional">Internacional</string>
+    <string name="tab_favoritos">Favoritos</string>
+    <string name="loading">Cargando&#8230;</string>
 
 </resources>

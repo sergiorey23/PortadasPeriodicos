@@ -5,10 +5,8 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
-import androidx.preference.SwitchPreferenceCompat;
 
 public class SettingsActivity extends AppCompatActivity {
 
@@ -37,28 +35,24 @@ public class SettingsActivity extends AppCompatActivity {
             setPreferencesFromResource(R.xml.preferences, rootKey);
 
             androidx.preference.ListPreference modesLP = findPreference("theme");
+            assert modesLP != null;
             modesLP.setSummary(modesLP.getEntry());
-            modesLP.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-                @Override
-                public boolean onPreferenceChange(Preference preference, Object newValue) {
-                    preference.setSummary(newValue.toString());
-                    preference.setDefaultValue(newValue);
-                    Activity activity = getActivity();
-                    if(activity != null) {
-                        getActivity().recreate();
-                    }
-                    return true;
+            modesLP.setOnPreferenceChangeListener((preference, newValue) -> {
+                preference.setSummary(newValue.toString());
+                preference.setDefaultValue(newValue);
+                Activity activity = getActivity();
+                if(activity != null) {
+                    getActivity().recreate();
                 }
+                return true;
             });
             androidx.preference.ListPreference categoriesLP = findPreference("init_category");
+            assert categoriesLP != null;
             categoriesLP.setSummary(categoriesLP.getValue());
-            categoriesLP.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-                @Override
-                public boolean onPreferenceChange(Preference preference, Object newValue) {
-                    preference.setSummary(newValue.toString());
-                    preference.setDefaultValue(newValue);
-                    return true;
-                }
+            categoriesLP.setOnPreferenceChangeListener((preference, newValue) -> {
+                preference.setSummary(newValue.toString());
+                preference.setDefaultValue(newValue);
+                return true;
             });
         }
     }
