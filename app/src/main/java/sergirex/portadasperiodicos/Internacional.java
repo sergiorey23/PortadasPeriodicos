@@ -1,6 +1,5 @@
 package sergirex.portadasperiodicos;
 
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,6 +7,8 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import java.text.DateFormat;
@@ -16,11 +17,11 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
-/**
- * Created by Sergio on 12/02/2017.
- */
+public class Internacional extends Fragment implements GetPortadas.PortadasListener {
 
-public class Internacional extends Fragment {
+    private PortadasAdapter adapter;
+    private SwipeRefreshLayout swipeRefreshLayout;
+    private String fecha;
 
     public static Internacional newInstance(String fecha) {
         Bundle args = new Bundle();
@@ -29,32 +30,70 @@ public class Internacional extends Fragment {
         i.setArguments(args);
         return i;
     }
+
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.portada_layout, container, false);
-        String fecha = getArguments().getString("fecha");
-        GetPortadas portadasAsyncTask = new GetPortadas(rootView, getClass().getSimpleName(), fecha, null);
-        portadasAsyncTask.execute(Periodicos.internacional);
-        SwipeRefreshLayout swipeRefreshLayout = rootView.findViewById(R.id.refreshLayout);
-        swipeRefreshLayout.setOnRefreshListener(() -> {
-            refreshFragment(rootView, swipeRefreshLayout);
-        });
-        return rootView.getRootView();
+
+        if (getArguments() != null) {
+            fecha = getArguments().getString("fecha");
+        }
+
+        // Set up RecyclerView
+        RecyclerView recyclerView = rootView.findViewById(R.id.recyclerView);
+        int spanCount = getResources().getBoolean(R.bool.isTablet) ? 3 : 2;
+        recyclerView.setLayoutManager(new GridLayoutManager(getContext(), spanCount));
+        adapter = new PortadasAdapter(getContext());
+        recyclerView.setAdapter(adapter);
+
+        // Set up SwipeRefreshLayout
+        swipeRefreshLayout = rootView.findViewById(R.id.refreshLayout);
+        swipeRefreshLayout.setOnRefreshListener(this::refreshFragment);
+
+        // Fetch data
+        loadPortadas();
+
+        return rootView;
     }
 
-    private void refreshFragment(View rootView, SwipeRefreshLayout swipeRefreshLayout) {
-        ViewGroup viewGroup = rootView.findViewById(R.id.linearLayout);
-        viewGroup.removeAllViews();
+    private void loadPortadas() {
+        if (getContext() != null) {
+            GetPortadas getPortadas = new GetPortadas(getContext(), getClass().getSimpleName(), fecha, swipeRefreshLayout, this);
+            getPortadas.execute(Periodicos.internacional);
+        }
+    }
+
+    private void refreshFragment() {
+        adapter.clear();
         Calendar calendar = Calendar.getInstance();
         Date today = new Date();
         calendar.setTime(today);
-        if(calendar.get(Calendar.HOUR_OF_DAY) < 6){
+        if (calendar.get(Calendar.HOUR_OF_DAY) < 6) {
             calendar.add(Calendar.DATE, -1);
         }
         DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd", Locale.FRANCE);
-        String fecha = formatter.format(calendar.getTime());
-        GetPortadas getPts = new GetPortadas(rootView, getClass().getSimpleName(),fecha, swipeRefreshLayout);
-        getPts.execute(Periodicos.internacional);
+        fecha = formatter.format(calendar.getTime());
+        loadPortadas();
+    }
+
+    @Override
+    public void onPreExecute() {
+        if (swipeRefreshLayout != null && !swipeRefreshLayout.isRefreshing()) {
+            swipeRefreshLayout.setRefreshing(true);
+        }
+    }
+
+    @Override
+    public void onPortadaLoaded(GetPortadas.PortadaResult result) {
+        if (adapter != null) {
+            adapter.addPortada(result);
+        }
+    }
+
+    @Override
+    public void onComplete() {
+        if (swipeRefreshLayout != null && swipeRefreshLayout.isRefreshing()) {
+            swipeRefreshLayout.setRefreshing(false);
+        }
     }
 }

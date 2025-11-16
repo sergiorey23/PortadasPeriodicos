@@ -1,53 +1,51 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Periódicos</string>
-    <string name="covers">Portadas</string>
-    <string name="fav_tab">Favoritos</string>
-    <string name="first_tab" translatable="false">General</string>
-    <string name="second_tab">Deportes</string>
-    <string name="third_tab">Economia</string>
-    <string name="fourth_tab">Locales</string>
-    <string name="fifth_tab">Internacional</string>
-    <string name="about">Arcerca de</string>
-    <string name="help">Ayuda</string>
-    <string name="rate">Puntuar</string>
-    <string name="action_share">Compartir</string>
-    <string name="action_fav">Añadir a favoritos</string>
-    <string name="help_description">Mantén pulsado en la portada para compartirla, guardarla o visitar su pagina web.</string>
-    <string name="help_description2">También puedes ver las portadas con el widget de la app.</string>
-    <string name="rate_app">Si te gusta la app, deja una reseña! Gracias!</string>
+    <string name="app_name">Portadas de prensa</string>
+    <string name="action_settings">Ajustes</string>
+    <string name="title_activity_portada_detalle">Portada</string>
+    <string name="title_activity_settings">Ajustes</string>
 
-    <string name="close">Cerrar</string>
-    <string name="instagram" translatable="false">Instagram</string>
-    <string name="contact">Contacto</string>
-    <string name="save">Guardar</string>
-    <string name="refresh">Actualizar</string>
-    <string name="settings">Ajustes</string>
-    <string name="mode">Modo oscuro</string>
-    <string name="tema">Tema</string>
-    <string name="about_desc">\t¿Tienes alguna sugerencia? ¿Falta alguna portada?\n\tNo dudes en comentármelo!</string>
-    <string name="copyright">Todas las imágenes tienen derechos de autor de sus respectivos propietarios.</string>
-    <string name="freeApp">Esta aplicación es totalmente gratuita y libre de publicidad. Estaría muy agradecido si me invitara a un café. Muchas gracias.</string>
-    <string name="appSource">Una aplicación de lasportadas.es</string>
-    <string name="supportDeveloper">Invítame a un café</string>
-    <string name="privacy_policy">Política de privacidad</string>
-    <string name="date">Fecha</string>
-    <string name="rateTitle">Califica Portadas</string>
-    <string name="rateDescription">Si estás disfrutando de la app. ¿Te importaría calificarla en la Play Store?</string>
-    <string name="later">Mas tarde</string>
-    <string name="sure">Claro!</string>
-    <string name="default_system">Predeterminado del sistema</string>
-    <string name="light">Claro</string>
-    <string name="dark">Oscuro</string>
-    <string name="categories">Categorias</string>
-    <string name="removeAds">Quitar anuncios</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="notification_name">Portadas</string>
-    <string name="notification_description">Echa un vistazo a las portadas de hoy!</string>
-    <string name="loading">Cargando...</string>
-    <string name="app_full_name">Portadas Periódicos</string>
-    <string name="mas_apps">Más apps:</string>
-    <string name="portadas_revistas">Portadas Revistas</string>
-    <!-- TODO: Remove or change this placeholder text -->
+    <!-- Strings related to Settings -->
+    <string name="pref_header_general">General</string>
+
+    <string name="pref_portadas_default_title">Ver en la app</string>
+    <string name="pref_portadas_default_summary">Abrir las portadas en la aplicación en vez de en el navegador</string>
+
+    <string-array name="pref_example_list_titles">
+        <item>Always</item>
+        <item>When possible</item>
+        <item>Never</item>
+    </string-array>
+    <string-array name="pref_example_list_values">
+        <item>1</item>
+        <item>0</item>
+        <item>-1</item>
+    </string-array>
+
+    <string name="pref_images_hd_title">Imágenes en HD</string>
+    <string name="pref_images_hd_summary">Cargar las portadas en alta resolución (más lento)</string>
+
+    <string name="pref_update_only_wifi_title">Actualizar solo con Wi-Fi</string>
+
+    <string name="pref_cache_delete_title">Borrar caché</string>
+    <string name="pref_cache_delete_summary">Borrar todas las imágenes guardadas en la memoria del dispositivo</string>
+    <string name="pref_cache_deleted_message">Caché borrada</string>
+
+    <string name="pref_header_about">Acerca de</string>
+
+    <string name="pref_app_version_title">Versión</string>
+
+    <string name="pref_contact_title">Contacto</string>
+    <string name="pref_contact_summary">Enviar correo con dudas o sugerencias</string>
+    <string name="pref_contact_email">sergirex@gmail.com</string>
+    <string name="pref_contact_subject">Portadas de prensa</string>
+    <string name="pref_contact_chooser_title">Enviar correo…</string>
+
+    <string name="pref_rate_title">Valorar</string>
+    <string name="pref_rate_summary">Valora la aplicación en Google Play</string>
+
+    <string name="pref_share_title">Compartir</string>
+    <string name="pref_share_summary">Compartir la aplicación con tus amigos</string>
+    <string name="pref_share_text">¡Descarga esta app para ver las portadas de los periódicos cada día! https://play.google.com/store/apps/details?id=sergirex.portadasperiodicos</string>
+    <string name="portada">Portada</string>
 
 </resources>

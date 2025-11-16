@@ -100,9 +100,9 @@ public class PortadaDetalle extends AppCompatActivity {
         fabWeb.setOnClickListener(v -> {
             try {
                 TypedValue typedValue = new TypedValue();
-                getTheme().resolveAttribute(R.attr.colorPrimary, typedValue, true);
+                getTheme().resolveAttribute(R.color.colorPrimary, typedValue, true);
                 int color = typedValue.data;
-                String url = "https://www." + portada.getWebPeriodico();
+                String url = "https://www." + portada.webPeriodico();
                 CustomTabColorSchemeParams customTabColorSchemeParams = new CustomTabColorSchemeParams.Builder()
                         .setToolbarColor(color).build();
                 CustomTabsIntent intent = new CustomTabsIntent.Builder()
@@ -112,7 +112,7 @@ public class PortadaDetalle extends AppCompatActivity {
                 intent.launchUrl(PortadaDetalle.this, Uri.parse(url));
             }catch (ActivityNotFoundException e){
                 Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setData(Uri.parse("https://www." + portada.getWebPeriodico()));
+                intent.setData(Uri.parse("https://www." + portada.webPeriodico()));
                 startActivity(intent);
             }catch (Exception e){
                 e.printStackTrace();
@@ -123,11 +123,11 @@ public class PortadaDetalle extends AppCompatActivity {
         favfab.setOnDragListener((view, dragEvent) -> false);
         favfab.setOnClickListener(view -> {
             SharedPreferences.Editor editor = prefsPer.edit();
-            if (prefsPer.contains(portada.getWebPeriodico())) {
-                editor.remove(portada.getWebPeriodico());
+            if (prefsPer.contains(portada.webPeriodico())) {
+                editor.remove(portada.webPeriodico());
                 favfab.setImageResource(R.drawable.ic_favorite_border_black_24dp);
             } else {
-                editor.putString(portada.getWebPeriodico(), portada.getPeriodico());
+                editor.putString(portada.webPeriodico(), portada.periodico());
                 favfab.setImageResource(R.drawable.ic_favorite_black_24dp);
             }
             editor.apply();
@@ -297,7 +297,7 @@ public class PortadaDetalle extends AppCompatActivity {
         }
     }
 
-    public class ViewPagerAdapter extends FragmentStateAdapter {
+    public static class ViewPagerAdapter extends FragmentStateAdapter {
         private final List<Fragment> mFragments = new ArrayList<>();
         private final List<Portada> mPortadas = new ArrayList<>();
 
@@ -384,20 +384,20 @@ public class PortadaDetalle extends AppCompatActivity {
         int position = mViewPager2.getCurrentItem();
         portada = mSectionsPagerAdapter.mPortadas.get(position);
 
-        String url = "https://kiosko.net/" + portada.getFecha() + "/" + portada.getSiglaPais() + "/" + portada.getTitle() + ".html";
+        String url = "https://kiosko.net/" + portada.fecha() + "/" + portada.siglaPais() + "/" + portada.title() + ".html";
 
         SavePortada savePortada = new SavePortada(this);
         if(item.getItemId() == R.id.share){
             if (savePortada.isExternalStorageWritable()) {
                 if (savePortada.checkPermissions()) {
-                    new DownloadPortada(this, savePortada, portada.getTitle()).execute(url);
+                    new DownloadPortada(this, savePortada, portada.title()).execute(url);
                 }
             }
         } else if (item.getItemId() == R.id.save) {
             if (savePortada.isExternalStorageWritable()) {
                 if (savePortada.checkPermissions()) {
                     File file;
-                    if ((file = new File(savePortada.getAlbumStorageDir() + File.separator + portada.getTitle() + "_" + (portada.getFecha() != null ? portada.getFecha().replace("/", "") : "") + ".jpg")).exists()) {
+                    if ((file = new File(savePortada.getAlbumStorageDir() + File.separator + portada.title() + "_" + (portada.fecha() != null ? portada.fecha().replace("/", "") : "") + ".jpg")).exists()) {
                         Toast.makeText(this, "Ya se ha guardado la portada.", Toast.LENGTH_LONG).show();
                         return true;
                     }
@@ -424,7 +424,7 @@ public class PortadaDetalle extends AppCompatActivity {
                         DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd", Locale.FRANCE);
                         String fecha = formatter.format(new Date(aLong));
                         mSectionsPagerAdapter.removeFragment(position);
-                        mSectionsPagerAdapter.addFragmentAt(position, PortadaDetalleFragment.newInstance(portada.getTitle(), portada.getSiglaPais(), fecha));
+                        mSectionsPagerAdapter.addFragmentAt(position, PortadaDetalleFragment.newInstance(portada.title(), portada.siglaPais(), fecha));
                         mSectionsPagerAdapter.notifyItemChanged(position);
                     });
         }
@@ -439,7 +439,7 @@ public class PortadaDetalle extends AppCompatActivity {
         if(mSectionsPagerAdapter.mPortadas.size() > 0) {
             portada = mSectionsPagerAdapter.mPortadas.get(position);
             if (portada != null && getSupportActionBar() != null)
-                getSupportActionBar().setTitle(portada.getTitle());
+                getSupportActionBar().setTitle(portada.title());
         }
     }
 

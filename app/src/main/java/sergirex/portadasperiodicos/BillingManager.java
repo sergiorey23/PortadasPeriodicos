@@ -171,4 +171,10 @@ public class BillingManager {
                     }
                 });
     }
+
+    public void destroy() {
+        if (billingClient != null && billingClient.isReady()) {
+            billingClient.endConnection();
+        }
+    }
 }

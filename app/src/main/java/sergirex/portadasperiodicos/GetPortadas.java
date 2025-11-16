@@ -3,37 +3,15 @@ package sergirex.portadasperiodicos;
 import static android.content.Context.MODE_PRIVATE;
 
 import android.annotation.SuppressLint;
-import android.content.ActivityNotFoundException;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-import android.net.Uri;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.TypedValue;
-import android.view.Gravity;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.LinearLayout;
-import android.widget.ProgressBar;
-import android.widget.Toast;
 
-import androidx.appcompat.view.menu.MenuBuilder;
-import androidx.appcompat.view.menu.MenuPopupHelper;
-import androidx.appcompat.widget.PopupMenu;
-import androidx.browser.customtabs.CustomTabColorSchemeParams;
-import androidx.browser.customtabs.CustomTabsIntent;
-import androidx.preference.PreferenceManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -51,14 +29,26 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 class GetPortadas {
-    private final WeakReference<View> rootView;
+
+    /**
+     * @param allPortadas   Needed for the intent
+     * @param originalFecha Needed for the intent
+     */ // Data class to hold the result for one newspaper cover
+        public record PortadaResult(Portada portada, Bitmap bitmap, String finalDate,
+                                    String finalImageUrl, String[] allPortadas, String originalFecha) {
+    }
+
+    // Listener to communicate with the UI thread
+    public interface PortadasListener {
+        void onPreExecute();
+        void onPortadaLoaded(PortadaResult result);
+        void onComplete();
+    }
+
     private final WeakReference<Context> context;
-    private int portCont = 0;
-    private WeakReference<LinearLayout> ly;
-    private WeakReference<ProgressBar> pb;
     private final SharedPreferences fechasSP;
-    private final SharedPreferences prefs;
-    private String fecha;
+    private final String fecha;
+    private final PortadasListener listener;
 
     @SuppressLint("StaticFieldLeak")
     private final SwipeRefreshLayout swipeRefreshLayout;
@@ -66,31 +56,28 @@ class GetPortadas {
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private final Handler handler = new Handler(Looper.getMainLooper());
 
-    GetPortadas(View rootView, String simpleName, String fecha, SwipeRefreshLayout swipeRefreshLayout) {
-        this.rootView = new WeakReference<>(rootView);
-        context = new WeakReference<>(rootView.getContext());
-        fechasSP = context.get().getSharedPreferences("Fechas" + simpleName, MODE_PRIVATE);
-        prefs = PreferenceManager.getDefaultSharedPreferences(context.get());
+    GetPortadas(Context context, String simpleName, String fecha, SwipeRefreshLayout swipeRefreshLayout, PortadasListener listener) {
+        this.context = new WeakReference<>(context);
+        this.fechasSP = context.getSharedPreferences("Fechas" + simpleName, MODE_PRIVATE);
         this.fecha = fecha;
         this.swipeRefreshLayout = swipeRefreshLayout;
+        this.listener = listener;
     }
 
-    View getRootView() {
-        return rootView.get();
-    }
-
+    // This method now only does UI work on the main thread via listener
     protected void onPreExecute() {
-        ly = new WeakReference<>(rootView.get().findViewById(R.id.linearLayout));
-        pb = new WeakReference<>(new ProgressBar(context.get()));
-        ly.get().addView(pb.get());
+        if (listener != null) {
+            listener.onPreExecute();
+        }
     }
 
+    // This method now only does UI work on the main thread via listener
     protected void onPostExecute() {
-        if (ly.get() != null) {
-            ly.get().removeView(pb.get());
-        }
         if (swipeRefreshLayout != null) {
             swipeRefreshLayout.setRefreshing(false);
+        }
+        if (listener != null) {
+            listener.onComplete();
         }
     }
 
@@ -103,10 +90,14 @@ class GetPortadas {
     }
 
     private void doInBackground(String... params) {
+        // FIX: Get context once and check for null to prevent crashes if the activity is destroyed.
+        Context safeContext = context.get();
+        if (safeContext == null) {
+            return; // Activity is gone, abort the background task.
+        }
 
-        final SavePortada savePortada = new SavePortada(context.get());
+        final SavePortada savePortada = new SavePortada(safeContext);
 
-        String fechaAux = fecha;
         SharedPreferences.Editor editor = null;
         String fechaPortadas = fechasSP.getString("fechaPortadas", "");
         boolean descargar = !fechaPortadas.equals(fecha);
@@ -115,10 +106,11 @@ class GetPortadas {
             editor = fechasSP.edit();
         }
 
-        String siglaPais = "es";
-
         for (String periodico : params) {
+            // FIX: Check context again inside the loop in case it gets destroyed during a long operation.
+            if (context.get() == null) return;
 
+            String siglaPais = "es";
             URL url;
             InputStream is = null;
             String webPeriodico;
@@ -174,137 +166,32 @@ class GetPortadas {
                     continue;
                 }
                 portadaBM = BitmapFactory.decodeStream(is);
-                savePortada.saveFile(context.get().getCacheDir(), title + "t", portadaBM);
-                if (editor != null) {
-                    editor.putString(title, date);
+                if (portadaBM != null) {
+                    savePortada.saveFile(safeContext.getCacheDir(), title + "t", portadaBM);
+                    if (editor != null) {
+                        editor.putString(title, date);
+                    }
                 }
+            }
+
+            if (portadaBM == null) {
+                continue;
             }
 
             Portada portada = new Portada(periodico, title, fecha, webPeriodico, siglaPais);
 
-            LinearLayout.LayoutParams paramsly = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            final String finalDate = date;
+            final String finalStrUrl = strUrl.replace(".640", "");
 
-            Button imageButton = new Button(context.get());
-            paramsly.width = getHalfScreenWidth();
-            paramsly.height = (portadaBM.getHeight() * paramsly.width) / portadaBM.getWidth();
-            Drawable drawable = new BitmapDrawable(context.get().getResources(), portadaBM);
-            imageButton.setBackground(drawable);
-            imageButton.setLayoutParams(paramsly);
-
-            if (!fechaAux.equals(date)) {
-                String[] arrayDate = date.split("/");
-                imageButton.setText(String.format("%s/%s/%s", arrayDate[2], arrayDate[1], arrayDate[0]));
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    imageButton.setTextAppearance(R.style.ButtonText);
-                }
+            if (listener != null) {
+                PortadaResult result = new PortadaResult(portada, portadaBM, finalDate, finalStrUrl, params, fecha);
+                handler.post(() -> listener.onPortadaLoaded(result));
             }
-
-            imageButton.setOnClickListener(view -> {
-                Intent intent = new Intent(context.get(), PortadaDetalle.class);
-                intent.putExtra("Portadas", params);
-                intent.putExtra("selectedPortada", portada.getTitle());
-                intent.putExtra("Fecha", fecha);
-                int adCount = prefs.getInt("adCount", 0) + 1;
-                SharedPreferences.Editor edit = prefs.edit();
-                edit.putInt("adCount", adCount);
-                edit.apply();
-                intent.putExtra("showAd", adCount);
-                context.get().startActivity(intent);
-            });
-            String finalStrUrl = strUrl.replace(".640", "");
-            imageButton.setOnLongClickListener(view -> {
-                PopupMenu popup = new PopupMenu(view.getContext(), view);
-                popup.getMenuInflater().inflate(R.menu.menu_portada_list, popup.getMenu());
-                popup.setOnMenuItemClickListener(menuItem -> {
-                    if (menuItem.getItemId() == R.id.share) {
-                        if (savePortada.isExternalStorageWritable()) {
-                            if (!savePortada.checkPermissions())
-                                return false;
-                            new DownloadPortada(context.get(), savePortada, portada.getTitle()).execute(finalStrUrl);
-                        }
-                    } else if (menuItem.getItemId() == R.id.save) {
-                        if (savePortada.isExternalStorageWritable()) {
-                            if (!savePortada.checkPermissions())
-                                return false;
-                            File file;
-                            if ((file = new File(savePortada.getAlbumStorageDir() + File.separator + portada.getTitle() + "_" + (portada.getFecha() != null ? portada.getFecha().replace("/", "") : "") + ".jpg")).exists()) {
-                                Toast.makeText(context.get(), "Ya se ha guardado la portada.", Toast.LENGTH_LONG).show();
-                                return true;
-                            }
-                            DownloadPortada dp = new DownloadPortada(context.get(), file);
-                            dp.execute(finalStrUrl);
-                        } else {
-                            Toast.makeText(context.get(), "Internal Storage unreadable", Toast.LENGTH_LONG).show();
-                        }
-                    } else if (menuItem.getItemId() == R.id.web) {
-                        try {
-                            String urlPortada = "https://www." + portada.getWebPeriodico();
-                            TypedValue typedValue = new TypedValue();
-                            context.get().getTheme().resolveAttribute(R.attr.colorPrimary, typedValue, true);
-                            int color = typedValue.data;
-                            CustomTabColorSchemeParams customTabColorSchemeParams = new CustomTabColorSchemeParams.Builder()
-                                    .setToolbarColor(color).build();
-                            CustomTabsIntent intent = new CustomTabsIntent.Builder()
-                                    .setShowTitle(true)
-                                    .setDefaultColorSchemeParams(customTabColorSchemeParams)
-                                    .build();
-                            intent.launchUrl(context.get(), Uri.parse(urlPortada));
-                        } catch (ActivityNotFoundException e) {
-                            Intent intent = new Intent(Intent.ACTION_VIEW);
-                            intent.setData(Uri.parse("https://www." + portada.getWebPeriodico()));
-                            context.get().startActivity(intent);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    return true;
-                });
-                MenuPopupHelper menuHelper = new MenuPopupHelper(context.get(), (MenuBuilder) popup.getMenu(), view);
-                menuHelper.setForceShowIcon(true);
-                menuHelper.show();
-                return true;
-            });
-
-            publishProgress(imageButton);
         }
+
         if (descargar && editor != null) {
-            editor.putString("fechaPortadas", fechaAux);
+            editor.putString("fechaPortadas", fecha);
             editor.apply();
         }
-    }
-
-
-    private WeakReference<LinearLayout> linearLayout;
-    private int lycount = 0;
-
-    protected void publishProgress(Button... ib) {
-        handler.post(() -> {
-            if (portCont % 2 == 0) {
-                linearLayout = new WeakReference<>(new LinearLayout(context.get()));
-                linearLayout.get().setOrientation(LinearLayout.HORIZONTAL);
-                linearLayout.get().setHorizontalGravity(Gravity.CENTER_HORIZONTAL);
-                linearLayout.get().addView(ib[0]);
-                if (ly.get() != null)
-                    ly.get().addView(linearLayout.get(), lycount);
-                lycount++;
-            } else {
-                if (linearLayout.get() != null) {
-                    Button button = (Button) linearLayout.get().getChildAt(0);
-                    LinearLayout.LayoutParams paramsly = (LinearLayout.LayoutParams) button.getLayoutParams();
-                    if (paramsly.height > ib[0].getLayoutParams().height) {
-                        ib[0].setLayoutParams(paramsly);
-                    } else {
-                        paramsly.height = ib[0].getLayoutParams().height;
-                        button.setLayoutParams(paramsly);
-                    }
-                    linearLayout.get().addView(ib[0]);
-                }
-            }
-            portCont++;
-        });
-    }
-
-    private static int getHalfScreenWidth() {
-        return Resources.getSystem().getDisplayMetrics().widthPixels / 2;
     }
 }

@@ -554,6 +554,9 @@ public class Portadas extends AppCompatActivity implements BillingManager.Billin
 
     @Override
     protected void onDestroy() {
+        if (billingManager != null) {
+            billingManager.destroy();
+        }
         if (adManager != null) {
             adManager.destroy();
         }

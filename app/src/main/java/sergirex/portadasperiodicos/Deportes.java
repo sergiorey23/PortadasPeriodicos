@@ -1,15 +1,15 @@
 package sergirex.portadasperiodicos;
 
-import android.content.SharedPreferences;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -17,12 +17,11 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
-/**
- * Created by Sergio on 12/02/2017.
- * Mierda
- */
+public class Deportes extends Fragment implements GetPortadas.PortadasListener {
 
-public class Deportes extends Fragment {
+    private PortadasAdapter adapter;
+    private SwipeRefreshLayout swipeRefreshLayout;
+    private String fecha;
 
     public static Deportes newInstance(String fecha) {
         Bundle args = new Bundle();
@@ -31,31 +30,80 @@ public class Deportes extends Fragment {
         d.setArguments(args);
         return d;
     }
+
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.portada_layout, container, false);
-        String fecha = getArguments().getString("fecha");
-        GetPortadas getPortadas = new GetPortadas(rootView, getClass().getSimpleName(), fecha,null);
-        getPortadas.execute(Periodicos.deportes);
-        SwipeRefreshLayout swipeRefreshLayout = rootView.findViewById(R.id.refreshLayout);
-        swipeRefreshLayout.setOnRefreshListener(() -> {
-            refreshFragment(rootView, swipeRefreshLayout);
-        });
-        return getPortadas.getRootView();
+
+        assert getArguments() != null;
+        fecha = getArguments().getString("fecha");
+
+        // Set up RecyclerView
+        RecyclerView recyclerView = rootView.findViewById(R.id.recyclerView);
+        // FIX: Use a more robust check for tablet vs. phone
+        int spanCount = getResources().getBoolean(R.bool.isTablet) ? 3 : 2;
+        recyclerView.setLayoutManager(new GridLayoutManager(getContext(), spanCount));
+        adapter = new PortadasAdapter(getContext());
+        recyclerView.setAdapter(adapter);
+
+        // Set up SwipeRefreshLayout
+        swipeRefreshLayout = rootView.findViewById(R.id.refreshLayout);
+        swipeRefreshLayout.setOnRefreshListener(this::refreshFragment);
+
+        // Fetch data
+        loadPortadas();
+
+        return rootView;
     }
 
-    private void refreshFragment(View rootView, SwipeRefreshLayout swipeRefreshLayout) {
-        ViewGroup viewGroup = rootView.findViewById(R.id.linearLayout);
-        viewGroup.removeAllViews();
+    private void loadPortadas() {
+        if (getContext() != null) {
+            GetPortadas getPortadas = new GetPortadas(getContext(), getClass().getSimpleName(), fecha, swipeRefreshLayout, this);
+            getPortadas.execute(Periodicos.deportes);
+        }
+    }
+
+    private void refreshFragment() {
+        // Clear the adapter
+        adapter.clear();
+
+        // Recalculate the date
         Calendar calendar = Calendar.getInstance();
         Date today = new Date();
         calendar.setTime(today);
-        if(calendar.get(Calendar.HOUR_OF_DAY) < 6){
+        if (calendar.get(Calendar.HOUR_OF_DAY) < 6) {
             calendar.add(Calendar.DATE, -1);
         }
         DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd", Locale.FRANCE);
-        String fecha = formatter.format(calendar.getTime());
-        GetPortadas getPts = new GetPortadas(rootView, getClass().getSimpleName(),fecha, swipeRefreshLayout);
-        getPts.execute(Periodicos.deportes);
+        fecha = formatter.format(calendar.getTime());
+
+        // Fetch new data
+        loadPortadas();
+    }
+
+    // --- GetPortadas.PortadasListener Implementation ---
+
+    @Override
+    public void onPreExecute() {
+        // Show loading indicator only if not already refreshing
+        if (!swipeRefreshLayout.isRefreshing()) {
+            swipeRefreshLayout.setRefreshing(true);
+        }
+    }
+
+    @Override
+    public void onPortadaLoaded(GetPortadas.PortadaResult result) {
+        // Add the loaded portada to the adapter
+        if (adapter != null) {
+            adapter.addPortada(result);
+        }
+    }
+
+    @Override
+    public void onComplete() {
+        // Hide loading indicator
+        if (swipeRefreshLayout.isRefreshing()) {
+            swipeRefreshLayout.setRefreshing(false);
+        }
     }
 }
