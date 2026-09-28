@@ -1,0 +1,26 @@
+# Android Studio / IntelliJ
+.idea/
+*.iml
+.gradle/
+local.properties
+
+# Gradle
+build/
+.cxx/
+captures/
+
+# Build outputs accidentally committed in the past
+app/release/
+app/debug/
+*.apk
+*.aab
+
+# Signing secrets — never commit these
+*.jks
+*.keystore
+keystore.properties
+keystorePortadas.txt
+
+# OS / editor noise
+.DS_Store
+*.swp
