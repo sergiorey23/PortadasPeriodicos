@@ -52,11 +52,11 @@
             android:clickable="true"
             android:focusable="true"
             android:src="@drawable/ic_language_black_24dp"
-            android:tooltipText="Página web"
+            android:tooltipText="@string/website"
             android:visibility="invisible"
             ads:maxImageSize="40dp"
             app:tint="?attr/actionMenuTextColor"
-            android:contentDescription="Página web"
+            android:contentDescription="@string/website"
             android:layout_marginRight="15dp"
             android:layout_marginEnd="15dp" />
 
@@ -71,14 +71,12 @@
             ads:srcCompat="@drawable/baseline_add_24"
             app:tint="?attr/actionMenuTextColor"
             ads:maxImageSize="30dp"
-            android:contentDescription="Add" />
+            android:contentDescription="@string/add" />
 
     </FrameLayout>
     <LinearLayout
         android:id="@+id/bannerContainerDetail"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintBottom_toBottomOf="parent"
-        />
+        android:orientation="vertical" />
 </LinearLayout>
