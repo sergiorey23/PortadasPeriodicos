@@ -1,60 +1,56 @@
 <resources>
     <string name="app_name">Portadas de prensa</string>
-    <string name="action_settings">Ajustes</string>
-    <string name="title_activity_portada_detalle">Portada</string>
-    <string name="title_activity_settings">Ajustes</string>
-
-    <!-- Strings related to Settings -->
-    <string name="pref_header_general">General</string>
-
-    <string name="pref_portadas_default_title">Ver en la app</string>
-    <string name="pref_portadas_default_summary">Abrir las portadas en la aplicación en vez de en el navegador</string>
-
-    <string-array name="pref_example_list_titles">
-        <item>Always</item>
-        <item>When possible</item>
-        <item>Never</item>
-    </string-array>
-    <string-array name="pref_example_list_values">
-        <item>1</item>
-        <item>0</item>
-        <item>-1</item>
-    </string-array>
-
-    <string name="pref_images_hd_title">Imágenes en HD</string>
-    <string name="pref_images_hd_summary">Cargar las portadas en alta resolución (más lento)</string>
-
-    <string name="pref_update_only_wifi_title">Actualizar solo con Wi-Fi</string>
-
-    <string name="pref_cache_delete_title">Borrar caché</string>
-    <string name="pref_cache_delete_summary">Borrar todas las imágenes guardadas en la memoria del dispositivo</string>
-    <string name="pref_cache_deleted_message">Caché borrada</string>
-
-    <string name="pref_header_about">Acerca de</string>
-
-    <string name="pref_app_version_title">Versión</string>
-
-    <string name="pref_contact_title">Contacto</string>
-    <string name="pref_contact_summary">Enviar correo con dudas o sugerencias</string>
-    <string name="pref_contact_email" translatable="false">sssergiooo23@gmail.com</string>
-    <string name="pref_contact_subject">Portadas de prensa</string>
-    <string name="pref_contact_chooser_title">Enviar correo…</string>
-
-    <string name="pref_rate_title">Valorar</string>
-    <string name="pref_rate_summary">Valora la aplicación en Google Play</string>
-
-    <string name="pref_share_title">Compartir</string>
-    <string name="pref_share_summary">Compartir la aplicación con tus amigos</string>
-    <string name="pref_share_text">¡Descarga esta app para ver las portadas de los periódicos cada día! https://play.google.com/store/apps/details?id=sergirex.portadasperiodicos</string>
     <string name="portada">Portada</string>
 
-    <!-- Tab Titles -->
-    <string name="tab_general">General</string>
-    <string name="tab_deportes">Deportes</string>
-    <string name="tab_economia">Economía</string>
-    <string name="tab_locales">Locales</string>
-    <string name="tab_internacional">Internacional</string>
-    <string name="tab_favoritos">Favoritos</string>
-    <string name="loading">Cargando&#8230;</string>
+    <!-- Fragment titles used as ViewPager tab identifiers, in tab order -->
+    <string name="fav_tab">Favoritos</string>
+    <string name="first_tab">General</string>
+    <string name="second_tab">Deportes</string>
+    <string name="third_tab">Economía</string>
+    <string name="fourth_tab">Locales</string>
+    <string name="fifth_tab">Internacional</string>
+
+    <!-- Navigation drawer -->
+    <string name="settings">Ajustes</string>
+    <string name="removeAds">Quitar anuncios</string>
+    <string name="rate">Valorar</string>
+    <string name="help">Ayuda</string>
+    <string name="about">Acerca de</string>
+    <string name="action_share">Compartir</string>
+
+    <!-- Help dialog -->
+    <string name="close">Cerrar</string>
+    <string name="help_description">Desliza entre las pestañas para ver las portadas de cada categoría: General, Deportes, Economía, Locales e Internacional.</string>
+    <string name="help_description2">Toca una portada para verla en grande, guardarla o compartirla, y marca tus periódicos favoritos para encontrarlos rápido en la pestaña Favoritos.</string>
+    <string name="rate_app">Si te gusta la aplicación, valórala en Google Play. ¡Nos ayuda mucho!</string>
+
+    <!-- Menu actions -->
+    <string name="date">Fecha</string>
+    <string name="save">Guardar</string>
+    <string name="action_fav">Favorito</string>
+    <string name="covers">Portadas</string>
+    <string name="website">Página web</string>
+    <string name="add">Añadir</string>
+
+    <!-- Settings screen -->
+    <string name="tema">Tema</string>
+    <string name="categories">Categorías</string>
+    <string name="default_system">Predeterminado del sistema</string>
+    <string name="light">Claro</string>
+    <string name="dark">Oscuro</string>
+
+    <!-- Daily reminder notification -->
+    <string name="notification_name">¡Ya están las portadas de hoy!</string>
+    <string name="notification_description">Toca para ver las portadas de los periódicos de hoy.</string>
+
+    <!-- About screen -->
+    <string name="app_full_name">Portadas de prensa</string>
+    <string name="about_desc">Consulta cada día las portadas de los principales periódicos españoles, guárdalas o compártelas, y marca tus favoritos para tenerlos siempre a mano.</string>
+    <string name="contact">Contacto</string>
+    <string name="mas_apps">Más aplicaciones</string>
+    <string name="portadas_revistas">Portadas de revistas</string>
+    <string name="appSource">lasportadas.es</string>
+    <string name="copyright">© 2026 sergirex. Todos los derechos reservados.</string>
+    <string name="privacy_policy">Política de privacidad</string>
 
 </resources>

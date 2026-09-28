@@ -127,7 +127,7 @@ class PortadaDetalle : AppCompatActivity() {
             val title = if (parts.size > 1) parts[0] else it.split(".")[0]
             val web = if (parts.size > 1) parts[1] else it
             val country = if (parts.size > 2) parts[2] else "es"
-            Portada(it, title, fecha, web, country)
+            Portada(it, title, fecha.orEmpty(), web, country)
         } ?: emptyList()
 
         mSectionsPagerAdapter.setPortadas(portadaList)
@@ -178,7 +178,8 @@ class PortadaDetalle : AppCompatActivity() {
 
         // Interstitial Ad
         if (showAd % 3 == 0) {
-            interstitialAd = InterstitialAd(this, "799967435028134_801174748240736")
+            val ad = InterstitialAd(this, "799967435028134_801174748240736")
+            interstitialAd = ad
             val interstitialAdListener = object : InterstitialAdListener {
                 override fun onInterstitialDisplayed(ad: Ad) {}
                 override fun onInterstitialDismissed(ad: Ad) {}
@@ -191,10 +192,10 @@ class PortadaDetalle : AppCompatActivity() {
                 override fun onAdClicked(ad: Ad) {}
                 override fun onLoggingImpression(ad: Ad) {}
             }
-            interstitialAd?.loadAd(
-                interstitialAd?.buildLoadAdConfig()
-                    ?.withAdListener(interstitialAdListener)
-                    ?.build()
+            ad.loadAd(
+                ad.buildLoadAdConfig()
+                    .withAdListener(interstitialAdListener)
+                    .build()
             )
         }
     }
@@ -266,7 +267,7 @@ class PortadaDetalle : AppCompatActivity() {
         val url = "https://www.${portada.webPeriodico}"
         try {
             val typedValue = TypedValue()
-            theme.resolveAttribute(com.google.android.material.R.attr.colorPrimary, typedValue, true)
+            theme.resolveAttribute(androidx.appcompat.R.attr.colorPrimary, typedValue, true)
             val color = typedValue.data
 
             val intent = CustomTabsIntent.Builder()

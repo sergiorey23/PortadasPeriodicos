@@ -9,7 +9,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.squareup.picasso.Picasso
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import sergirex.portadasperiodicos.databinding.FragmentPortadaDetalleBinding
@@ -51,7 +50,19 @@ class PortadaDetalleFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        loadCover()
+    }
 
+    /** Reloads the cover for a newly picked date (called from the parent Activity's date picker). */
+    fun reloadWithDate(newDate: String) {
+        initialDate = newDate
+        binding.fechaPortada.visibility = View.GONE
+        binding.imagenExtendida.visibility = View.GONE
+        binding.loadingProgressBar.visibility = View.VISIBLE
+        loadCover()
+    }
+
+    private fun loadCover() {
         // Launch a coroutine to fetch the cover image in the background
         viewLifecycleOwner.lifecycleScope.launch {
             getCover()
@@ -82,10 +93,9 @@ class PortadaDetalleFragment : Fragment() {
             val currentDate = formatter.format(calendar.time)
             val url = "https://img.kiosko.net/$currentDate/$countryCode/$newspaperTitle.jpg"
 
-            // Run the network request on a background thread
-            val success = withContext(Dispatchers.IO) {
-                loadImageWithPicasso(url)
-            }
+            // Picasso schedules the actual network fetch itself; into() must be called
+            // from the main thread, so this suspend call is not wrapped in Dispatchers.IO.
+            val success = loadImageWithPicasso(url)
 
             if (success) {
                 coverFound = true

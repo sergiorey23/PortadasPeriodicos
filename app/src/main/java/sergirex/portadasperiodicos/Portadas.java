@@ -83,6 +83,10 @@ public class Portadas extends AppCompatActivity implements BillingManager.Billin
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // The manifest sets SplashTheme (a plain AppCompat theme) for a clean cold-start
+        // background; switch to the real MaterialComponents theme before inflating any
+        // Material widgets (e.g. TabLayout), which require a MaterialComponents theme.
+        setTheme(R.style.AppTheme);
 
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
         billingManager = new BillingManager(this, prefs, this);

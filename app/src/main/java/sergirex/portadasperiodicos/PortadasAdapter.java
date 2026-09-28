@@ -37,9 +37,9 @@ public class PortadasAdapter extends RecyclerView.Adapter<PortadasAdapter.Portad
         // Set the click listener to open the detail view
         holder.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(context, PortadaDetalle.class);
-            intent.putExtra("portada", result.portada());
-            intent.putExtra("fecha", result.originalFecha());
-            intent.putExtra("allportadas", result.allPortadas());
+            intent.putExtra("Portadas", result.allPortadas());
+            intent.putExtra("selectedPortada", result.portada().getTitle());
+            intent.putExtra("Fecha", result.originalFecha());
             context.startActivity(intent);
         });
     }
