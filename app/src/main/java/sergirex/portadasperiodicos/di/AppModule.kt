@@ -6,9 +6,13 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import kotlinx.serialization.json.Json
+import sergirex.portadasperiodicos.data.repository.FavoritePeriodicosRepositoryImpl
 import sergirex.portadasperiodicos.data.repository.PeriodicosRepositoryImpl
+import sergirex.portadasperiodicos.data.repository.PortadaCoverRepositoryImpl
 import sergirex.portadasperiodicos.data.repository.ThemeRepositoryImpl
+import sergirex.portadasperiodicos.domain.repository.FavoritePeriodicosRepository
 import sergirex.portadasperiodicos.domain.repository.PeriodicosRepository
+import sergirex.portadasperiodicos.domain.repository.PortadaCoverRepository
 import sergirex.portadasperiodicos.domain.repository.ThemeRepository
 import javax.inject.Singleton
 
@@ -30,6 +34,14 @@ abstract class AppModule {
     @Binds
     @Singleton
     abstract fun bindThemeRepository(impl: ThemeRepositoryImpl): ThemeRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindPortadaCoverRepository(impl: PortadaCoverRepositoryImpl): PortadaCoverRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindFavoritePeriodicosRepository(impl: FavoritePeriodicosRepositoryImpl): FavoritePeriodicosRepository
 
     companion object {
         @Provides

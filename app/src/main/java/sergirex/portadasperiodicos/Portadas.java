@@ -51,6 +51,8 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
+import sergirex.portadasperiodicos.domain.model.PeriodicoCategory;
+
 import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -60,6 +62,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+// Required structurally: Portadas hosts PortadasFragment (@AndroidEntryPoint), and Hilt
+// requires the hosting Activity to be an entry point too, even though Portadas itself
+// doesn't inject anything yet — that's a later migration phase.
+@AndroidEntryPoint
 public class Portadas extends AppCompatActivity implements BillingManager.BillingListener {
     static final int MY_PERMISSIONS_REQUEST_WRITE_STORAGE = 0;
     static final int MY_PERMISSIONS_REQUEST_POST_NOTIFICATION = 1;
@@ -217,14 +225,14 @@ public class Portadas extends AppCompatActivity implements BillingManager.Billin
         mViewPager = findViewById(R.id.viewpager);
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager(), getLifecycle());
         if(!prefsPor.getAll().isEmpty()) {
-            mSectionsPagerAdapter.addFragment(getString(R.string.fav_tab),Favoritos.newInstance(fecha));
+            mSectionsPagerAdapter.addFragment(getString(R.string.fav_tab),PortadasFragment.newInstanceFavorites());
             favsCount = prefsPor.getAll().size();
         }
-        mSectionsPagerAdapter.addFragment(getString(R.string.first_tab),General.newInstance(fecha));
-        mSectionsPagerAdapter.addFragment(getString(R.string.second_tab),Deportes.newInstance(fecha));
-        mSectionsPagerAdapter.addFragment(getString(R.string.third_tab),Economia.newInstance(fecha));
-        mSectionsPagerAdapter.addFragment(getString(R.string.fourth_tab),Locales.newInstance(fecha));
-        mSectionsPagerAdapter.addFragment(getString(R.string.fifth_tab),Internacional.newInstance(fecha));
+        mSectionsPagerAdapter.addFragment(getString(R.string.first_tab),PortadasFragment.newInstance(PeriodicoCategory.GENERAL));
+        mSectionsPagerAdapter.addFragment(getString(R.string.second_tab),PortadasFragment.newInstance(PeriodicoCategory.DEPORTES));
+        mSectionsPagerAdapter.addFragment(getString(R.string.third_tab),PortadasFragment.newInstance(PeriodicoCategory.ECONOMIA));
+        mSectionsPagerAdapter.addFragment(getString(R.string.fourth_tab),PortadasFragment.newInstance(PeriodicoCategory.LOCALES));
+        mSectionsPagerAdapter.addFragment(getString(R.string.fifth_tab),PortadasFragment.newInstance(PeriodicoCategory.INTERNACIONAL));
 
         mViewPager.setAdapter(mSectionsPagerAdapter);
         mViewPager.setOffscreenPageLimit(mSectionsPagerAdapter.getItemCount()-1);
@@ -541,12 +549,12 @@ public class Portadas extends AppCompatActivity implements BillingManager.Billin
         int count = prefsPor.getAll().size();
         if(count > 0){
             if(!categorias.get(0).equals(getString(R.string.fav_tab))) {
-                mSectionsPagerAdapter.addFirstFragment(getString(R.string.fav_tab), Favoritos.newInstance(fecha));
+                mSectionsPagerAdapter.addFirstFragment(getString(R.string.fav_tab), PortadasFragment.newInstanceFavorites());
                 mSectionsPagerAdapter.notifyItemInserted(0);
                 mViewPager.setCurrentItem(0);
             }else if(favsCount != count){
                 mSectionsPagerAdapter.removeFragment();
-                mSectionsPagerAdapter.addFirstFragment(getString(R.string.fav_tab),Favoritos.newInstance(fecha));
+                mSectionsPagerAdapter.addFirstFragment(getString(R.string.fav_tab),PortadasFragment.newInstanceFavorites());
                 mSectionsPagerAdapter.notifyItemChanged(0);
                 favsCount = count;
             }
