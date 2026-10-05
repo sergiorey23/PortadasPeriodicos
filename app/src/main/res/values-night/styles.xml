@@ -1,0 +1,30 @@
+<resources>
+
+    <!-- Dark-mode attribute values for AppTheme; see values/styles.xml for the full explanation. -->
+    <style name="AppTheme" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:windowAnimationStyle">@style/WindowAnimationTransition</item>
+        <item name="colorPrimary">@color/background_material_dark</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorPrimaryContainer">@android:color/holo_green_dark</item>
+        <item name="colorAccent">@android:color/holo_green_light</item>
+        <item name="textColorAlertDialogListItem">@android:color/white</item>
+
+        <item name="android:textColorPrimary">@android:color/white</item>
+        <item name="colorOnPrimary">@android:color/white</item>
+        <item name="colorOnSecondary">@android:color/white</item>
+        <item name="colorOnSecondaryContainer">@android:color/white</item>
+        <item name="colorOnSurface">@android:color/white</item>
+        <item name="colorOnSurfaceVariant">@android:color/white</item>
+        <item name="titleTextColor">@android:color/white</item>
+
+        <item name="materialAlertDialogTheme">@style/MaterialAlertDialogDark</item>
+        <item name="android:navigationBarColor">@color/background_material_dark</item>
+        <item name="android:statusBarColor">@color/background_material_dark</item>
+        <item name="materialCalendarStyle">@style/Widget.MaterialComponents.MaterialCalendar</item>
+        <item name="materialCalendarFullscreenTheme">@style/ThemeOverlay.MaterialComponents.MaterialCalendar.Fullscreen</item>
+        <item name="materialCalendarTheme">@style/MaterialCalendarTheme</item>
+        <item name="buttonBarNegativeButtonStyle">@style/TextButton</item>
+        <item name="buttonBarPositiveButtonStyle">@style/TextButton</item>
+        <item name="buttonBarNeutralButtonStyle">@style/TextButton</item>
+    </style>
+</resources>

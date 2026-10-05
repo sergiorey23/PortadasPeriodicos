@@ -1,7 +1,20 @@
 <resources>
 
-    <style name="AppTheme" parent="Theme.MaterialComponents.Light">
-        <!-- Customize your theme here. -->
+    <!--
+    AppTheme is now DayNight-aware: this file holds the light-mode attribute
+    values, and values-night/styles.xml redefines the SAME style name with
+    dark-mode values. AppCompatDelegate.setDefaultNightMode() (set from
+    ThemeRepositoryImpl's persisted ThemeMode) decides which of the two gets
+    resolved, for every Activity, automatically.
+
+    This replaces the old setup where AppTheme and AppThemeDark were two
+    unrelated styles (different parents, divergent attribute sets) and every
+    Activity had to manually call setTheme(R.style.AppThemeDark) after
+    checking Configuration.UI_MODE_NIGHT_MASK by hand — a second, independent
+    light/dark switch that could (and did) fall out of sync with
+    AppCompatDelegate's own night mode.
+    -->
+    <style name="AppTheme" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@android:color/holo_green_dark</item>
@@ -17,40 +30,9 @@
         <item name="materialCalendarStyle">@style/Widget.MaterialComponents.MaterialCalendar</item>
         <item name="materialCalendarFullscreenTheme">@style/ThemeOverlay.MaterialComponents.MaterialCalendar.Fullscreen</item>
         <item name="materialCalendarTheme">@style/MaterialCalendarThemeLight</item>
-        <item name="android:windowActionBar">false</item>
         <item name="android:windowAnimationStyle">@style/WindowAnimationTransition</item>
-        <item name="windowNoTitle">true</item>
     </style>
-    <style name="AppThemeDark" parent="Theme.Material3.Dark">
-        <!-- Customize your theme here. -->
 
-        <item name="android:windowAnimationStyle">@style/WindowAnimationTransition</item>
-        <item name="colorPrimary">@color/background_material_dark</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorPrimaryContainer">@android:color/holo_green_dark</item>
-        <item name="colorAccent">@android:color/holo_green_light</item>
-        <item name="textColorAlertDialogListItem">@android:color/white</item>
-
-        <item name="android:textColorPrimary">@android:color/white</item>
-        <item name="colorOnPrimary">@android:color/white</item>
-        <item name="colorOnSecondary">@android:color/white</item>
-        <item name="colorOnSecondaryContainer">@android:color/white</item>
-        <item name="colorOnSurface">@android:color/white</item>
-        <item name="colorOnSurfaceVariant">@android:color/white</item>
-        <item name="titleTextColor">@android:color/white</item>
-
-        <item name="materialAlertDialogTheme">@style/MaterialAlertDialogDark</item>
-        <item name="android:navigationBarColor">@color/background_material_dark</item>
-        <item name="android:statusBarColor">@color/background_material_dark</item>
-        <item name="materialCalendarStyle">@style/Widget.MaterialComponents.MaterialCalendar</item>
-        <item name="materialCalendarFullscreenTheme">@style/ThemeOverlay.MaterialComponents.MaterialCalendar.Fullscreen</item>
-        <item name="materialCalendarTheme">@style/MaterialCalendarTheme</item>
-        <item name="buttonBarNegativeButtonStyle">@style/TextButton</item>
-        <item name="buttonBarPositiveButtonStyle">@style/TextButton</item>
-        <item name="buttonBarNeutralButtonStyle">@style/TextButton</item>
-        <item name="android:windowActionBar">false</item>
-        <item name="windowNoTitle">true</item>
-    </style>
     <style name="MaterialAlertDialog" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
         <item name="buttonBarPositiveButtonStyle">@style/Widget.MaterialComponents.Button</item>
     </style>
@@ -82,7 +64,7 @@
         <item name="backgroundTint">@color/background_material_dark</item>
     </style>
 
-    <style name="SplashTheme" parent="Theme.AppCompat.NoActionBar">
+    <style name="SplashTheme" parent="Theme.AppCompat.DayNight.NoActionBar">
         <item name="android:windowBackground">@drawable/splash_screen</item>
         <item name="colorPrimary">@color/colorPrimary</item>
     </style>
