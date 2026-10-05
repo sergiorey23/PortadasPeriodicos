@@ -58,7 +58,7 @@ public class General extends Fragment implements GetPortadas.PortadasListener {
     private void loadPortadas() {
         if (getContext() != null) {
             GetPortadas getPortadas = new GetPortadas(getContext(), getClass().getSimpleName(), fecha, swipeRefreshLayout, this);
-            getPortadas.execute(Periodicos.general);
+            getPortadas.execute(Periodicos.general(getContext()));
         }
     }
 

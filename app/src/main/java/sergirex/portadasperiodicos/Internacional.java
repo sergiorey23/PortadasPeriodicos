@@ -59,7 +59,7 @@ public class Internacional extends Fragment implements GetPortadas.PortadasListe
     private void loadPortadas() {
         if (getContext() != null) {
             GetPortadas getPortadas = new GetPortadas(getContext(), getClass().getSimpleName(), fecha, swipeRefreshLayout, this);
-            getPortadas.execute(Periodicos.internacional);
+            getPortadas.execute(Periodicos.internacional(getContext()));
         }
     }
 

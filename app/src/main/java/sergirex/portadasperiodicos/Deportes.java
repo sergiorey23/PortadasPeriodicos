@@ -59,7 +59,7 @@ public class Deportes extends Fragment implements GetPortadas.PortadasListener {
     private void loadPortadas() {
         if (getContext() != null) {
             GetPortadas getPortadas = new GetPortadas(getContext(), getClass().getSimpleName(), fecha, swipeRefreshLayout, this);
-            getPortadas.execute(Periodicos.deportes);
+            getPortadas.execute(Periodicos.deportes(getContext()));
         }
     }
 

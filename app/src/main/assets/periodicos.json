@@ -1,0 +1,386 @@
+[
+  {
+    "id": "elpais",
+    "domain": "elpais.com",
+    "country": "es",
+    "category": "GENERAL"
+  },
+  {
+    "id": "elmundo",
+    "domain": "elmundo.es",
+    "country": "es",
+    "category": "GENERAL"
+  },
+  {
+    "id": "abc",
+    "domain": "abc.es",
+    "country": "es",
+    "category": "GENERAL"
+  },
+  {
+    "id": "larazon",
+    "domain": "larazon.es",
+    "country": "es",
+    "category": "GENERAL"
+  },
+  {
+    "id": "lavanguardia",
+    "domain": "lavanguardia.com",
+    "country": "es",
+    "category": "GENERAL"
+  },
+  {
+    "id": "elperiodico",
+    "domain": "elperiodico.com",
+    "country": "es",
+    "category": "GENERAL"
+  },
+  {
+    "id": "marca",
+    "domain": "marca.com",
+    "country": "es",
+    "category": "DEPORTES"
+  },
+  {
+    "id": "as",
+    "domain": "as.com",
+    "country": "es",
+    "category": "DEPORTES"
+  },
+  {
+    "id": "sport",
+    "domain": "sport.es",
+    "country": "es",
+    "category": "DEPORTES"
+  },
+  {
+    "id": "mundodeportivo",
+    "domain": "mundodeportivo.com",
+    "country": "es",
+    "category": "DEPORTES"
+  },
+  {
+    "id": "superdeporte",
+    "domain": "superdeporte.es",
+    "country": "es",
+    "category": "DEPORTES"
+  },
+  {
+    "id": "el9",
+    "domain": "lesportiudecatalunya.cat",
+    "country": "es",
+    "category": "DEPORTES"
+  },
+  {
+    "id": "expansion",
+    "domain": "expansion.com",
+    "country": "es",
+    "category": "ECONOMIA"
+  },
+  {
+    "id": "eleconomista",
+    "domain": "eleconomista.es",
+    "country": "es",
+    "category": "ECONOMIA"
+  },
+  {
+    "id": "5dias",
+    "domain": "cincodias.elpais.com",
+    "country": "es",
+    "category": "ECONOMIA"
+  },
+  {
+    "id": "vozgalicia",
+    "domain": "lavozdegalicia.es",
+    "country": "es",
+    "category": "LOCALES"
+  },
+  {
+    "id": "diario_sevilla",
+    "domain": "diariodesevilla.es",
+    "country": "es",
+    "category": "LOCALES"
+  },
+  {
+    "id": "diario_informacion",
+    "domain": "informacion.es",
+    "country": "es",
+    "category": "LOCALES"
+  },
+  {
+    "id": "20minutos_madrid",
+    "domain": "20minutos.es/madrid",
+    "country": "es",
+    "category": "LOCALES"
+  },
+  {
+    "id": "20minutos_sevilla",
+    "domain": "20minutos.es/andalucia/sevilla",
+    "country": "es",
+    "category": "LOCALES"
+  },
+  {
+    "id": "viva_sevilla",
+    "domain": "vivasevilla.es",
+    "country": "es",
+    "category": "LOCALES"
+  },
+  {
+    "id": "elperiodico_mediterraneo",
+    "domain": "elperiodicomediterraneo.com",
+    "country": "es",
+    "category": "LOCALES"
+  },
+  {
+    "id": "levante",
+    "domain": "levante-emv.com",
+    "country": "es",
+    "category": "LOCALES"
+  },
+  {
+    "id": "diario_montanes",
+    "domain": "eldiariomontanes.es",
+    "country": "es",
+    "category": "LOCALES"
+  },
+  {
+    "id": "elcorreo",
+    "domain": "elcorreo.com",
+    "country": "es",
+    "category": "LOCALES"
+  },
+  {
+    "id": "diario_navarra",
+    "domain": "diariodenavarra.es",
+    "country": "es",
+    "category": "LOCALES"
+  },
+  {
+    "id": "lanuevaespana",
+    "domain": "lne.es",
+    "country": "es",
+    "category": "LOCALES"
+  },
+  {
+    "id": "diario_cordoba",
+    "domain": "diariocordoba.es",
+    "country": "es",
+    "category": "LOCALES"
+  },
+  {
+    "id": "eldia_cordoba",
+    "domain": "eldiadecordoba.es",
+    "country": "es",
+    "category": "LOCALES"
+  },
+  {
+    "id": "granada_hoy",
+    "domain": "granadahoy.com",
+    "country": "es",
+    "category": "LOCALES"
+  },
+  {
+    "id": "ideal_jaen",
+    "domain": "ideal.es",
+    "country": "es",
+    "category": "LOCALES"
+  },
+  {
+    "id": "nortecastilla_valladolid",
+    "domain": "elnortedecastilla.es",
+    "country": "es",
+    "category": "LOCALES"
+  },
+  {
+    "id": "larioja",
+    "domain": "larioja.com",
+    "country": "es",
+    "category": "LOCALES"
+  },
+  {
+    "id": "diario_vasco",
+    "domain": "diariovasco.com",
+    "country": "es",
+    "category": "LOCALES"
+  },
+  {
+    "id": "diario_leon",
+    "domain": "diariodeleon.es",
+    "country": "es",
+    "category": "LOCALES"
+  },
+  {
+    "id": "diario_avila",
+    "domain": "diariodeavila.es",
+    "country": "es",
+    "category": "LOCALES"
+  },
+  {
+    "id": "lasprovincias",
+    "domain": "lasprovincias.es",
+    "country": "es",
+    "category": "LOCALES"
+  },
+  {
+    "id": "farodevigo",
+    "domain": "farodevigo.es",
+    "country": "es",
+    "category": "LOCALES"
+  },
+  {
+    "id": "diariosur",
+    "domain": "diariosur.es",
+    "country": "es",
+    "category": "LOCALES"
+  },
+  {
+    "id": "malaga_hoy",
+    "domain": "malagahoy.es",
+    "country": "es",
+    "category": "LOCALES"
+  },
+  {
+    "id": "laprovincia",
+    "domain": "laprovincia.es",
+    "country": "es",
+    "category": "LOCALES"
+  },
+  {
+    "id": "hoy_badajoz",
+    "domain": "hoy.es/extremadura",
+    "country": "es",
+    "category": "LOCALES"
+  },
+  {
+    "id": "elperiodico_extremadura",
+    "domain": "elperiodicoextremadura.com",
+    "country": "es",
+    "category": "LOCALES"
+  },
+  {
+    "id": "latribuna_albacete",
+    "domain": "latribunadealbacete.es",
+    "country": "es",
+    "category": "LOCALES"
+  },
+  {
+    "id": "latribuna_ciudadreal",
+    "domain": "latribunadeciudadreal.es",
+    "country": "es",
+    "category": "LOCALES"
+  },
+  {
+    "id": "elfaro_ceuta",
+    "domain": "elfarodeceuta.es",
+    "country": "es",
+    "category": "LOCALES"
+  },
+  {
+    "id": "elfaro_melilla",
+    "domain": "elfarodemelilla.es",
+    "country": "es",
+    "category": "LOCALES"
+  },
+  {
+    "id": "canarias7",
+    "domain": "canarias7.es",
+    "country": "es",
+    "category": "LOCALES"
+  },
+  {
+    "id": "diario_mallorca",
+    "domain": "diariodemallorca.es",
+    "country": "es",
+    "category": "LOCALES"
+  },
+  {
+    "id": "diario_ibiza",
+    "domain": "diariodeibiza.es",
+    "country": "es",
+    "category": "LOCALES"
+  },
+  {
+    "id": "laverdad_murcia",
+    "domain": "laverdad.es",
+    "country": "es",
+    "category": "LOCALES"
+  },
+  {
+    "id": "heraldo_aragon",
+    "domain": "heraldo.es",
+    "country": "es",
+    "category": "LOCALES"
+  },
+  {
+    "id": "newyork_times",
+    "domain": "nytimes.com/es",
+    "country": "us",
+    "category": "INTERNACIONAL"
+  },
+  {
+    "id": "wsj",
+    "domain": "wsj.com",
+    "country": "us",
+    "category": "INTERNACIONAL"
+  },
+  {
+    "id": "washington_post",
+    "domain": "washingtonpost.com",
+    "country": "us",
+    "category": "INTERNACIONAL"
+  },
+  {
+    "id": "ft_uk",
+    "domain": "ft.com",
+    "country": "uk",
+    "category": "INTERNACIONAL"
+  },
+  {
+    "id": "sun",
+    "domain": "thesun.co.uk",
+    "country": "uk",
+    "category": "INTERNACIONAL"
+  },
+  {
+    "id": "lemonde",
+    "domain": "lemonde.fr",
+    "country": "fr",
+    "category": "INTERNACIONAL"
+  },
+  {
+    "id": "spiegel",
+    "domain": "spiegel.de",
+    "country": "de",
+    "category": "INTERNACIONAL"
+  },
+  {
+    "id": "sole24ore",
+    "domain": "ilsole24ore.com",
+    "country": "it",
+    "category": "INTERNACIONAL"
+  },
+  {
+    "id": "the_times",
+    "domain": "thetimes.co.uk",
+    "country": "uk",
+    "category": "INTERNACIONAL"
+  },
+  {
+    "id": "guardian",
+    "domain": "theguardian.com/uk",
+    "country": "uk",
+    "category": "INTERNACIONAL"
+  },
+  {
+    "id": "ar_clarin",
+    "domain": "clarin.com",
+    "country": "ar",
+    "category": "INTERNACIONAL"
+  },
+  {
+    "id": "ole",
+    "domain": "ole.com.ar",
+    "country": "ar",
+    "category": "INTERNACIONAL"
+  }
+]
