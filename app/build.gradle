@@ -1,5 +1,8 @@
 apply plugin: 'com.android.application'
 apply plugin: 'org.jetbrains.kotlin.android'
+apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
+apply plugin: 'com.google.devtools.ksp'
+apply plugin: 'com.google.dagger.hilt.android'
 
 def keystorePropertiesFile = rootProject.file('keystore.properties')
 def keystoreProperties = new Properties()
@@ -70,8 +73,22 @@ dependencies {
     implementation 'com.google.android.play:review:2.0.2'
     implementation 'androidx.activity:activity:1.11.0'
     implementation 'androidx.core:core-ktx:1.17.0'
+    // Forces a modern Fragment version: androidx.preference:1.2.1 transitively
+    // pulls fragment 1.5.4, which predates the CreationExtras-based
+    // SavedStateHandle wiring that Hilt's ViewModelFactory + lifecycle-viewmodel
+    // 2.9.4 require for activityViewModels()/@HiltViewModel to work at all.
+    implementation 'androidx.fragment:fragment-ktx:1.9.1'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.9.4'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.9.4'
+
+    // Clean Architecture: domain/data layers
+    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0'
+    implementation 'androidx.datastore:datastore-preferences:1.2.1'
+
+    // Dependency injection
+    implementation 'com.google.dagger:hilt-android:2.60.1'
+    ksp 'com.google.dagger:hilt-android-compiler:2.60.1'
+
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.7.0'
     implementation 'com.facebook.android:audience-network-sdk:6.21.0'
