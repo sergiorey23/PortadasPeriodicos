@@ -8,15 +8,15 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import com.squareup.picasso.Picasso
+import coil3.BitmapImage
+import coil3.imageLoader
+import coil3.request.ImageRequest
+import coil3.request.SuccessResult
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import sergirex.portadasperiodicos.databinding.FragmentPortadaDetalleBinding
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 class PortadaDetalleFragment : Fragment() {
 
@@ -93,9 +93,7 @@ class PortadaDetalleFragment : Fragment() {
             val currentDate = formatter.format(calendar.time)
             val url = "https://img.kiosko.net/$currentDate/$countryCode/$newspaperTitle.jpg"
 
-            // Picasso schedules the actual network fetch itself; into() must be called
-            // from the main thread, so this suspend call is not wrapped in Dispatchers.IO.
-            val success = loadImageWithPicasso(url)
+            val success = loadImageWithCoil(url)
 
             if (success) {
                 coverFound = true
@@ -117,17 +115,20 @@ class PortadaDetalleFragment : Fragment() {
         }
     }
 
-    // A helper suspend function to wrap Picasso's callback in a coroutine
-    private suspend fun loadImageWithPicasso(url: String): Boolean = suspendCoroutine { continuation ->
-        Picasso.get().load(url).into(binding.imagenExtendida, object : com.squareup.picasso.Callback {
-            override fun onSuccess() {
-                continuation.resume(true) // Resume coroutine with success
-            }
-
-            override fun onError(e: Exception?) {
-                continuation.resume(false) // Resume coroutine with failure
-            }
-        })
+    /**
+     * Coil's ImageLoader.execute() is a suspend function in its own right — unlike
+     * Picasso, which only offers a callback API, so the old code had to wrap it in
+     * suspendCoroutine by hand. The Bitmap is applied manually (same approach as
+     * FavoritosWidget's RemoteViews, which has no ImageView to hand Coil a target
+     * for in the first place) rather than via ImageRequest.target(), which only
+     * returns before Coil actually applies the image to it in a reliable way.
+     */
+    private suspend fun loadImageWithCoil(url: String): Boolean {
+        val request = ImageRequest.Builder(requireContext()).data(url).build()
+        val result = requireContext().imageLoader.execute(request)
+        val bitmap = ((result as? SuccessResult)?.image as? BitmapImage)?.bitmap ?: return false
+        binding.imagenExtendida.setImageBitmap(bitmap)
+        return true
     }
 
     private fun showDateIfNotToday(coverDate: String) {

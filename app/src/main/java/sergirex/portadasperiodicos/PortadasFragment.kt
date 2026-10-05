@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -86,7 +85,7 @@ class PortadasFragment : Fragment() {
 
         @JvmStatic
         fun newInstance(category: PeriodicoCategory): PortadasFragment = PortadasFragment().apply {
-            arguments = bundleOf(PortadasViewModel.ARG_CATEGORY to category.name)
+            arguments = Bundle().apply { putString(PortadasViewModel.ARG_CATEGORY, category.name) }
         }
 
         @JvmStatic
