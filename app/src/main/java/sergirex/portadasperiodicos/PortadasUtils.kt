@@ -9,7 +9,6 @@ import java.util.Date
 import java.util.Locale
 
 object PortadasUtils {
-    const val MY_PERMISSIONS_REQUEST_WRITE_STORAGE = 1
     private const val DATE_PATTERN = "yyyy/MM/dd"
 
     /**

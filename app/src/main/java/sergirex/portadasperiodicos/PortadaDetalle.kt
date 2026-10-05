@@ -4,7 +4,6 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.Uri
@@ -17,6 +16,7 @@ import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.browser.customtabs.CustomTabColorSchemeParams
@@ -24,6 +24,7 @@ import androidx.browser.customtabs.CustomTabsIntent
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.preference.PreferenceManager
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
@@ -33,6 +34,7 @@ import com.google.android.material.datepicker.DateValidatorPointBackward
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.play.core.review.ReviewManagerFactory
+import kotlinx.coroutines.launch
 import sergirex.portadasperiodicos.databinding.ActivityPortadaDetalleBinding
 import java.io.File
 import java.text.SimpleDateFormat
@@ -50,6 +52,18 @@ class PortadaDetalle : AppCompatActivity() {
     private lateinit var mSectionsPagerAdapter: ViewPagerAdapter
 
     private var interstitialAd: InterstitialAd? = null
+
+    // Must be registered before STARTED (i.e. as a field, not inside a click handler) per
+    // the Activity Result API contract; SavePortada can't register its own since only an
+    // Activity/Fragment can.
+    private val requestStoragePermission =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            if (granted) {
+                Toast.makeText(this, "Permiso concedido. Por favor, intente la acción de nuevo.", Toast.LENGTH_LONG).show()
+            } else {
+                Toast.makeText(this, "Permiso denegado. No se puede guardar ni compartir la portada.", Toast.LENGTH_LONG).show()
+            }
+        }
 
     // Animations are loaded once
     private val rotateOpen: Animation by lazy { AnimationUtils.loadAnimation(this, R.anim.rotate_open_anim) }
@@ -208,24 +222,26 @@ class PortadaDetalle : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         val position = binding.viewpager2.currentItem
         val portada = mSectionsPagerAdapter.getPortadaAt(position) ?: return false
-        val url = "https://kiosko.net/${portada.fecha}/${portada.siglaPais}/${portada.title}.html"
-        val savePortada = SavePortada(this)
+        // The actual cover image lives on the img. subdomain as a .jpg — not the
+        // kiosko.net/....html article page this used to point at, which is an HTML
+        // document and can never decode as a Bitmap (confirmed against the real
+        // kiosko.net: that URL 301-redirects to an HTML page, Content-Type text/html).
+        val imageUrl = "https://img.kiosko.net/${portada.fecha}/${portada.siglaPais}/${portada.title}.jpg"
+        val savePortada = SavePortada(this, requestStoragePermission)
 
         when (item.itemId) {
             R.id.share -> {
                 if (savePortada.isExternalStorageWritable && savePortada.checkPermissions()) {
-                    // Pass the root view for the Snackbar
-                    DownloadPortada(this, binding.root, savePortada, portada.title).execute(url)
+                    lifecycleScope.launch { savePortada.share(imageUrl, portada.title) }
                 }
             }
             R.id.save -> {
                 if (savePortada.isExternalStorageWritable && savePortada.checkPermissions()) {
-                    val file = File(savePortada.albumStorageDir, "${portada.title}_${portada.fecha?.replace("/", "")}.jpg")
+                    val file = File(savePortada.albumStorageDir, "${portada.title}_${portada.fecha.replace("/", "")}.jpg")
                     if (file.exists()) {
                         Toast.makeText(this, "Ya se ha guardado la portada.", Toast.LENGTH_LONG).show()
                     } else {
-                        // Pass the root view for the Snackbar
-                        DownloadPortada(this, binding.root, file).execute(url)
+                        lifecycleScope.launch { savePortada.saveToGallery(binding.root, imageUrl, file) }
                     }
                 }
             }
@@ -344,23 +360,6 @@ class PortadaDetalle : AppCompatActivity() {
             } else {
                 // There was some error, log it.
                 Log.e("InAppReview", "Review flow request failed.", task.exception)
-            }
-        }
-    }
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        when (requestCode) {
-            PortadasUtils.MY_PERMISSIONS_REQUEST_WRITE_STORAGE -> {
-                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                    Toast.makeText(this, "Permiso concedido. Por favor, intente la acción de nuevo.", Toast.LENGTH_LONG).show()
-                } else {
-                    Toast.makeText(this, "Permiso denegado. No se puede guardar ni compartir la portada.", Toast.LENGTH_LONG).show()
-                }
-                return
-            }
-            else -> {
-                // Ignore all other requests.
             }
         }
     }
