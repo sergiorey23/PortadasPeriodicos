@@ -24,6 +24,17 @@
         android:id="@+id/imageViewWidget"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:contentDescription="Portada" />
+        android:contentDescription="@string/portada" />
+
+    <TextView
+        android:id="@+id/emptyStateText"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:padding="16dp"
+        android:text="@string/widget_no_favorites"
+        android:textColor="@android:color/black"
+        android:textSize="13sp"
+        android:visibility="gone" />
 
 </FrameLayout>

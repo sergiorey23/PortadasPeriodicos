@@ -53,4 +53,7 @@
     <string name="copyright">© 2026 sergirex. Todos los derechos reservados.</string>
     <string name="privacy_policy">Política de privacidad</string>
 
+    <!-- Favorites widget -->
+    <string name="widget_no_favorites">Aún no tienes portadas favoritas. Márcalas con el ❤ desde la app.</string>
+
 </resources>
