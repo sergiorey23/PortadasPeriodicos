@@ -6,6 +6,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import kotlinx.serialization.json.Json
+import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
 import sergirex.portadasperiodicos.data.network.CoverCacheControlInterceptor
 import sergirex.portadasperiodicos.data.repository.EngagementRepositoryImpl
@@ -68,6 +69,9 @@ abstract class AppModule {
         @Singleton
         fun provideOkHttpClient(): OkHttpClient =
             OkHttpClient.Builder()
+                // Covers all come from one host; the default of 5 concurrent requests per host made a
+                // tab wait behind another tab's lookups and thumbnails.
+                .dispatcher(Dispatcher().apply { maxRequestsPerHost = 12 })
                 .connectTimeout(10, TimeUnit.SECONDS)
                 .readTimeout(15, TimeUnit.SECONDS)
                 .callTimeout(30, TimeUnit.SECONDS)

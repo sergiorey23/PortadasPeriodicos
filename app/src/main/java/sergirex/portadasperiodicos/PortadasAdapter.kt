@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import coil3.load
+import coil3.size.Size
 import sergirex.portadasperiodicos.databinding.PortadaItemBinding
 import sergirex.portadasperiodicos.domain.model.PortadaCover
 
@@ -32,7 +33,7 @@ class PortadasAdapter(
 
     inner class ViewHolder(private val binding: PortadaItemBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(cover: PortadaCover) {
-            binding.portadaImageView.load(cover.imageUrl)
+            binding.portadaImageView.load(cover.imageUrl) { size(Size.ORIGINAL) }
             binding.root.setOnClickListener { onCoverClick(cover) }
         }
     }

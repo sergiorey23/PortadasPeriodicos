@@ -54,17 +54,23 @@ class PortadasFragment : Fragment() {
         // pull-to-refresh gesture to look at the RecyclerView's scroll position instead.
         binding.refreshLayout.setOnChildScrollUpCallback { _, _ -> binding.recyclerView.canScrollVertically(-1) }
 
+        // Render whenever the page is on screen or being swiped to...
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                launch {
-                    viewModel.uiState(tab).collect { state ->
-                        adapter.submitList(state.covers)
-                        binding.refreshLayout.isRefreshing = state.isRefreshing
-                        binding.emptyStateText.isVisible = state.showLoadFailed
-                    }
+                viewModel.uiState(tab).collect { state ->
+                    adapter.submitList(state.covers)
+                    binding.refreshLayout.isRefreshing = state.isRefreshing
+                    binding.emptyStateText.isVisible = state.showLoadFailed
                 }
-                // Fires on every start and whenever the selected date changes.
-                launch { viewModel.selectedDate.collect { viewModel.loadIfNeeded(tab) } }
+            }
+        }
+        // ...but only fetch for the page the user is actually on (RESUMED). Pages that are merely
+        // passed through when jumping straight to a far tab are STARTED only; fetching for them would
+        // queue their requests ahead of the tab the user chose.
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                // Fires on every resume and whenever the selected date changes.
+                viewModel.selectedDate.collect { viewModel.loadIfNeeded(tab) }
             }
         }
     }
