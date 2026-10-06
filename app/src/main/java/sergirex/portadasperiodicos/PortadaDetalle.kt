@@ -4,8 +4,6 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -32,14 +30,16 @@ import com.facebook.ads.*
 import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.DateValidatorPointBackward
 import com.google.android.material.datepicker.MaterialDatePicker
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.play.core.review.ReviewManagerFactory
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import sergirex.portadasperiodicos.databinding.ActivityPortadaDetalleBinding
+import sergirex.portadasperiodicos.domain.model.CoverUrls
+import sergirex.portadasperiodicos.domain.model.EditionDate
 import java.io.File
-import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
 
+@AndroidEntryPoint
 class PortadaDetalle : AppCompatActivity() {
 
     // Using View Binding to replace findViewById
@@ -52,14 +52,6 @@ class PortadaDetalle : AppCompatActivity() {
     private lateinit var mSectionsPagerAdapter: ViewPagerAdapter
 
     private var interstitialAd: InterstitialAd? = null
-
-    // The fragment may fall back to an earlier edition when the requested date has no cover;
-    // it reports the date it actually displayed so Save/Share fetch that same image.
-    private val resolvedDates = mutableMapOf<String, String>()
-
-    fun onCoverDateResolved(title: String?, date: String) {
-        if (title != null) resolvedDates[title] = date
-    }
 
     // Must be registered before STARTED (i.e. as a field, not inside a click handler) per
     // the Activity Result API contract; SavePortada can't register its own since only an
@@ -95,7 +87,7 @@ class PortadaDetalle : AppCompatActivity() {
     private fun setupToolbar() {
         setSupportActionBar(binding.toolbar)
         binding.toolbar.setNavigationIcon(R.drawable.ic_arrow_back_black_24dp)
-        binding.toolbar.setNavigationOnClickListener { onBackPressed() }
+        binding.toolbar.setNavigationOnClickListener { onBackPressedDispatcher.onBackPressed() }
     }
 
     private fun setupFabs() {
@@ -133,11 +125,6 @@ class PortadaDetalle : AppCompatActivity() {
     }
 
     private fun loadSectionsAdapter() {
-        if (!isNetworkAvailable(this)) {
-            showNoConnectionDialog()
-            return
-        }
-
         val portadas = intent.getStringArrayExtra("Portadas")
         val initialPortada = intent.getStringExtra("selectedPortada")
         val fecha = intent.getStringExtra("Fecha")
@@ -234,8 +221,8 @@ class PortadaDetalle : AppCompatActivity() {
         // kiosko.net/....html article page this used to point at, which is an HTML
         // document and can never decode as a Bitmap (confirmed against the real
         // kiosko.net: that URL 301-redirects to an HTML page, Content-Type text/html).
-        val coverDate = resolvedDates[portada.title] ?: portada.fecha
-        val imageUrl = "https://img.kiosko.net/$coverDate/${portada.siglaPais}/${portada.title}.jpg"
+        val coverDate = viewModel.resolvedDates[portada.title] ?: portada.fecha
+        val imageUrl = CoverUrls.full(coverDate, portada.siglaPais, portada.title)
         val savePortada = SavePortada(this, requestStoragePermission)
 
         when (item.itemId) {
@@ -273,12 +260,11 @@ class PortadaDetalle : AppCompatActivity() {
 
         datePicker.addOnPositiveButtonClickListener { selection ->
             viewModel.lastSelectedDateMillis = selection
-            val formatter = SimpleDateFormat("yyyy/MM/dd", Locale.FRANCE)
-            val newDate = formatter.format(Date(selection))
+            val newDate = EditionDate.format(Date(selection))
 
             val currentPosition = binding.viewpager2.currentItem
             mSectionsPagerAdapter.updateDateForPortada(currentPosition, newDate)
-            mSectionsPagerAdapter.getPortadaAt(currentPosition)?.let { resolvedDates.remove(it.title) }
+            mSectionsPagerAdapter.getPortadaAt(currentPosition)?.let { viewModel.resolvedDates.remove(it.title) }
 
             // Find the current fragment and tell it to reload
             val currentFragment = supportFragmentManager.findFragmentByTag("f$currentPosition")
@@ -321,31 +307,6 @@ class PortadaDetalle : AppCompatActivity() {
             binding.favButton.setImageResource(R.drawable.ic_favorite_black_24dp)
         }
         editor.apply()
-    }
-
-    // Check for network connectivity
-    private fun isNetworkAvailable(context: Context): Boolean {
-        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-
-        // For modern Android versions
-        val network = connectivityManager.activeNetwork ?: return false
-        val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
-
-        return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
-                capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
-    }
-
-    private fun showNoConnectionDialog() {
-        MaterialAlertDialogBuilder(this)
-            .setTitle("Error de conexión")
-            .setIcon(R.mipmap.news_icon)
-            .setMessage("No hay conexión a internet. Por favor, comprueba tu conexión.")
-            .setPositiveButton("Reintentar") { dialog, _ ->
-                dialog.dismiss()
-                loadSectionsAdapter() // Retry loading
-            }
-            .setNegativeButton("Cancelar") { dialog, _ -> dialog.dismiss() }
-            .show()
     }
 
     override fun onDestroy() {

@@ -38,10 +38,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import sergirex.portadasperiodicos.databinding.AboutBinding
 import sergirex.portadasperiodicos.databinding.ActivityPortadasBinding
 import sergirex.portadasperiodicos.domain.model.PeriodicoCategory
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Date
-import java.util.Locale
 
 /**
  * Required structurally: Portadas hosts PortadasFragment (@AndroidEntryPoint), and Hilt
@@ -82,14 +78,6 @@ class Portadas : AppCompatActivity(), BillingManager.BillingListener {
         billingManager = BillingManager(this, prefs, this)
         adManager = AdManager(this)
 
-        val calendar = Calendar.getInstance().apply {
-            if (get(Calendar.HOUR_OF_DAY) < 6) add(Calendar.DATE, -1)
-        }
-        val fecha = SimpleDateFormat("yyyy/MM/dd", Locale.FRANCE).format(calendar.time)
-        val fechaPortadas = getSharedPreferences("FechasGeneral", Context.MODE_PRIVATE)
-            .getString("fechaPortadas", null)
-        val descargar = fechaPortadas == null || fechaPortadas != fecha
-
         binding = ActivityPortadasBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -105,11 +93,11 @@ class Portadas : AppCompatActivity(), BillingManager.BillingListener {
             prefs.edit().putInt("rate", 0).apply()
         }
 
-        if (descargar && !isOnline()) {
-            showNoConnectionDialog()
-        } else {
-            loadSectionsAdapter()
-        }
+        // Always build the tabs: the covers screens load on their own (and retry on the next
+        // onStart), and anything already cached still shows offline. Starting offline used to
+        // skip this and leave the screen blank even after the network came back.
+        loadSectionsAdapter()
+        if (!isOnline()) showNoConnectionDialog()
 
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {

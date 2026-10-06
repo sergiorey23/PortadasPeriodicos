@@ -12,7 +12,6 @@ class GetPortadaCoversUseCase @Inject constructor(
     operator fun invoke(
         periodicos: List<PeriodicoRef>,
         targetDate: String,
-        cacheGroup: String,
         forceRefresh: Boolean
-    ): Flow<PortadaCover> = repository.getCovers(periodicos, targetDate, cacheGroup, forceRefresh)
+    ): Flow<PortadaCover> = repository.getCovers(periodicos, targetDate, forceRefresh)
 }

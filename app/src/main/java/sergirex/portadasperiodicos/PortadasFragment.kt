@@ -59,7 +59,10 @@ class PortadasFragment : Fragment() {
                 }
             }
         }
+    }
 
+    override fun onStart() {
+        super.onStart()
         viewModel.loadIfNeeded()
     }
 

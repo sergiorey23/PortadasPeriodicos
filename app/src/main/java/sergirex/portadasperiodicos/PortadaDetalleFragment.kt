@@ -7,18 +7,18 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
-import coil3.BitmapImage
-import coil3.imageLoader
-import coil3.request.ImageRequest
-import coil3.request.SuccessResult
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import sergirex.portadasperiodicos.databinding.FragmentPortadaDetalleBinding
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
+import sergirex.portadasperiodicos.domain.model.CoverUrls
+import sergirex.portadasperiodicos.domain.model.EditionDate
 
+@AndroidEntryPoint
 class PortadaDetalleFragment : Fragment() {
+
+    private val viewModel: PortadaDetalleViewModel by activityViewModels()
 
     // Use View Binding for safe and efficient view access
     private var _binding: FragmentPortadaDetalleBinding? = null
@@ -70,79 +70,40 @@ class PortadaDetalleFragment : Fragment() {
     }
 
     private suspend fun getCover() {
-        // Ensure we have the necessary data to proceed
-        if (newspaperTitle == null || countryCode == null || initialDate == null) {
+        val title = newspaperTitle
+        val country = countryCode
+        val date = initialDate
+        if (title == null || country == null || date == null) {
             showError("Información insuficiente para cargar la portada.")
             return
         }
 
-        val formatter = SimpleDateFormat("yyyy/MM/dd", Locale.FRANCE)
-        val calendar = Calendar.getInstance()
-        try {
-            calendar.time = formatter.parse(initialDate!!)!!
-        } catch (e: Exception) {
-            showError("Fecha inválida.")
-            return
-        }
+        // The repository remembers which edition each newspaper resolved to, so reopening a
+        // cover doesn't re-probe the server day by day; Coil then serves the image itself
+        // from its disk cache when it can.
+        val coverDate = viewModel.resolveDate(title, country, date)
+        val loaded = coverDate?.let { loadImageWithCoil(CoverUrls.full(it, country, title)) } == true
 
-        var coverFound = false
-        var finalDate: String? = null
-
-        // Try to find the cover, going back up to 20 days
-        for (i in 0 until 20) {
-            val currentDate = formatter.format(calendar.time)
-            val url = "https://img.kiosko.net/$currentDate/$countryCode/$newspaperTitle.jpg"
-
-            val success = loadImageWithCoil(url)
-
-            if (success) {
-                coverFound = true
-                finalDate = currentDate
-                break // Exit the loop as soon as the cover is found
-            } else {
-                // If not found, go to the previous day
-                calendar.add(Calendar.DATE, -1)
-            }
-        }
-
-        // Update the UI on the main thread
         binding.loadingProgressBar.visibility = View.GONE
-        if (coverFound && finalDate != null) {
-            (activity as? PortadaDetalle)?.onCoverDateResolved(newspaperTitle, finalDate)
-            showDateIfNotToday(finalDate)
+        if (coverDate != null && loaded) {
+            viewModel.resolvedDates[title] = coverDate
+            showDateIfNotToday(coverDate)
             binding.imagenExtendida.visibility = View.VISIBLE
         } else {
             showError("No se pudo encontrar ninguna portada.")
         }
     }
 
-    /**
-     * Coil's ImageLoader.execute() is a suspend function in its own right — unlike
-     * Picasso, which only offers a callback API, so the old code had to wrap it in
-     * suspendCoroutine by hand. The Bitmap is applied manually (same approach as
-     * FavoritosWidget's RemoteViews, which has no ImageView to hand Coil a target
-     * for in the first place) rather than via ImageRequest.target(), which only
-     * returns before Coil actually applies the image to it in a reliable way.
-     */
+    /** Applies the bitmap manually: `ImageRequest.target()` + `execute()` was found to hang (see [loadBitmap]). */
     private suspend fun loadImageWithCoil(url: String): Boolean {
-        val request = ImageRequest.Builder(requireContext()).data(url).build()
-        val result = requireContext().imageLoader.execute(request)
-        val bitmap = ((result as? SuccessResult)?.image as? BitmapImage)?.bitmap ?: return false
+        val bitmap = requireContext().loadBitmap(url) ?: return false
         binding.imagenExtendida.setImageBitmap(bitmap)
         return true
     }
 
     private fun showDateIfNotToday(coverDate: String) {
-        val formatter = SimpleDateFormat("yyyy/MM/dd", Locale.FRANCE)
-        val todayCalendar = Calendar.getInstance()
-        if (todayCalendar.get(Calendar.HOUR_OF_DAY) < 6) {
-            todayCalendar.add(Calendar.DATE, -1)
-        }
-        val todayDate = formatter.format(todayCalendar.time)
-
-        if (coverDate != todayDate) {
-            val dateStr = coverDate.split("/")
-            binding.fechaPortada.text = "${dateStr[2]}/${dateStr[1]}/${dateStr[0]}"
+        if (coverDate != EditionDate.today()) {
+            binding.fechaPortada.text = EditionDate.toDisplay(coverDate)
             binding.fechaPortada.visibility = View.VISIBLE
         }
     }
@@ -150,8 +111,6 @@ class PortadaDetalleFragment : Fragment() {
     private fun showError(message: String) {
         binding.loadingProgressBar.visibility = View.GONE
         Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
-        // Optionally, navigate back or show an error image
-        parentFragmentManager.popBackStack()
     }
 
     override fun onResume() {

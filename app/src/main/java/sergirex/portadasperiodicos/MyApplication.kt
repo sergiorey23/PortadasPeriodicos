@@ -2,11 +2,17 @@ package sergirex.portadasperiodicos
 
 import android.app.Application
 import androidx.appcompat.app.AppCompatDelegate
+import coil3.ImageLoader
+import coil3.PlatformContext
+import coil3.SingletonImageLoader
+import coil3.network.okhttp.OkHttpNetworkFetcherFactory
+import dagger.Lazy
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import okhttp3.OkHttpClient
 import sergirex.portadasperiodicos.domain.model.ThemeMode
 import sergirex.portadasperiodicos.domain.usecase.GetThemeModeUseCase
 import javax.inject.Inject
@@ -23,10 +29,13 @@ import javax.inject.Inject
  * does the "notify observers on change" part for free.
  */
 @HiltAndroidApp
-class MyApplication : Application() {
+class MyApplication : Application(), SingletonImageLoader.Factory {
 
     @Inject
     lateinit var getThemeMode: GetThemeModeUseCase
+
+    @Inject
+    lateinit var okHttpClient: Lazy<OkHttpClient>
 
     // Lives for the whole process, same as the night-mode setting it applies —
     // there's nothing to cancel it early for, unlike a ViewModel's viewModelScope.
@@ -38,6 +47,10 @@ class MyApplication : Application() {
             getThemeMode().collect { mode -> AppCompatDelegate.setDefaultNightMode(mode.toNightMode()) }
         }
     }
+
+    override fun newImageLoader(context: PlatformContext): ImageLoader = ImageLoader.Builder(context)
+        .components { add(OkHttpNetworkFetcherFactory(callFactory = { okHttpClient.get() })) }
+        .build()
 
     private fun ThemeMode.toNightMode(): Int = when (this) {
         ThemeMode.LIGHT -> AppCompatDelegate.MODE_NIGHT_NO

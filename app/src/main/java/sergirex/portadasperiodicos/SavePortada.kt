@@ -15,10 +15,6 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import coil3.BitmapImage
-import coil3.imageLoader
-import coil3.request.ImageRequest
-import coil3.request.SuccessResult
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -63,7 +59,7 @@ class SavePortada(
     suspend fun saveToGallery(view: View, imageUrl: String, file: File) {
         Toast.makeText(context, "Iniciando descarga...", Toast.LENGTH_SHORT).show()
 
-        val bitmap = fetchBitmap(imageUrl)
+        val bitmap = context.loadBitmap(imageUrl)
         if (bitmap == null) {
             Snackbar.make(view, "No se pudo guardar la portada.", Snackbar.LENGTH_LONG).show()
             return
@@ -117,7 +113,7 @@ class SavePortada(
 
     /** Downloads [imageUrl] and hands it off to the system share sheet. Fails silently if the download fails, matching the original behavior. */
     suspend fun share(imageUrl: String, fileName: String) {
-        val bitmap = fetchBitmap(imageUrl) ?: return
+        val bitmap = context.loadBitmap(imageUrl) ?: return
         val fileUri = withContext(Dispatchers.IO) { saveBitmapToCache(fileName, bitmap) } ?: return
         val intent = Intent(Intent.ACTION_SEND).apply {
             flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
@@ -126,12 +122,6 @@ class SavePortada(
             type = "image/jpeg"
         }
         context.startActivity(Intent.createChooser(intent, "Compartir portada"))
-    }
-
-    private suspend fun fetchBitmap(url: String): Bitmap? {
-        val request = ImageRequest.Builder(context).data(url).build()
-        val result = context.imageLoader.execute(request)
-        return ((result as? SuccessResult)?.image as? BitmapImage)?.bitmap
     }
 
     private fun saveBitmapToCache(fileName: String, bitmap: Bitmap): Uri? {

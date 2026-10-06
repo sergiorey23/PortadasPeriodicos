@@ -4,20 +4,19 @@ import kotlinx.coroutines.flow.Flow
 import sergirex.portadasperiodicos.domain.model.PeriodicoRef
 import sergirex.portadasperiodicos.domain.model.PortadaCover
 
-/**
- * Resolves covers for a list of newspapers. Modeled as a [Flow] that emits one
- * [PortadaCover] per newspaper as it's resolved — not a single
- * `List<PortadaCover>` — because resolving each one can mean several network
- * round trips (walking backwards through dates), and the old UI behavior of
- * "covers pop into the grid as they're found" is worth keeping; a
- * suspend-returning-a-List would force the whole grid to wait for the
- * slowest newspaper.
- */
+/** Finds which edition (date) of a newspaper's cover is actually published. */
 interface PortadaCoverRepository {
+
+    /**
+     * Emits one [PortadaCover] per newspaper as it's resolved (a [Flow], not a List, because
+     * resolving can take several round trips and covers should pop into the grid as found).
+     */
     fun getCovers(
         periodicos: List<PeriodicoRef>,
         targetDate: String,
-        cacheGroup: String,
         forceRefresh: Boolean
     ): Flow<PortadaCover>
+
+    /** The newest published date at or before [targetDate] (yyyy/MM/dd), or null if none in the lookback window. */
+    suspend fun resolveDate(id: String, country: String, targetDate: String, forceRefresh: Boolean = false): String?
 }

@@ -6,6 +6,8 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import kotlinx.serialization.json.Json
+import okhttp3.OkHttpClient
+import sergirex.portadasperiodicos.data.network.CoverCacheControlInterceptor
 import sergirex.portadasperiodicos.data.repository.FavoritePeriodicosRepositoryImpl
 import sergirex.portadasperiodicos.data.repository.PeriodicosRepositoryImpl
 import sergirex.portadasperiodicos.data.repository.PortadaCoverRepositoryImpl
@@ -47,5 +49,11 @@ abstract class AppModule {
         @Provides
         @Singleton
         fun provideJson(): Json = Json { ignoreUnknownKeys = true }
+
+        /** Shared by Coil (image downloads) and the cover-date probes, so both reuse connections. */
+        @Provides
+        @Singleton
+        fun provideOkHttpClient(): OkHttpClient =
+            OkHttpClient.Builder().addNetworkInterceptor(CoverCacheControlInterceptor()).build()
     }
 }

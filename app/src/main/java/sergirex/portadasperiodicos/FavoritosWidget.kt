@@ -10,15 +10,12 @@ import android.graphics.Bitmap
 import android.view.View
 import android.widget.RemoteViews
 import androidx.core.content.edit
-import coil3.BitmapImage
-import coil3.imageLoader
-import coil3.request.ImageRequest
-import coil3.request.SuccessResult
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
+import sergirex.portadasperiodicos.domain.model.EditionDate
 import sergirex.portadasperiodicos.domain.model.PeriodicoRef
 import sergirex.portadasperiodicos.domain.usecase.GetFavoritePeriodicosUseCase
 import sergirex.portadasperiodicos.domain.usecase.GetPortadaCoversUseCase
@@ -41,7 +38,7 @@ import javax.inject.Inject
  * silently. getBroadcast() is correct. There were also two different
  * "is it still yesterday's edition" hour thresholds (6am in one method, 4am
  * in another) for what's meant to be the same notion of "today" — unified
- * on PortadasUtils.effectiveTodayDate(), the same one every other screen uses.
+ * on EditionDate.today(), the same one every other screen uses.
  *
  * Threading-wise, the three `new Thread { ... }` blocks (one in onUpdate, one
  * per button in onReceive) are replaced with goAsync() + a coroutine: a
@@ -112,11 +109,9 @@ class FavoritosWidget : AppWidgetProvider() {
 
     /** Reuses PortadaCoverRepository (date resolution) + Coil (fetch/decode/cache) — the same pipeline the list screens use. */
     private suspend fun loadCoverBitmap(context: Context, periodico: PeriodicoRef): Bitmap? {
-        val cover = getPortadaCovers(listOf(periodico), PortadasUtils.effectiveTodayDate(), CACHE_GROUP, forceRefresh = false)
+        val cover = getPortadaCovers(listOf(periodico), EditionDate.today(), forceRefresh = false)
             .firstOrNull() ?: return null
-        val request = ImageRequest.Builder(context).data(cover.imageUrl).build()
-        val result = context.imageLoader.execute(request)
-        return ((result as? SuccessResult)?.image as? BitmapImage)?.bitmap
+        return context.loadBitmap(cover.imageUrl)
     }
 
     private fun navigatePendingIntent(context: Context, appWidgetId: Int, action: String): PendingIntent {
@@ -149,6 +144,5 @@ class FavoritosWidget : AppWidgetProvider() {
         const val KEY_INDEX = "index"
         const val ACTION_LEFT = "android.appwidget.action.LEFT"
         const val ACTION_RIGHT = "android.appwidget.action.RIGHT"
-        const val CACHE_GROUP = "Widget"
     }
 }

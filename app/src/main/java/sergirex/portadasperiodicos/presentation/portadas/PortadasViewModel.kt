@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import sergirex.portadasperiodicos.PortadasUtils
+import sergirex.portadasperiodicos.domain.model.EditionDate
 import sergirex.portadasperiodicos.domain.model.PeriodicoCategory
 import sergirex.portadasperiodicos.domain.model.toRef
 import sergirex.portadasperiodicos.domain.usecase.GetFavoritePeriodicosUseCase
@@ -37,16 +37,21 @@ class PortadasViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val categoryName: String? = savedStateHandle[ARG_CATEGORY]
-    private val cacheGroup: String = categoryName ?: CACHE_GROUP_FAVORITES
 
     private val _uiState = MutableStateFlow(PortadasUiState())
     val uiState: StateFlow<PortadasUiState> = _uiState.asStateFlow()
 
     private var loadJob: Job? = null
+    private var loadedDate: String? = null
 
-    /** No-op if a load already ran for this ViewModel instance (e.g. after a configuration change). */
+    /**
+     * Loads on first use and again whenever the day changed since the last successful load.
+     * The Activity is never destroyed when the user leaves (back just minimizes), so without
+     * the date check a ViewModel would keep showing the covers it loaded days ago.
+     */
     fun loadIfNeeded() {
-        if (_uiState.value.allPeriodicos.isEmpty()) load(forceRefresh = false)
+        if (loadJob?.isActive == true) return
+        if (loadedDate != EditionDate.today()) load(forceRefresh = false)
     }
 
     fun refresh() = load(forceRefresh = true)
@@ -57,12 +62,23 @@ class PortadasViewModel @Inject constructor(
             val periodicos = categoryName
                 ?.let { getPeriodicosByCategory(PeriodicoCategory.valueOf(it)).getOrDefault(emptyList()).map { p -> p.toRef() } }
                 ?: getFavoritePeriodicos()
+            val today = EditionDate.today()
 
-            _uiState.update { it.copy(allPeriodicos = periodicos, covers = emptyList(), isRefreshing = true) }
+            _uiState.update {
+                it.copy(allPeriodicos = periodicos, covers = if (periodicos.isEmpty()) emptyList() else it.covers, isRefreshing = true)
+            }
 
-            getPortadaCovers(periodicos, PortadasUtils.effectiveTodayDate(), cacheGroup, forceRefresh)
+            // Keep showing the previous covers until the first new one arrives, so a failed
+            // (e.g. offline) reload doesn't blank the screen.
+            var received = false
+            getPortadaCovers(periodicos, today, forceRefresh)
                 .catch { /* leave whatever resolved so far on screen; nothing more to try */ }
-                .collect { cover -> _uiState.update { it.copy(covers = it.covers + cover) } }
+                .collect { cover ->
+                    _uiState.update { it.copy(covers = if (received) it.covers + cover else listOf(cover)) }
+                    received = true
+                }
+            // Only a load that produced covers counts, so an offline attempt is retried on the next onStart.
+            if (received) loadedDate = today
 
             _uiState.update { it.copy(isRefreshing = false) }
         }
@@ -70,6 +86,5 @@ class PortadasViewModel @Inject constructor(
 
     companion object {
         const val ARG_CATEGORY = "category"
-        private const val CACHE_GROUP_FAVORITES = "Favoritos"
     }
 }
