@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--
+    The app theme: Material 3, one definition for light and dark. Colors come from the roles in
+    values/colors.xml and values-night/colors.xml, and AppCompatDelegate.setDefaultNightMode()
+    (driven by the user's theme setting in MyApplication) picks which set applies to every Activity.
+    -->
+    <style name="Theme.Portadas" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorOnPrimary">@color/on_primary</item>
+        <item name="colorPrimaryContainer">@color/primary_container</item>
+        <item name="colorOnPrimaryContainer">@color/on_primary_container</item>
+        <item name="colorPrimaryInverse">@color/inverse_primary</item>
+        <item name="colorSecondary">@color/secondary</item>
+        <item name="colorOnSecondary">@color/on_secondary</item>
+        <item name="colorSecondaryContainer">@color/secondary_container</item>
+        <item name="colorOnSecondaryContainer">@color/on_secondary_container</item>
+        <item name="colorTertiary">@color/tertiary</item>
+        <item name="colorOnTertiary">@color/on_tertiary</item>
+        <item name="colorTertiaryContainer">@color/tertiary_container</item>
+        <item name="colorOnTertiaryContainer">@color/on_tertiary_container</item>
+        <item name="colorError">@color/error</item>
+        <item name="colorOnError">@color/on_error</item>
+        <item name="colorErrorContainer">@color/error_container</item>
+        <item name="colorOnErrorContainer">@color/on_error_container</item>
+
+        <item name="android:colorBackground">@color/background</item>
+        <item name="colorOnBackground">@color/on_background</item>
+        <item name="colorSurface">@color/surface</item>
+        <item name="colorOnSurface">@color/on_surface</item>
+        <item name="colorSurfaceVariant">@color/surface_variant</item>
+        <item name="colorOnSurfaceVariant">@color/on_surface_variant</item>
+        <item name="colorSurfaceInverse">@color/inverse_surface</item>
+        <item name="colorOnSurfaceInverse">@color/inverse_on_surface</item>
+        <item name="colorOutline">@color/outline</item>
+        <item name="colorOutlineVariant">@color/outline_variant</item>
+        <item name="colorSurfaceDim">@color/surface_dim</item>
+        <item name="colorSurfaceBright">@color/surface_bright</item>
+        <item name="colorSurfaceContainerLowest">@color/surface_container_lowest</item>
+        <item name="colorSurfaceContainerLow">@color/surface_container_low</item>
+        <item name="colorSurfaceContainer">@color/surface_container</item>
+        <item name="colorSurfaceContainerHigh">@color/surface_container_high</item>
+        <item name="colorSurfaceContainerHighest">@color/surface_container_highest</item>
+
+        <item name="colorAppBar">@color/app_bar</item>
+        <item name="colorOnAppBar">@color/on_app_bar</item>
+
+        <!-- Android 14 and older draw the status bar in this color; 15+ is edge-to-edge and ignores it. -->
+        <item name="android:statusBarColor">?attr/colorAppBar</item>
+        <item name="android:windowLightStatusBar">@bool/light_status_bar</item>
+
+        <!-- Legacy AppCompat attribute still read by androidx.preference for category titles. -->
+        <item name="colorAccent">?attr/colorPrimary</item>
+
+        <item name="android:windowAnimationStyle">@style/Animation.Portadas.Window</item>
+        <item name="appBarLayoutStyle">@style/Widget.Portadas.AppBarLayout</item>
+    </style>
+
+    <!-- Launch theme (AndroidX SplashScreen): the app icon on the app-bar color, then Theme.Portadas. -->
+    <style name="Theme.Portadas.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/app_bar</item>
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/news_icon_foreground</item>
+        <item name="postSplashScreenTheme">@style/Theme.Portadas</item>
+    </style>
+
+    <!-- Applied to toolbars so their icons and overflow dots use the app-bar content color. -->
+    <style name="ThemeOverlay.Portadas.AppBar" parent="">
+        <item name="colorControlNormal">?attr/colorOnAppBar</item>
+        <item name="android:textColorPrimary">?attr/colorOnAppBar</item>
+    </style>
+
+</resources>

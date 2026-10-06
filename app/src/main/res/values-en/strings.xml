@@ -62,6 +62,15 @@
     <string name="daily_notification_summary">Get a notification every morning at 9:00</string>
     <string name="notifications_permission_denied">The daily reminder needs the notification permission. You can grant it in the system settings.</string>
     <string name="select_date">Select date</string>
+    <string name="billing_remove_ads_message">Remove ads for %1$s, forever</string>
+    <string name="billing_cancel">Cancel</string>
+    <string name="billing_restore">Restore purchase</string>
+    <string name="billing_buy">Buy</string>
+    <string name="billing_no_products">No products are available right now. Please try again later.</string>
+    <string name="billing_restored">Purchase restored</string>
+    <string name="billing_nothing_to_restore">No purchase found</string>
+    <string name="billing_purchase_pending">Your purchase is pending. Ads will be removed as soon as it completes.</string>
+    <string name="billing_error">Couldn\'t complete the operation with Google Play</string>
     <string name="widget_no_favorites">You haven\'t favorited any covers yet. Mark some with the ❤ in the app.</string>
 
 </resources>

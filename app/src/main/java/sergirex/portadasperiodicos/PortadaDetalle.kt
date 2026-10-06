@@ -19,6 +19,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.browser.customtabs.CustomTabColorSchemeParams
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.content.IntentCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Lifecycle
@@ -27,7 +30,6 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.preference.PreferenceManager
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
-import com.facebook.ads.*
 import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.DateValidatorPointBackward
 import com.google.android.material.datepicker.MaterialDatePicker
@@ -35,7 +37,6 @@ import com.google.android.play.core.review.ReviewManagerFactory
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import sergirex.portadasperiodicos.databinding.ActivityPortadaDetalleBinding
-import sergirex.portadasperiodicos.domain.model.CoverOpenOutcome
 import sergirex.portadasperiodicos.domain.model.CoverUrls
 import sergirex.portadasperiodicos.domain.model.EditionDate
 import java.io.File
@@ -51,7 +52,7 @@ class PortadaDetalle : AppCompatActivity() {
 
     private lateinit var mSectionsPagerAdapter: ViewPagerAdapter
 
-    private var interstitialAd: InterstitialAd? = null
+    private val adManager by lazy { AdManager(this) }
 
     // Must be registered before STARTED (i.e. as a field, not inside a click handler) per
     // the Activity Result API contract; SavePortada can't register its own since only an
@@ -76,15 +77,25 @@ class PortadaDetalle : AppCompatActivity() {
         binding = ActivityPortadaDetalleBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        keepBannerAboveNavigationBar()
         setupToolbar()
         setupFabs()
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) { viewModel.favoriteIds.collect { renderFavorite() } }
         }
         loadSectionsAdapter()
+        showBannerAd()
         // Count the visit once per real open (not when the system recreates the Activity).
         if (savedInstanceState == null) {
-            lifecycleScope.launch { onCoverOpened(viewModel.onCoverOpened()) }
+            lifecycleScope.launch { if (viewModel.onCoverOpened()) showInAppReviewPrompt() }
+        }
+    }
+
+    /** The banner is the bottom-most view: pad it by the navigation/gesture bar so it isn't drawn under it. */
+    private fun keepBannerAboveNavigationBar() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.bannerContainerDetail) { view, insets ->
+            view.updatePadding(bottom = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom)
+            insets
         }
     }
 
@@ -165,43 +176,10 @@ class PortadaDetalle : AppCompatActivity() {
         binding.favButton.setImageResource(if (isFavorite) R.drawable.ic_favorite_black_24dp else R.drawable.ic_favorite_border_black_24dp)
     }
 
-    private fun onCoverOpened(outcome: CoverOpenOutcome) {
-        if (outcome.askForReview) showInAppReviewPrompt()
-
+    private fun showBannerAd() {
         val prefs = PreferenceManager.getDefaultSharedPreferences(this)
-        if (!prefs.getBoolean("remove_fb_ads", false)) {
-            loadFacebookAds(outcome.showInterstitial)
-        }
-    }
-
-    private fun loadFacebookAds(showInterstitial: Boolean) {
-        AudienceNetworkAds.initialize(this)
-        // Banner Ad
-        val bottomBanner = AdView(this, "799967435028134_814221240269420", AdSize.BANNER_HEIGHT_50)
-        binding.bannerContainerDetail.addView(bottomBanner)
-        bottomBanner.loadAd()
-
-        // Interstitial Ad
-        if (showInterstitial) {
-            val ad = InterstitialAd(this, "799967435028134_801174748240736")
-            interstitialAd = ad
-            val interstitialAdListener = object : InterstitialAdListener {
-                override fun onInterstitialDisplayed(ad: Ad) {}
-                override fun onInterstitialDismissed(ad: Ad) {}
-                override fun onError(ad: Ad, adError: AdError) {
-                    Log.e("AD_ERROR", "Interstitial ad failed to load: " + adError.errorMessage)
-                }
-                override fun onAdLoaded(ad: Ad) {
-                    interstitialAd?.show()
-                }
-                override fun onAdClicked(ad: Ad) {}
-                override fun onLoggingImpression(ad: Ad) {}
-            }
-            ad.loadAd(
-                ad.buildLoadAdConfig()
-                    .withAdListener(interstitialAdListener)
-                    .build()
-            )
+        if (!BillingManager.isAdsRemoved(prefs)) {
+            adManager.loadBanner(binding.bannerContainerDetail, DETAIL_BANNER_PLACEMENT)
         }
     }
 
@@ -298,8 +276,7 @@ class PortadaDetalle : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        interstitialAd?.destroy()
-        interstitialAd = null
+        adManager.destroy()
         super.onDestroy()
     }
 
@@ -348,6 +325,7 @@ class PortadaDetalle : AppCompatActivity() {
     companion object {
         private const val EXTRA_PORTADAS = "portadas"
         private const val EXTRA_SELECTED_ID = "selected_id"
+        private const val DETAIL_BANNER_PLACEMENT = "799967435028134_814221240269420"
 
         fun createIntent(context: Context, portadas: List<Portada>, selectedId: String): Intent =
             Intent(context, PortadaDetalle::class.java)

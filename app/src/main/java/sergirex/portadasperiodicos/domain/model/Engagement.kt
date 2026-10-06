@@ -9,9 +9,6 @@ data class Engagement(
     val lastReviewPromptAt: Long?
 )
 
-/** What to do right after a cover has been opened. */
-data class CoverOpenOutcome(val showInterstitial: Boolean, val askForReview: Boolean)
-
 /**
  * When to ask for a Play review, following the usual guidance: only after the user has
  * clearly gotten value from the app (several covers viewed, a few days since install), never
@@ -27,11 +24,4 @@ object ReviewPromptPolicy {
         engagement.coverOpens >= MIN_COVER_OPENS &&
             now - engagement.installedAt >= MIN_DAYS_SINCE_INSTALL * DAY_MILLIS &&
             engagement.lastReviewPromptAt.let { it == null || now - it >= MIN_DAYS_BETWEEN_PROMPTS * DAY_MILLIS }
-}
-
-/** Interstitials are spaced out: one every [EVERY_NTH_OPEN] cover opens, not on every one. */
-object InterstitialPolicy {
-    const val EVERY_NTH_OPEN = 3
-
-    fun shouldShow(coverOpens: Int): Boolean = coverOpens > 0 && coverOpens % EVERY_NTH_OPEN == 0
 }

@@ -28,7 +28,7 @@
             android:gravity="center"
             android:text="@string/app_full_name"
             android:textAllCaps="false"
-            android:textAppearance="@style/ActionBar.nameText" />
+            android:textAppearance="@style/TextAppearance.Portadas.AppTitle" />
     </LinearLayout>
 
     <TextView
@@ -50,20 +50,19 @@
         android:lineSpacingExtra="4sp"
         android:text="@string/about_desc"
         android:textAllCaps="false"
-        android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+        android:textAppearance="@style/TextAppearance.Material3.BodyLarge" />
 
     <Space
         android:layout_width="match_parent"
         android:layout_height="10dp" />
 
-    <androidx.appcompat.widget.AppCompatButton
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/contact"
+        style="@style/Widget.Material3.Button.TonalButton.Icon"
         android:layout_width="200dp"
         android:layout_height="wrap_content"
-        android:drawableStart="@drawable/ic_contact_mail_black_24dp"
-        android:drawableLeft="@drawable/ic_contact_mail_black_24dp"
         android:text="@string/contact"
-        android:textAppearance="@style/TextAppearance.AppCompat.SearchResult.Subtitle" />
+        app:icon="@drawable/ic_contact_mail_black_24dp" />
 
     <Space
         android:layout_width="match_parent"
@@ -76,25 +75,20 @@
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
         android:layout_marginBottom="16dp"
-        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+        android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
         android:text="@string/mas_apps" />
 
-    <androidx.appcompat.widget.AppCompatButton
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/portadas_revistas"
+        style="@style/Widget.Material3.Button.OutlinedButton.Icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:drawableStart="@mipmap/magazines_icon"
-        android:drawableLeft="@mipmap/magazines_icon"
-        android:paddingRight="12dp"
-        android:paddingStart="8dp"
-        android:backgroundTint="@color/cardview_light_background"
-        android:text="@string/portadas_revistas"
-        android:textAppearance="@style/TextAppearance.AppCompat.SearchResult.Subtitle"
         android:fontFamily="cursive"
+        android:text="@string/portadas_revistas"
         android:textStyle="bold"
-        android:textColor="@android:color/black"
-        android:paddingEnd="12dp"
-        android:paddingLeft="8dp" />
+        app:icon="@mipmap/magazines_icon"
+        app:iconSize="32dp"
+        app:iconTint="@null" />
 
     <Space
         android:layout_width="match_parent"
@@ -127,7 +121,7 @@
             android:lineSpacingExtra="4sp"
             android:text="@string/appSource"
             android:textAllCaps="false"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+            android:textAppearance="@style/TextAppearance.Material3.BodyLarge" />
 
         <TextView
             android:layout_width="match_parent"
@@ -140,7 +134,7 @@
             android:lineSpacingExtra="4sp"
             android:text="@string/copyright"
             android:textAllCaps="false"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+            android:textAppearance="@style/TextAppearance.Material3.BodyLarge" />
 
         <TextView
             android:id="@+id/privacy_policy"
@@ -155,7 +149,7 @@
             android:linksClickable="true"
             android:text="@string/privacy_policy"
             android:textAllCaps="false"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
+            android:textAppearance="@style/TextAppearance.Material3.BodyMedium" />
 
 
     </LinearLayout>

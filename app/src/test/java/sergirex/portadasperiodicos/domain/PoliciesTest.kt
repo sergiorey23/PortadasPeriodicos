@@ -4,7 +4,6 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import sergirex.portadasperiodicos.domain.model.Engagement
-import sergirex.portadasperiodicos.domain.model.InterstitialPolicy
 import sergirex.portadasperiodicos.domain.model.ReviewPromptPolicy
 
 class PoliciesTest {
@@ -38,15 +37,5 @@ class PoliciesTest {
     fun `not again soon after a previous request, but again after the cooldown`() {
         assertFalse(ReviewPromptPolicy.shouldPrompt(engaged(promptedDaysAgo = 89), now))
         assertTrue(ReviewPromptPolicy.shouldPrompt(engaged(promptedDaysAgo = 90), now))
-    }
-
-    @Test
-    fun `interstitial every third open only`() {
-        assertFalse(InterstitialPolicy.shouldShow(0))
-        assertFalse(InterstitialPolicy.shouldShow(1))
-        assertFalse(InterstitialPolicy.shouldShow(2))
-        assertTrue(InterstitialPolicy.shouldShow(3))
-        assertFalse(InterstitialPolicy.shouldShow(4))
-        assertTrue(InterstitialPolicy.shouldShow(6))
     }
 }

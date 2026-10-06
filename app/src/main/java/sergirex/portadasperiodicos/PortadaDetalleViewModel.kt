@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import sergirex.portadasperiodicos.domain.model.CoverOpenOutcome
 import sergirex.portadasperiodicos.domain.model.PeriodicoRef
 import sergirex.portadasperiodicos.domain.usecase.MarkReviewPromptedUseCase
 import sergirex.portadasperiodicos.domain.usecase.ObserveFavoritesUseCase
@@ -44,7 +43,8 @@ class PortadaDetalleViewModel @Inject constructor(
         viewModelScope.launch { toggleFavoriteUseCase(periodico) }
     }
 
-    suspend fun onCoverOpened(): CoverOpenOutcome = recordCoverOpened()
+    /** Counts the visit; true when it's a good moment to ask for a review. */
+    suspend fun onCoverOpened(): Boolean = recordCoverOpened()
 
     fun onReviewPromptShown() {
         viewModelScope.launch { markReviewPrompted() }

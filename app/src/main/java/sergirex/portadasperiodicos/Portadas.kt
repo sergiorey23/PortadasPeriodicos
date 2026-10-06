@@ -18,6 +18,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AlertDialog
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
@@ -66,21 +68,19 @@ class Portadas : AppCompatActivity(), BillingManager.BillingListener {
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Shows the launch splash and switches to Theme.Portadas (postSplashScreenTheme) once drawn.
+        installSplashScreen()
         super.onCreate(savedInstanceState)
-        // The manifest sets SplashTheme (a plain AppCompat theme) for a clean cold-start
-        // background; switch to the real MaterialComponents theme before inflating any
-        // Material widgets (e.g. TabLayout), which require a MaterialComponents theme.
-        setTheme(R.style.AppTheme)
 
         prefs = PreferenceManager.getDefaultSharedPreferences(this)
-        billingManager = BillingManager(this, prefs, this)
+        billingManager = BillingManager(this, lifecycleScope, prefs, { binding.drawerLayout }, this)
         adManager = AdManager(this)
 
         binding = ActivityPortadasBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
 
-        if (prefs.getBoolean("remove_fb_ads", false)) {
+        if (BillingManager.isAdsRemoved(prefs)) {
             hideRemoveAdsMenuItem(binding.navView)
         }
 
@@ -127,8 +127,8 @@ class Portadas : AppCompatActivity(), BillingManager.BillingListener {
 
         askNotificationPermissionOnce()
 
-        if (!prefs.getBoolean("remove_fb_ads", false)) {
-            adManager?.loadBannerAd(binding.bannerContainer)
+        if (!BillingManager.isAdsRemoved(prefs)) {
+            adManager?.loadBanner(binding.bannerContainer, MAIN_BANNER_PLACEMENT)
         }
     }
 
@@ -211,7 +211,7 @@ class Portadas : AppCompatActivity(), BillingManager.BillingListener {
             }
         }
 
-        AlertDialog.Builder(this)
+        MaterialAlertDialogBuilder(this)
             .setPositiveButton(R.string.close, null)
             .setView(aboutBinding.root)
             .show()
@@ -222,7 +222,7 @@ class Portadas : AppCompatActivity(), BillingManager.BillingListener {
 
         val message = "<Big>${getString(R.string.help_description)}<br/><br/>" +
             "${getString(R.string.help_description2)}</Big><br/><br/>${getString(R.string.rate_app)}"
-        val dialog = AlertDialog.Builder(this)
+        val dialog = MaterialAlertDialogBuilder(this)
             .setTitle(R.string.help)
             .setIcon(R.mipmap.news_icon)
             .setPositiveButton("OK", null)
@@ -245,7 +245,7 @@ class Portadas : AppCompatActivity(), BillingManager.BillingListener {
         }
     }
 
-    override fun onPurchaseAcknowledged() {
+    override fun onAdsRemoved() {
         adManager?.destroy()
         binding.bannerContainer.visibility = View.GONE
         hideRemoveAdsMenuItem(binding.navView)
@@ -318,5 +318,9 @@ class Portadas : AppCompatActivity(), BillingManager.BillingListener {
         billingManager?.destroy()
         adManager?.destroy()
         super.onDestroy()
+    }
+
+    private companion object {
+        const val MAIN_BANNER_PLACEMENT = "799967435028134_799969321694612"
     }
 }

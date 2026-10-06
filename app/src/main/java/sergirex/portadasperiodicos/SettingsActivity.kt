@@ -24,20 +24,29 @@ import sergirex.portadasperiodicos.presentation.settings.SettingsViewModel
 import sergirex.portadasperiodicos.presentation.theme.ThemeViewModel
 
 /**
- * No longer needs to pick a theme by hand: AppTheme is DayNight-aware (see
- * values/styles.xml and values-night/styles.xml), so AppCompatDelegate's
- * night mode — set once in MyApplication from the same ThemeRepository this
- * screen writes to — is all that's needed for this (and every other)
- * Activity to render in the right mode.
+ * Theme.Portadas is DayNight-aware (see values/themes.xml and the color roles in
+ * values/colors.xml + values-night/colors.xml), so AppCompatDelegate's night mode — set once in
+ * MyApplication from the same ThemeRepository this screen writes to — is all that's needed for
+ * this (and every other) Activity to render in the right mode.
  */
 @AndroidEntryPoint
 class SettingsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        supportFragmentManager.beginTransaction()
-            .replace(android.R.id.content, PreferencesFragment())
-            .commit()
+        setContentView(R.layout.activity_settings)
+        setSupportActionBar(findViewById(R.id.toolbar))
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        if (savedInstanceState == null) {
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.settingsContainer, PreferencesFragment())
+                .commit()
+        }
+    }
+
+    override fun onSupportNavigateUp(): Boolean {
+        onBackPressedDispatcher.onBackPressed()
+        return true
     }
 
     @AndroidEntryPoint

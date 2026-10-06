@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Background of the app bar, tab strip and drawer header (teal in light mode, a dark surface in dark mode). -->
+    <attr name="colorAppBar" format="color" />
+    <!-- Content (title, icons, tab labels) drawn on [colorAppBar]. -->
+    <attr name="colorOnAppBar" format="color" />
+</resources>

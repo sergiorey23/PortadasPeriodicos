@@ -26,7 +26,7 @@
             android:gravity="center"
             android:padding="32dp"
             android:text="@string/covers_load_failed"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:textAppearance="@style/TextAppearance.Material3.BodyLarge"
             android:visibility="gone" />
     </FrameLayout>
 

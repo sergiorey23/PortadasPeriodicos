@@ -9,6 +9,7 @@
         android:id="@+id/drawerLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_above="@id/bannerContainer"
         android:fitsSystemWindows="true">
 
         <androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -28,13 +29,12 @@
                     app:layout_scrollFlags="scroll|enterAlways"
                     app:titleEnabled="false">
 
-                    <androidx.appcompat.widget.Toolbar
+                    <com.google.android.material.appbar.MaterialToolbar
                         android:id="@+id/toolbar"
+                        style="@style/Widget.Portadas.Toolbar"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:background="?attr/colorPrimary"
-                        app:layout_collapseMode="pin"
-                        app:titleTextAppearance="@style/ActionBar.nameText" />
+                        app:layout_collapseMode="pin" />
 
                 </com.google.android.material.appbar.CollapsingToolbarLayout>
 
@@ -42,10 +42,9 @@
                     android:id="@+id/tabs"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="?attr/colorPrimary"
                     android:contentDescription="@string/app_full_name"
                     app:tabMode="scrollable"
-                    style="@style/TabLayout" />
+                    style="@style/Widget.Portadas.TabLayout" />
             </com.google.android.material.appbar.AppBarLayout>
 
 
@@ -87,7 +86,7 @@
                 android:layout_gravity="bottom"
                 android:text="@string/appSource"
                 android:textAllCaps="false"
-                android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+                android:textAppearance="@style/TextAppearance.Material3.BodyLarge" />
 
         </com.google.android.material.navigation.NavigationView>
 

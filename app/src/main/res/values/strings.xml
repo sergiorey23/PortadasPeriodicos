@@ -61,6 +61,15 @@
     <string name="daily_notification_summary">Recibe una notificación cada mañana a las 9:00</string>
     <string name="notifications_permission_denied">Sin permiso de notificaciones no se puede activar el aviso diario. Puedes concederlo en los ajustes del sistema.</string>
     <string name="select_date">Seleccionar fecha</string>
+    <string name="billing_remove_ads_message">Deshazte de la publicidad por %1$s de por vida</string>
+    <string name="billing_cancel">Cancelar</string>
+    <string name="billing_restore">Restaurar compra</string>
+    <string name="billing_buy">Comprar</string>
+    <string name="billing_no_products">No hay productos disponibles ahora mismo. Inténtalo más tarde.</string>
+    <string name="billing_restored">Compra restaurada</string>
+    <string name="billing_nothing_to_restore">No se ha encontrado ninguna compra</string>
+    <string name="billing_purchase_pending">Tu compra está pendiente. Quitaremos la publicidad en cuanto se complete.</string>
+    <string name="billing_error">No se ha podido completar la operación con Google Play</string>
     <string name="widget_no_favorites">Aún no tienes portadas favoritas. Márcalas con el ❤ desde la app.</string>
 
 </resources>
