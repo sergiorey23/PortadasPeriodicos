@@ -59,7 +59,6 @@ class Portadas : AppCompatActivity(), BillingManager.BillingListener {
 
     private var mSectionsPagerAdapter: SectionsPagerAdapter? = null
     private var alertDialog: AlertDialog? = null
-    private var alertDialogNoConn: AlertDialog? = null
     private var favsCount = 0
 
     // Remembers the user's last date-picker selection across re-openings of the dialog.
@@ -107,8 +106,7 @@ class Portadas : AppCompatActivity(), BillingManager.BillingListener {
         }
 
         if (descargar && !isOnline()) {
-            val dialog = alertDialogNoConn ?: createNoConnectionDialog().also { alertDialogNoConn = it }
-            dialog.show()
+            showNoConnectionDialog()
         } else {
             loadSectionsAdapter()
         }
@@ -152,14 +150,14 @@ class Portadas : AppCompatActivity(), BillingManager.BillingListener {
         binding.drawerLayout.addDrawerListener(drawerToggle)
         drawerToggle.syncState()
 
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
-            == PackageManager.PERMISSION_DENIED
+        // POST_NOTIFICATIONS is a runtime permission from API 33 (Tiramisu) on; older versions need none.
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
+            ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+            == PackageManager.PERMISSION_GRANTED
         ) {
-            if (Build.VERSION.SDK_INT > 33) {
-                requestPostNotificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
-            }
-        } else if (Build.VERSION.SDK_INT <= 33) {
             startAlarmBroadcastReceiver(this)
+        } else {
+            requestPostNotificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
         }
 
         if (!prefs.getBoolean("remove_fb_ads", false)) {
@@ -382,16 +380,16 @@ class Portadas : AppCompatActivity(), BillingManager.BillingListener {
             capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
     }
 
-    private fun createNoConnectionDialog(): AlertDialog {
-        lateinit var dialog: AlertDialog
-        dialog = AlertDialog.Builder(this)
+    // Built fresh each time: re-showing a dialog from inside its own button handler is a no-op,
+    // because AlertDialog dismisses itself right after the handler returns.
+    private fun showNoConnectionDialog() {
+        AlertDialog.Builder(this)
             .setTitle(" Error de conexión")
             .setIcon(R.mipmap.news_icon)
             .setMessage("No hay conexión a internet. Por favor, comprueba tu conexión")
-            .setPositiveButton("Reintentar") { _, _ -> if (isOnline()) loadSectionsAdapter() else dialog.show() }
-            .setNegativeButton("Cancelar") { _, _ -> dialog.dismiss() }
-            .create()
-        return dialog
+            .setPositiveButton("Reintentar") { _, _ -> if (isOnline()) loadSectionsAdapter() else showNoConnectionDialog() }
+            .setNegativeButton("Cancelar", null)
+            .show()
     }
 
     override fun onResume() {

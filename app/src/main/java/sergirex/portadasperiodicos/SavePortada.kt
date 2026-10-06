@@ -69,31 +69,50 @@ class SavePortada(
             return
         }
 
-        val imageUri = withContext(Dispatchers.IO) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                saveBitmapToMediaStore(bitmap, file.name)
-            } else {
-                FileOutputStream(file).use { bitmap.compress(Bitmap.CompressFormat.JPEG, 100, it) }
-                PortadasUtils.scanFile(context, file)
-                FileProvider.getUriForFile(context, "sergirex.portadasperiodicos.fileprovider", file)
-            }
+        val imageUri = withContext(Dispatchers.IO) { writeToGallery(bitmap, file) }
+        if (imageUri == null) {
+            Snackbar.make(view, "No se pudo guardar la portada.", Snackbar.LENGTH_LONG).show()
+            return
         }
 
         val snackbar = Snackbar.make(view, "Portada guardada en la galería", Snackbar.LENGTH_LONG)
-        imageUri?.let { uri ->
-            snackbar.setAction("ABRIR") {
-                val intent = Intent(Intent.ACTION_VIEW).apply {
-                    setDataAndType(uri, "image/jpeg")
-                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                }
-                try {
-                    context.startActivity(intent)
-                } catch (e: Exception) {
-                    Toast.makeText(context, "No se encontró una app para abrir la imagen.", Toast.LENGTH_SHORT).show()
-                }
+        snackbar.setAction("ABRIR") {
+            val intent = Intent(Intent.ACTION_VIEW).apply {
+                setDataAndType(imageUri, "image/jpeg")
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+            try {
+                context.startActivity(intent)
+            } catch (e: Exception) {
+                Toast.makeText(context, "No se encontró una app para abrir la imagen.", Toast.LENGTH_SHORT).show()
             }
         }
         snackbar.show()
+    }
+
+    /** Returns the saved image's Uri, or null if anything went wrong (partial output is cleaned up). */
+    private fun writeToGallery(bitmap: Bitmap, file: File): Uri? {
+        return try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                saveBitmapToMediaStore(bitmap, file.name)
+            } else {
+                try {
+                    val ok = FileOutputStream(file).use { bitmap.compress(Bitmap.CompressFormat.JPEG, 100, it) }
+                    if (!ok) throw IOException("compress failed")
+                } catch (e: IOException) {
+                    file.delete()
+                    throw e
+                }
+                PortadasUtils.scanFile(context, file)
+                FileProvider.getUriForFile(context, "sergirex.portadasperiodicos.fileprovider", file)
+            }
+        } catch (e: IOException) {
+            null
+        } catch (e: SecurityException) {
+            null
+        } catch (e: IllegalStateException) {
+            null
+        }
     }
 
     /** Downloads [imageUrl] and hands it off to the system share sheet. Fails silently if the download fails, matching the original behavior. */
@@ -133,7 +152,13 @@ class SavePortada(
             put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + File.separator + "Portadas")
         }
         val imageUri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values) ?: return null
-        val wrote = resolver.openOutputStream(imageUri)?.use { bitmap.compress(Bitmap.CompressFormat.JPEG, 100, it) }
-        return if (wrote == true) imageUri else null
+        val wrote = try {
+            resolver.openOutputStream(imageUri)?.use { bitmap.compress(Bitmap.CompressFormat.JPEG, 100, it) }
+        } catch (e: IOException) {
+            null
+        }
+        if (wrote == true) return imageUri
+        resolver.delete(imageUri, null, null)
+        return null
     }
 }

@@ -53,6 +53,14 @@ class PortadaDetalle : AppCompatActivity() {
 
     private var interstitialAd: InterstitialAd? = null
 
+    // The fragment may fall back to an earlier edition when the requested date has no cover;
+    // it reports the date it actually displayed so Save/Share fetch that same image.
+    private val resolvedDates = mutableMapOf<String, String>()
+
+    fun onCoverDateResolved(title: String?, date: String) {
+        if (title != null) resolvedDates[title] = date
+    }
+
     // Must be registered before STARTED (i.e. as a field, not inside a click handler) per
     // the Activity Result API contract; SavePortada can't register its own since only an
     // Activity/Fragment can.
@@ -226,7 +234,8 @@ class PortadaDetalle : AppCompatActivity() {
         // kiosko.net/....html article page this used to point at, which is an HTML
         // document and can never decode as a Bitmap (confirmed against the real
         // kiosko.net: that URL 301-redirects to an HTML page, Content-Type text/html).
-        val imageUrl = "https://img.kiosko.net/${portada.fecha}/${portada.siglaPais}/${portada.title}.jpg"
+        val coverDate = resolvedDates[portada.title] ?: portada.fecha
+        val imageUrl = "https://img.kiosko.net/$coverDate/${portada.siglaPais}/${portada.title}.jpg"
         val savePortada = SavePortada(this, requestStoragePermission)
 
         when (item.itemId) {
@@ -237,7 +246,7 @@ class PortadaDetalle : AppCompatActivity() {
             }
             R.id.save -> {
                 if (savePortada.isExternalStorageWritable && savePortada.checkPermissions()) {
-                    val file = File(savePortada.albumStorageDir, "${portada.title}_${portada.fecha.replace("/", "")}.jpg")
+                    val file = File(savePortada.albumStorageDir, "${portada.title}_${coverDate.replace("/", "")}.jpg")
                     if (file.exists()) {
                         Toast.makeText(this, "Ya se ha guardado la portada.", Toast.LENGTH_LONG).show()
                     } else {
@@ -269,6 +278,7 @@ class PortadaDetalle : AppCompatActivity() {
 
             val currentPosition = binding.viewpager2.currentItem
             mSectionsPagerAdapter.updateDateForPortada(currentPosition, newDate)
+            mSectionsPagerAdapter.getPortadaAt(currentPosition)?.let { resolvedDates.remove(it.title) }
 
             // Find the current fragment and tell it to reload
             val currentFragment = supportFragmentManager.findFragmentByTag("f$currentPosition")

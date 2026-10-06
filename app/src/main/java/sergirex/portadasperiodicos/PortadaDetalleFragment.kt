@@ -108,6 +108,7 @@ class PortadaDetalleFragment : Fragment() {
         // Update the UI on the main thread
         binding.loadingProgressBar.visibility = View.GONE
         if (coverFound && finalDate != null) {
+            (activity as? PortadaDetalle)?.onCoverDateResolved(newspaperTitle, finalDate)
             showDateIfNotToday(finalDate)
             binding.imagenExtendida.visibility = View.VISIBLE
         } else {
