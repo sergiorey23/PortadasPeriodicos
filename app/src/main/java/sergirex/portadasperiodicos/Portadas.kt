@@ -6,8 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -93,11 +91,7 @@ class Portadas : AppCompatActivity(), BillingManager.BillingListener {
             prefs.edit().putInt("rate", 0).apply()
         }
 
-        // Always build the tabs: the covers screens load on their own (and retry on the next
-        // onStart), and anything already cached still shows offline. Starting offline used to
-        // skip this and leave the screen blank even after the network came back.
         loadSectionsAdapter()
-        if (!isOnline()) showNoConnectionDialog()
 
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
@@ -358,26 +352,6 @@ class Portadas : AppCompatActivity(), BillingManager.BillingListener {
             }
         }
         return true
-    }
-
-    private fun isOnline(): Boolean {
-        val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val network = connectivityManager.activeNetwork ?: return false
-        val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
-        return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
-            capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
-    }
-
-    // Built fresh each time: re-showing a dialog from inside its own button handler is a no-op,
-    // because AlertDialog dismisses itself right after the handler returns.
-    private fun showNoConnectionDialog() {
-        AlertDialog.Builder(this)
-            .setTitle(" Error de conexión")
-            .setIcon(R.mipmap.news_icon)
-            .setMessage("No hay conexión a internet. Por favor, comprueba tu conexión")
-            .setPositiveButton("Reintentar") { _, _ -> if (isOnline()) loadSectionsAdapter() else showNoConnectionDialog() }
-            .setNegativeButton("Cancelar", null)
-            .show()
     }
 
     override fun onResume() {

@@ -20,4 +20,7 @@ data class PortadasUiState(
     val allPeriodicos: List<PeriodicoRef> = emptyList(),
     val covers: List<PortadaCover> = emptyList(),
     val isRefreshing: Boolean = false
-)
+) {
+    /** A load finished, there were newspapers to show, and none of their covers could be fetched. */
+    val showLoadFailed: Boolean get() = !isRefreshing && allPeriodicos.isNotEmpty() && covers.isEmpty()
+}

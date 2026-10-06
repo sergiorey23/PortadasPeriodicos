@@ -53,6 +53,7 @@
     <string name="privacy_policy">Política de privacidad</string>
 
     <!-- Favorites widget -->
+    <string name="covers_load_failed">No se han podido cargar las portadas. Desliza hacia abajo para reintentar.</string>
     <string name="widget_no_favorites">Aún no tienes portadas favoritas. Márcalas con el ❤ desde la app.</string>
 
 </resources>

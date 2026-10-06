@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -50,12 +51,16 @@ class PortadasFragment : Fragment() {
         binding.recyclerView.layoutManager = GridLayoutManager(context, spanCount)
         binding.recyclerView.adapter = adapter
         binding.refreshLayout.setOnRefreshListener { viewModel.refresh() }
+        // The grid is wrapped (with the empty-state text) in a FrameLayout, so tell the
+        // pull-to-refresh gesture to look at the RecyclerView's scroll position instead.
+        binding.refreshLayout.setOnChildScrollUpCallback { _, _ -> binding.recyclerView.canScrollVertically(-1) }
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect { state ->
                     adapter.submitList(state.covers)
                     binding.refreshLayout.isRefreshing = state.isRefreshing
+                    binding.emptyStateText.isVisible = state.showLoadFailed
                 }
             }
         }

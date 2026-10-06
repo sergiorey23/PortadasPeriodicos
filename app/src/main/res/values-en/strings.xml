@@ -54,6 +54,7 @@
     <string name="privacy_policy">Privacy policy</string>
 
     <!-- Favorites widget -->
+    <string name="covers_load_failed">Couldn\'t load the covers. Pull down to retry.</string>
     <string name="widget_no_favorites">You haven\'t favorited any covers yet. Mark some with the ❤ in the app.</string>
 
 </resources>
