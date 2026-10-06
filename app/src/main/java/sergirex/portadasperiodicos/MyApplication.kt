@@ -1,6 +1,7 @@
 package sergirex.portadasperiodicos
 
 import android.app.Application
+import android.util.Log
 import androidx.appcompat.app.AppCompatDelegate
 import coil3.ImageLoader
 import coil3.PlatformContext
@@ -51,7 +52,13 @@ class MyApplication : Application(), SingletonImageLoader.Factory {
             getThemeMode().collect { mode -> AppCompatDelegate.setDefaultNightMode(mode.toNightMode()) }
         }
         // Alarms don't survive a force-stop or update, so make sure the reminder matches the setting at every start.
-        applicationScope.launch { notificationScheduler.sync() }
+        applicationScope.launch {
+            try {
+                notificationScheduler.sync()
+            } catch (error: Exception) {
+                Log.e("MyApplication", "Couldn't sync the daily reminder", error)
+            }
+        }
     }
 
     override fun newImageLoader(context: PlatformContext): ImageLoader = ImageLoader.Builder(context)

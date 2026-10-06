@@ -10,17 +10,24 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
+import okhttp3.Call
+import okhttp3.Callback
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.Response
 import sergirex.portadasperiodicos.domain.model.CoverUrls
 import sergirex.portadasperiodicos.domain.model.EditionDate
 import sergirex.portadasperiodicos.domain.model.PeriodicoRef
 import sergirex.portadasperiodicos.domain.model.PortadaCover
 import sergirex.portadasperiodicos.domain.repository.PortadaCoverRepository
+import java.io.IOException
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 /**
  * Resolves "which edition is current" per newspaper: probes backwards from the target date
@@ -79,9 +86,25 @@ class PortadaCoverRepositoryImpl @Inject constructor(
     private fun Resolution.isUsableFor(requested: String): Boolean = target == requested &&
         (EditionDate.isPast(target) || date == target || System.currentTimeMillis() - checkedAt < FALLBACK_RECHECK_MS)
 
-    private fun coverExists(url: String): Boolean = runCatching {
-        client.newCall(Request.Builder().url(url).head().build()).execute().use { it.isSuccessful }
-    }.getOrDefault(false)
+    private suspend fun coverExists(url: String): Boolean = try {
+        client.newCall(Request.Builder().url(url).head().build()).await().use { it.isSuccessful }
+    } catch (error: IOException) {
+        false
+    }
+
+    /** Suspends until the response arrives; cancelling the coroutine cancels the HTTP call too. */
+    private suspend fun Call.await(): Response = suspendCancellableCoroutine { continuation ->
+        continuation.invokeOnCancellation { cancel() }
+        enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                if (continuation.isActive) continuation.resumeWithException(e)
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                continuation.resume(response) { _, _, _ -> response.close() }
+            }
+        })
+    }
 
     private companion object {
         const val MAX_DAYS_BACK = 20

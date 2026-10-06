@@ -103,8 +103,9 @@ class BillingManager(
         }
     }
 
+    /** Releases the connection even while it is still being established, so it can't keep the Activity alive. */
     fun destroy() {
-        if (billingClient.isReady) billingClient.endConnection()
+        billingClient.endConnection()
     }
 
     private fun launchPurchaseFlow(details: ProductDetails) {

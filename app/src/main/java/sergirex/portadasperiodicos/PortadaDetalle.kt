@@ -52,7 +52,8 @@ class PortadaDetalle : AppCompatActivity() {
 
     private lateinit var mSectionsPagerAdapter: ViewPagerAdapter
 
-    private val adManager by lazy { AdManager(this) }
+    private val adManagerDelegate = lazy { AdManager(this) }
+    private val adManager by adManagerDelegate
 
     // Must be registered before STARTED (i.e. as a field, not inside a click handler) per
     // the Activity Result API contract; SavePortada can't register its own since only an
@@ -141,6 +142,11 @@ class PortadaDetalle : AppCompatActivity() {
 
     private fun loadSectionsAdapter() {
         val portadaList = IntentCompat.getParcelableArrayListExtra(intent, EXTRA_PORTADAS, Portada::class.java).orEmpty()
+        if (portadaList.isEmpty()) {
+            // Launched without the covers it should show (not possible from the app itself): nothing to display.
+            finish()
+            return
+        }
         val initialPortada = intent.getStringExtra(EXTRA_SELECTED_ID)
 
         mSectionsPagerAdapter = ViewPagerAdapter(supportFragmentManager, lifecycle)
@@ -264,9 +270,8 @@ class PortadaDetalle : AppCompatActivity() {
                 .build()
             intent.launchUrl(this, Uri.parse(url))
         } catch (e: ActivityNotFoundException) {
-            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
-        } catch (e: Exception) {
-            e.printStackTrace()
+            // No Custom Tabs provider: fall back to any browser.
+            startActivityOrToast(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
         }
     }
 
@@ -276,7 +281,8 @@ class PortadaDetalle : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        adManager.destroy()
+        // Don't build (and initialize the SDK for) an AdManager just to destroy it.
+        if (adManagerDelegate.isInitialized()) adManager.destroy()
         super.onDestroy()
     }
 

@@ -77,11 +77,7 @@ class SavePortada(
                 setDataAndType(imageUri, "image/jpeg")
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             }
-            try {
-                context.startActivity(intent)
-            } catch (e: Exception) {
-                Toast.makeText(context, "No se encontró una app para abrir la imagen.", Toast.LENGTH_SHORT).show()
-            }
+            context.startActivityOrToast(intent)
         }
         snackbar.show()
     }
@@ -111,17 +107,21 @@ class SavePortada(
         }
     }
 
-    /** Downloads [imageUrl] and hands it off to the system share sheet. Fails silently if the download fails, matching the original behavior. */
+    /** Downloads [imageUrl] and hands it off to the system share sheet. Tells the user if the download or the temporary file fails. */
     suspend fun share(imageUrl: String, fileName: String) {
-        val bitmap = context.loadBitmap(imageUrl) ?: return
-        val fileUri = withContext(Dispatchers.IO) { saveBitmapToCache(fileName, bitmap) } ?: return
+        val bitmap = context.loadBitmap(imageUrl)
+        val fileUri = bitmap?.let { withContext(Dispatchers.IO) { saveBitmapToCache(fileName, it) } }
+        if (fileUri == null) {
+            Toast.makeText(context, R.string.share_failed, Toast.LENGTH_LONG).show()
+            return
+        }
         val intent = Intent(Intent.ACTION_SEND).apply {
             flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
             putExtra(Intent.EXTRA_STREAM, fileUri)
             putExtra(Intent.EXTRA_TEXT, "https://play.google.com/store/apps/details?id=${context.packageName}")
             type = "image/jpeg"
         }
-        context.startActivity(Intent.createChooser(intent, "Compartir portada"))
+        context.startActivityOrToast(Intent.createChooser(intent, "Compartir portada"))
     }
 
     private fun saveBitmapToCache(fileName: String, bitmap: Bitmap): Uri? {

@@ -70,6 +70,8 @@
     <string name="billing_nothing_to_restore">No se ha encontrado ninguna compra</string>
     <string name="billing_purchase_pending">Tu compra está pendiente. Quitaremos la publicidad en cuanto se complete.</string>
     <string name="billing_error">No se ha podido completar la operación con Google Play</string>
+    <string name="no_app_found">No hay ninguna aplicación para abrir este enlace</string>
+    <string name="share_failed">No se pudo compartir la portada</string>
     <string name="widget_no_favorites">Aún no tienes portadas favoritas. Márcalas con el ❤ desde la app.</string>
 
 </resources>

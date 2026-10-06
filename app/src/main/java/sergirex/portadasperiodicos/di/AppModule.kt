@@ -20,6 +20,7 @@ import sergirex.portadasperiodicos.domain.repository.PeriodicosRepository
 import sergirex.portadasperiodicos.domain.repository.PortadaCoverRepository
 import sergirex.portadasperiodicos.domain.repository.SettingsRepository
 import sergirex.portadasperiodicos.domain.repository.ThemeRepository
+import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
 /**
@@ -66,6 +67,11 @@ abstract class AppModule {
         @Provides
         @Singleton
         fun provideOkHttpClient(): OkHttpClient =
-            OkHttpClient.Builder().addNetworkInterceptor(CoverCacheControlInterceptor()).build()
+            OkHttpClient.Builder()
+                .connectTimeout(10, TimeUnit.SECONDS)
+                .readTimeout(15, TimeUnit.SECONDS)
+                .callTimeout(30, TimeUnit.SECONDS)
+                .addNetworkInterceptor(CoverCacheControlInterceptor())
+                .build()
     }
 }

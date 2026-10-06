@@ -71,6 +71,8 @@
     <string name="billing_nothing_to_restore">No purchase found</string>
     <string name="billing_purchase_pending">Your purchase is pending. Ads will be removed as soon as it completes.</string>
     <string name="billing_error">Couldn\'t complete the operation with Google Play</string>
+    <string name="no_app_found">No app can open this link</string>
+    <string name="share_failed">Couldn\'t share the cover</string>
     <string name="widget_no_favorites">You haven\'t favorited any covers yet. Mark some with the ❤ in the app.</string>
 
 </resources>

@@ -2,11 +2,12 @@ package sergirex.portadasperiodicos.data.repository
 
 import android.content.Context
 import androidx.datastore.preferences.SharedPreferencesMigration
-import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
+import sergirex.portadasperiodicos.data.local.editSafely
+import sergirex.portadasperiodicos.data.local.safeData
 import kotlinx.coroutines.flow.first
 import sergirex.portadasperiodicos.domain.model.Engagement
 import sergirex.portadasperiodicos.domain.repository.EngagementRepository
@@ -40,7 +41,7 @@ class EngagementRepositoryImpl @Inject constructor(
     }
 
     override suspend fun recordCoverOpened(): Engagement {
-        context.engagementDataStore.edit { prefs ->
+        context.engagementDataStore.editSafely { prefs ->
             prefs[COVER_OPENS] = (prefs[COVER_OPENS] ?: 0) + 1
             // Someone who was already asked by an older version: count that as a prompt made now.
             if (prefs[LEGACY_RATE] != null) {
@@ -50,12 +51,12 @@ class EngagementRepositoryImpl @Inject constructor(
                 prefs.remove(LEGACY_RATE)
             }
         }
-        val prefs = context.engagementDataStore.data.first()
+        val prefs = context.engagementDataStore.safeData.first()
         return Engagement(prefs[COVER_OPENS] ?: 0, installedAt, prefs[LAST_REVIEW_PROMPT])
     }
 
     override suspend fun markReviewPrompted() {
-        context.engagementDataStore.edit { it[LAST_REVIEW_PROMPT] = System.currentTimeMillis() }
+        context.engagementDataStore.editSafely { it[LAST_REVIEW_PROMPT] = System.currentTimeMillis() }
     }
 
     private companion object {

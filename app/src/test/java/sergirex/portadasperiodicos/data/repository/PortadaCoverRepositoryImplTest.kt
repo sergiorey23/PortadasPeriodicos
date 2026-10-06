@@ -1,6 +1,8 @@
 package sergirex.portadasperiodicos.data.repository
 
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
 import okhttp3.Protocol
@@ -8,9 +10,13 @@ import okhttp3.Response
 import okhttp3.ResponseBody.Companion.toResponseBody
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import sergirex.portadasperiodicos.domain.model.EditionDate
 import sergirex.portadasperiodicos.domain.model.PeriodicoRef
+import java.io.IOException
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 class PortadaCoverRepositoryImplTest {
 
@@ -98,5 +104,26 @@ class PortadaCoverRepositoryImplTest {
         ).toList()
         assertEquals(listOf("a", "b"), covers.map { it.periodico.id })
         assertEquals(today, covers.first().resolvedDate)
+    }
+
+    @Test
+    fun `cancelling a lookup cancels its in-flight request instead of leaving it running`() = runBlocking {
+        val started = CountDownLatch(1)
+        val cancelled = CountDownLatch(1)
+        val client = OkHttpClient.Builder().addInterceptor { chain ->
+            started.countDown()
+            // A request that never completes by itself; it only stops when its call is cancelled.
+            while (!chain.call().isCanceled()) Thread.sleep(10)
+            cancelled.countDown()
+            throw IOException("Canceled")
+        }.build()
+        val repo = PortadaCoverRepositoryImpl(client)
+
+        val job = launch(Dispatchers.Default) { repo.resolveDate("elpais", "es", today) }
+        assertTrue("request should have started", started.await(5, TimeUnit.SECONDS))
+        job.cancel()
+
+        assertTrue("the HTTP call should be cancelled with the coroutine", cancelled.await(5, TimeUnit.SECONDS))
+        job.join()
     }
 }

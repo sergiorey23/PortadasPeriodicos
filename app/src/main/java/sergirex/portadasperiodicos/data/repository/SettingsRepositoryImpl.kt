@@ -5,17 +5,15 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.SharedPreferencesMigration
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
+import sergirex.portadasperiodicos.data.local.editSafely
+import sergirex.portadasperiodicos.data.local.safeData
 import sergirex.portadasperiodicos.domain.model.HomeTab
 import sergirex.portadasperiodicos.domain.repository.SettingsRepository
-import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -43,23 +41,22 @@ class SettingsRepositoryImpl @Inject constructor(
 
     private val dataStore: DataStore<Preferences> = context.settingsDataStore
 
-    private val data: Flow<Preferences> = dataStore.data
-        .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
+    private val data: Flow<Preferences> = dataStore.safeData
 
     override val initialTab: Flow<HomeTab> = data.map { HomeTab.fromKey(it[INITIAL_TAB]) }
     override val dailyNotificationEnabled: Flow<Boolean> = data.map { it[DAILY_NOTIFICATION] ?: true }
     override val notificationPermissionRequested: Flow<Boolean> = data.map { it[PERMISSION_REQUESTED] ?: false }
 
     override suspend fun setInitialTab(tab: HomeTab) {
-        dataStore.edit { it[INITIAL_TAB] = tab.key }
+        dataStore.editSafely { it[INITIAL_TAB] = tab.key }
     }
 
     override suspend fun setDailyNotificationEnabled(enabled: Boolean) {
-        dataStore.edit { it[DAILY_NOTIFICATION] = enabled }
+        dataStore.editSafely { it[DAILY_NOTIFICATION] = enabled }
     }
 
     override suspend fun setNotificationPermissionRequested() {
-        dataStore.edit { it[PERMISSION_REQUESTED] = true }
+        dataStore.editSafely { it[PERMISSION_REQUESTED] = true }
     }
 
     private companion object {

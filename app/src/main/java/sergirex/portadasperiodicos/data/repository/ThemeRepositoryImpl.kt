@@ -1,11 +1,12 @@
 package sergirex.portadasperiodicos.data.repository
 
 import android.content.Context
-import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.preference.PreferenceManager
 import dagger.hilt.android.qualifiers.ApplicationContext
+import sergirex.portadasperiodicos.data.local.editSafely
+import sergirex.portadasperiodicos.data.local.safeData
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import sergirex.portadasperiodicos.domain.model.ThemeMode
@@ -39,11 +40,11 @@ class ThemeRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context
 ) : ThemeRepository {
 
-    override val themeMode: Flow<ThemeMode> = context.themeDataStore.data
+    override val themeMode: Flow<ThemeMode> = context.themeDataStore.safeData
         .map { prefs -> prefs[THEME_KEY]?.toThemeModeOrNull() ?: migrateFromLegacyPreferenceOrDefault() }
 
     override suspend fun setThemeMode(mode: ThemeMode) {
-        context.themeDataStore.edit { it[THEME_KEY] = mode.name }
+        context.themeDataStore.editSafely { it[THEME_KEY] = mode.name }
     }
 
     /**

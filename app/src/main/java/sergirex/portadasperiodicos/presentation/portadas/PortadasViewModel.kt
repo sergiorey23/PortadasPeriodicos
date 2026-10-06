@@ -1,5 +1,6 @@
 package sergirex.portadasperiodicos.presentation.portadas
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -122,7 +123,7 @@ class PortadasViewModel @Inject constructor(
             // reload doesn't blank the screen.
             var received = false
             getPortadaCovers(periodicos, target, forceRefresh)
-                .catch { /* leave whatever resolved so far on screen; nothing more to try */ }
+                .catch { error -> Log.w(TAG, "Loading covers failed", error) } // keep whatever resolved so far on screen
                 .collect { cover ->
                     loader.state.update { it.copy(covers = if (received) it.covers + cover else listOf(cover)) }
                     received = true
@@ -132,5 +133,9 @@ class PortadasViewModel @Inject constructor(
         } finally {
             loader.state.update { it.copy(isRefreshing = false) }
         }
+    }
+
+    private companion object {
+        const val TAG = "PortadasViewModel"
     }
 }

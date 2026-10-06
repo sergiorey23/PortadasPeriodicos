@@ -1,7 +1,6 @@
 package sergirex.portadasperiodicos
 
 import android.Manifest
-import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
@@ -111,7 +110,7 @@ class Portadas : AppCompatActivity(), BillingManager.BillingListener {
                             "Descarga la app de Portadas gratis!\n\nhttps://play.google.com/store/apps/details?id=$packageName"
                         )
                     }
-                    startActivity(Intent.createChooser(intent, null))
+                    startActivityOrToast(Intent.createChooser(intent, null))
                 }
                 R.id.nav_about -> showAboutInfo()
                 R.id.nav_settings -> startActivity(Intent(applicationContext, SettingsActivity::class.java))
@@ -191,24 +190,20 @@ class Portadas : AppCompatActivity(), BillingManager.BillingListener {
         aboutBinding.appVersion.text = "v${versionName ?: "N/A"}"
 
         aboutBinding.appSource.setOnClickListener {
-            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://www.lasportadas.es/")))
+            startActivityOrToast(Intent(Intent.ACTION_VIEW, Uri.parse("https://www.lasportadas.es/")))
         }
 
         aboutBinding.privacyPolicy.setOnClickListener {
-            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://www.lasportadas.es/privacy.php")))
+            startActivityOrToast(Intent(Intent.ACTION_VIEW, Uri.parse("https://www.lasportadas.es/privacy.php")))
         }
 
         aboutBinding.contact.setOnClickListener {
             val uri = Uri.parse("mailto:sssergiooo23@gmail.com")
-            startActivity(Intent(Intent.ACTION_SENDTO, uri))
+            startActivityOrToast(Intent(Intent.ACTION_SENDTO, uri))
         }
 
         aboutBinding.portadasRevistas.setOnClickListener {
-            try {
-                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=sergirex.portadasrevistas")))
-            } catch (e: ActivityNotFoundException) {
-                Toast.makeText(this, " unable to find market app", Toast.LENGTH_LONG).show()
-            }
+            startActivityOrToast(Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=sergirex.portadasrevistas")))
         }
 
         MaterialAlertDialogBuilder(this)
@@ -238,11 +233,7 @@ class Portadas : AppCompatActivity(), BillingManager.BillingListener {
     }
 
     private fun launchMarket() {
-        try {
-            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$packageName")))
-        } catch (e: ActivityNotFoundException) {
-            Toast.makeText(this, " unable to find market app", Toast.LENGTH_LONG).show()
-        }
+        startActivityOrToast(Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$packageName")))
     }
 
     override fun onAdsRemoved() {
@@ -315,6 +306,8 @@ class Portadas : AppCompatActivity(), BillingManager.BillingListener {
     }
 
     override fun onDestroy() {
+        // A dialog still showing when the Activity goes away would leak its window.
+        alertDialog?.dismiss()
         billingManager?.destroy()
         adManager?.destroy()
         super.onDestroy()

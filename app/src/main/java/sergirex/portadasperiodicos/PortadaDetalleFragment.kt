@@ -56,6 +56,7 @@ class PortadaDetalleFragment : Fragment() {
     /** Reloads the cover for a newly picked date (called from the parent Activity's date picker). */
     fun reloadWithDate(newDate: String) {
         initialDate = newDate
+        if (_binding == null) return // no view right now: it loads with the new date when it gets one
         binding.fechaPortada.visibility = View.GONE
         binding.imagenExtendida.visibility = View.GONE
         binding.loadingProgressBar.visibility = View.VISIBLE
