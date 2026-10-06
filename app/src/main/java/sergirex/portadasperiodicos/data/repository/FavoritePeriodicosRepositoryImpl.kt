@@ -13,6 +13,7 @@ import sergirex.portadasperiodicos.data.local.editSafely
 import sergirex.portadasperiodicos.data.local.safeData
 import sergirex.portadasperiodicos.domain.model.PeriodicoRef
 import sergirex.portadasperiodicos.domain.repository.FavoritePeriodicosRepository
+import sergirex.portadasperiodicos.domain.repository.PeriodicosRepository
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -49,11 +50,18 @@ private val Context.favoritesDataStore by preferencesDataStore(
 
 @Singleton
 class FavoritePeriodicosRepositoryImpl @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val catalog: PeriodicosRepository
 ) : FavoritePeriodicosRepository {
 
     override val favorites: Flow<List<PeriodicoRef>> = context.favoritesDataStore.safeData
-        .map { FavoritesCodec.decode(it[FAVORITES_KEY]) }
+        .map { prefs ->
+            // The catalog is the source of truth for names, so renamed papers and favorites saved before
+            // names existed show the current title.
+            FavoritesCodec.decode(prefs[FAVORITES_KEY]).map { ref ->
+                catalog.getById(ref.id)?.let { ref.copy(name = it.name) } ?: ref
+            }
+        }
 
     override suspend fun toggle(periodico: PeriodicoRef) {
         context.favoritesDataStore.editSafely { prefs ->

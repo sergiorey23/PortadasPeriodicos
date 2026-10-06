@@ -11,4 +11,7 @@ import sergirex.portadasperiodicos.domain.model.PeriodicoCategory
  */
 interface PeriodicosRepository {
     suspend fun getByCategory(category: PeriodicoCategory): Result<List<Periodico>>
+
+    /** The catalog entry with this id, or null if it isn't (or no longer is) in the catalog. */
+    suspend fun getById(id: String): Periodico?
 }

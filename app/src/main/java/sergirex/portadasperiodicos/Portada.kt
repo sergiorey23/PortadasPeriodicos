@@ -8,9 +8,10 @@ import sergirex.portadasperiodicos.domain.model.PeriodicoRef
 @Parcelize
 data class Portada(
     val id: String,
+    val name: String,
     val domain: String,
     val country: String,
     var fecha: String
 ) : Parcelable {
-    fun toRef() = PeriodicoRef(id, domain, country)
+    fun toRef() = PeriodicoRef(id, name, domain, country)
 }

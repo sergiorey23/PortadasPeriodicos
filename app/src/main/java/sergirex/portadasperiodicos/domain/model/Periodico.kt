@@ -11,12 +11,14 @@ package sergirex.portadasperiodicos.domain.model
  * consumer and no compiler help if a field was missing or misplaced.
  *
  * @param id unique slug (also the image/cache filename key), e.g. "elpais"
+ * @param name the title shown to the user, e.g. "El País"
  * @param domain the newspaper's web domain, e.g. "elpais.com"
  * @param country ISO-ish country code used for the cover's image path, e.g. "es"
  * @param category the section this newspaper is listed under
  */
 data class Periodico(
     val id: String,
+    val name: String,
     val domain: String,
     val country: String,
     val category: PeriodicoCategory

@@ -43,6 +43,9 @@ class PeriodicosRepositoryImpl @Inject constructor(
             }
         }
 
+    override suspend fun getById(id: String): Periodico? =
+        withContext(Dispatchers.IO) { runCatching { catalog.firstOrNull { it.id == id } }.getOrNull() }
+
     private fun loadCatalog(): List<Periodico> =
         context.assets.open(CATALOG_ASSET).bufferedReader().use { it.readText() }
             .let { json.decodeFromString<List<PeriodicoDto>>(it) }

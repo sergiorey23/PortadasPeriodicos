@@ -9,7 +9,7 @@ class FavoritesCodecTest {
 
     @Test
     fun `favorites round-trip in order`() {
-        val favorites = listOf(PeriodicoRef("elpais", "elpais.com", "es"), PeriodicoRef("lemonde", "lemonde.fr", "fr"))
+        val favorites = listOf(PeriodicoRef("elpais", "El País", "elpais.com", "es"), PeriodicoRef("lemonde", "Le Monde", "lemonde.fr", "fr"))
         assertEquals(favorites, FavoritesCodec.decode(FavoritesCodec.encode(favorites)))
     }
 
@@ -22,7 +22,13 @@ class FavoritesCodecTest {
 
     @Test
     fun `legacy encoded favorites are understood`() {
-        assertEquals(PeriodicoRef("elpais", "elpais.com", "es"), PeriodicoRef.fromLegacyEncoded("elpais:elpais.com:es"))
-        assertEquals(PeriodicoRef("elpais", "elpais.com", "es"), PeriodicoRef.fromLegacyEncoded("elpais.com"))
+        assertEquals(PeriodicoRef("elpais", "elpais", "elpais.com", "es"), PeriodicoRef.fromLegacyEncoded("elpais:elpais.com:es"))
+        assertEquals(PeriodicoRef("elpais", "elpais", "elpais.com", "es"), PeriodicoRef.fromLegacyEncoded("elpais.com"))
+    }
+
+    @Test
+    fun `favorites saved before names existed decode with the id as a placeholder name`() {
+        val old = """[{"id":"elpais","domain":"elpais.com","country":"es"}]"""
+        assertEquals(listOf(PeriodicoRef("elpais", "elpais", "elpais.com", "es")), FavoritesCodec.decode(old))
     }
 }

@@ -43,8 +43,9 @@ class PortadasViewModelTest {
     private val coverRequests = mutableListOf<String>() // the target date of each load
 
     private val catalog = object : PeriodicosRepository {
+        override suspend fun getById(id: String): Periodico? = null
         override suspend fun getByCategory(category: PeriodicoCategory) =
-            Result.success(listOf(Periodico("elpais", "elpais.com", "es", category), Periodico("abc", "abc.es", "es", category)))
+            Result.success(listOf(Periodico("elpais", "El País", "elpais.com", "es", category), Periodico("abc", "ABC", "abc.es", "es", category)))
     }
     private val favorites = object : FavoritePeriodicosRepository {
         override val favorites: Flow<List<PeriodicoRef>> = favoritesFlow
@@ -134,7 +135,7 @@ class PortadasViewModelTest {
         advanceUntilIdle()
         assertEquals(HomeTab.categories, vm.tabs.value)
 
-        favoritesFlow.value = listOf(PeriodicoRef("elpais", "elpais.com", "es"))
+        favoritesFlow.value = listOf(PeriodicoRef("elpais", "El País", "elpais.com", "es"))
         advanceUntilIdle()
         assertEquals(listOf(HomeTab.Favorites) + HomeTab.categories, vm.tabs.value)
 
@@ -142,7 +143,7 @@ class PortadasViewModelTest {
         advanceUntilIdle()
         assertEquals(listOf("elpais"), vm.uiState(HomeTab.Favorites).value.covers.map { it.periodico.id })
 
-        favoritesFlow.value = listOf(PeriodicoRef("elpais", "elpais.com", "es"), PeriodicoRef("abc", "abc.es", "es"))
+        favoritesFlow.value = listOf(PeriodicoRef("elpais", "El País", "elpais.com", "es"), PeriodicoRef("abc", "ABC", "abc.es", "es"))
         vm.loadIfNeeded(HomeTab.Favorites)
         advanceUntilIdle()
         assertEquals(listOf("elpais", "abc"), vm.uiState(HomeTab.Favorites).value.covers.map { it.periodico.id })

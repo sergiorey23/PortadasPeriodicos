@@ -77,7 +77,7 @@ class PortadasFragment : Fragment() {
 
     private fun openDetail(clicked: PortadaCover) {
         val state = viewModel.uiState(tab).value
-        val portadas = state.allPeriodicos.map { Portada(it.id, it.domain, it.country, state.targetDate) }
+        val portadas = state.allPeriodicos.map { Portada(it.id, it.name, it.domain, it.country, state.targetDate) }
         startActivity(PortadaDetalle.createIntent(requireContext(), portadas, clicked.periodico.id))
     }
 

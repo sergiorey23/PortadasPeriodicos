@@ -1,384 +1,448 @@
 [
   {
     "id": "elpais",
+    "name": "El País",
     "domain": "elpais.com",
     "country": "es",
     "category": "GENERAL"
   },
   {
     "id": "elmundo",
+    "name": "El Mundo",
     "domain": "elmundo.es",
     "country": "es",
     "category": "GENERAL"
   },
   {
     "id": "abc",
+    "name": "ABC",
     "domain": "abc.es",
     "country": "es",
     "category": "GENERAL"
   },
   {
     "id": "larazon",
+    "name": "La Razón",
     "domain": "larazon.es",
     "country": "es",
     "category": "GENERAL"
   },
   {
     "id": "lavanguardia",
+    "name": "La Vanguardia",
     "domain": "lavanguardia.com",
     "country": "es",
     "category": "GENERAL"
   },
   {
     "id": "elperiodico",
+    "name": "El Periódico",
     "domain": "elperiodico.com",
     "country": "es",
     "category": "GENERAL"
   },
   {
     "id": "marca",
+    "name": "Marca",
     "domain": "marca.com",
     "country": "es",
     "category": "DEPORTES"
   },
   {
     "id": "as",
+    "name": "AS",
     "domain": "as.com",
     "country": "es",
     "category": "DEPORTES"
   },
   {
     "id": "sport",
+    "name": "Sport",
     "domain": "sport.es",
     "country": "es",
     "category": "DEPORTES"
   },
   {
     "id": "mundodeportivo",
+    "name": "Mundo Deportivo",
     "domain": "mundodeportivo.com",
     "country": "es",
     "category": "DEPORTES"
   },
   {
     "id": "superdeporte",
+    "name": "Superdeporte",
     "domain": "superdeporte.es",
     "country": "es",
     "category": "DEPORTES"
   },
   {
     "id": "el9",
+    "name": "L'Esportiu",
     "domain": "lesportiudecatalunya.cat",
     "country": "es",
     "category": "DEPORTES"
   },
   {
     "id": "expansion",
+    "name": "Expansión",
     "domain": "expansion.com",
     "country": "es",
     "category": "ECONOMIA"
   },
   {
     "id": "eleconomista",
+    "name": "elEconomista",
     "domain": "eleconomista.es",
     "country": "es",
     "category": "ECONOMIA"
   },
   {
     "id": "5dias",
+    "name": "Cinco Días",
     "domain": "cincodias.elpais.com",
     "country": "es",
     "category": "ECONOMIA"
   },
   {
     "id": "vozgalicia",
+    "name": "La Voz de Galicia",
     "domain": "lavozdegalicia.es",
     "country": "es",
     "category": "LOCALES"
   },
   {
     "id": "diario_sevilla",
+    "name": "Diario de Sevilla",
     "domain": "diariodesevilla.es",
     "country": "es",
     "category": "LOCALES"
   },
   {
     "id": "diario_informacion",
+    "name": "Diario Información",
     "domain": "informacion.es",
     "country": "es",
     "category": "LOCALES"
   },
   {
     "id": "20minutos_madrid",
+    "name": "20 Minutos Madrid",
     "domain": "20minutos.es/madrid",
     "country": "es",
     "category": "LOCALES"
   },
   {
     "id": "20minutos_sevilla",
+    "name": "20 Minutos Sevilla",
     "domain": "20minutos.es/andalucia/sevilla",
     "country": "es",
     "category": "LOCALES"
   },
   {
     "id": "viva_sevilla",
+    "name": "Viva Sevilla",
     "domain": "vivasevilla.es",
     "country": "es",
     "category": "LOCALES"
   },
   {
     "id": "elperiodico_mediterraneo",
+    "name": "El Periódico Mediterráneo",
     "domain": "elperiodicomediterraneo.com",
     "country": "es",
     "category": "LOCALES"
   },
   {
     "id": "levante",
+    "name": "Levante-EMV",
     "domain": "levante-emv.com",
     "country": "es",
     "category": "LOCALES"
   },
   {
     "id": "diario_montanes",
+    "name": "El Diario Montañés",
     "domain": "eldiariomontanes.es",
     "country": "es",
     "category": "LOCALES"
   },
   {
     "id": "elcorreo",
+    "name": "El Correo",
     "domain": "elcorreo.com",
     "country": "es",
     "category": "LOCALES"
   },
   {
     "id": "diario_navarra",
+    "name": "Diario de Navarra",
     "domain": "diariodenavarra.es",
     "country": "es",
     "category": "LOCALES"
   },
   {
     "id": "lanuevaespana",
+    "name": "La Nueva España",
     "domain": "lne.es",
     "country": "es",
     "category": "LOCALES"
   },
   {
     "id": "diario_cordoba",
+    "name": "Diario Córdoba",
     "domain": "diariocordoba.es",
     "country": "es",
     "category": "LOCALES"
   },
   {
     "id": "eldia_cordoba",
+    "name": "El Día de Córdoba",
     "domain": "eldiadecordoba.es",
     "country": "es",
     "category": "LOCALES"
   },
   {
     "id": "granada_hoy",
+    "name": "Granada Hoy",
     "domain": "granadahoy.com",
     "country": "es",
     "category": "LOCALES"
   },
   {
     "id": "ideal_jaen",
+    "name": "Ideal (Jaén)",
     "domain": "ideal.es",
     "country": "es",
     "category": "LOCALES"
   },
   {
     "id": "nortecastilla_valladolid",
+    "name": "El Norte de Castilla",
     "domain": "elnortedecastilla.es",
     "country": "es",
     "category": "LOCALES"
   },
   {
     "id": "larioja",
+    "name": "La Rioja",
     "domain": "larioja.com",
     "country": "es",
     "category": "LOCALES"
   },
   {
     "id": "diario_vasco",
+    "name": "Diario Vasco",
     "domain": "diariovasco.com",
     "country": "es",
     "category": "LOCALES"
   },
   {
     "id": "diario_leon",
+    "name": "Diario de León",
     "domain": "diariodeleon.es",
     "country": "es",
     "category": "LOCALES"
   },
   {
     "id": "diario_avila",
+    "name": "Diario de Ávila",
     "domain": "diariodeavila.es",
     "country": "es",
     "category": "LOCALES"
   },
   {
     "id": "lasprovincias",
+    "name": "Las Provincias",
     "domain": "lasprovincias.es",
     "country": "es",
     "category": "LOCALES"
   },
   {
     "id": "farodevigo",
+    "name": "Faro de Vigo",
     "domain": "farodevigo.es",
     "country": "es",
     "category": "LOCALES"
   },
   {
     "id": "diariosur",
+    "name": "Diario Sur",
     "domain": "diariosur.es",
     "country": "es",
     "category": "LOCALES"
   },
   {
     "id": "malaga_hoy",
+    "name": "Málaga Hoy",
     "domain": "malagahoy.es",
     "country": "es",
     "category": "LOCALES"
   },
   {
     "id": "laprovincia",
+    "name": "La Provincia",
     "domain": "laprovincia.es",
     "country": "es",
     "category": "LOCALES"
   },
   {
     "id": "hoy_badajoz",
+    "name": "Hoy (Badajoz)",
     "domain": "hoy.es/extremadura",
     "country": "es",
     "category": "LOCALES"
   },
   {
     "id": "elperiodico_extremadura",
+    "name": "El Periódico Extremadura",
     "domain": "elperiodicoextremadura.com",
     "country": "es",
     "category": "LOCALES"
   },
   {
     "id": "latribuna_albacete",
+    "name": "La Tribuna de Albacete",
     "domain": "latribunadealbacete.es",
     "country": "es",
     "category": "LOCALES"
   },
   {
     "id": "latribuna_ciudadreal",
+    "name": "La Tribuna de Ciudad Real",
     "domain": "latribunadeciudadreal.es",
     "country": "es",
     "category": "LOCALES"
   },
   {
     "id": "elfaro_ceuta",
+    "name": "El Faro de Ceuta",
     "domain": "elfarodeceuta.es",
     "country": "es",
     "category": "LOCALES"
   },
   {
     "id": "elfaro_melilla",
+    "name": "El Faro de Melilla",
     "domain": "elfarodemelilla.es",
     "country": "es",
     "category": "LOCALES"
   },
   {
     "id": "canarias7",
+    "name": "Canarias7",
     "domain": "canarias7.es",
     "country": "es",
     "category": "LOCALES"
   },
   {
     "id": "diario_mallorca",
+    "name": "Diario de Mallorca",
     "domain": "diariodemallorca.es",
     "country": "es",
     "category": "LOCALES"
   },
   {
     "id": "diario_ibiza",
+    "name": "Diario de Ibiza",
     "domain": "diariodeibiza.es",
     "country": "es",
     "category": "LOCALES"
   },
   {
     "id": "laverdad_murcia",
+    "name": "La Verdad",
     "domain": "laverdad.es",
     "country": "es",
     "category": "LOCALES"
   },
   {
     "id": "heraldo_aragon",
+    "name": "Heraldo de Aragón",
     "domain": "heraldo.es",
     "country": "es",
     "category": "LOCALES"
   },
   {
     "id": "newyork_times",
+    "name": "The New York Times",
     "domain": "nytimes.com/es",
     "country": "us",
     "category": "INTERNACIONAL"
   },
   {
     "id": "wsj",
+    "name": "The Wall Street Journal",
     "domain": "wsj.com",
     "country": "us",
     "category": "INTERNACIONAL"
   },
   {
     "id": "washington_post",
+    "name": "The Washington Post",
     "domain": "washingtonpost.com",
     "country": "us",
     "category": "INTERNACIONAL"
   },
   {
     "id": "ft_uk",
+    "name": "Financial Times",
     "domain": "ft.com",
     "country": "uk",
     "category": "INTERNACIONAL"
   },
   {
     "id": "sun",
+    "name": "The Sun",
     "domain": "thesun.co.uk",
     "country": "uk",
     "category": "INTERNACIONAL"
   },
   {
     "id": "lemonde",
+    "name": "Le Monde",
     "domain": "lemonde.fr",
     "country": "fr",
     "category": "INTERNACIONAL"
   },
   {
     "id": "spiegel",
+    "name": "Der Spiegel",
     "domain": "spiegel.de",
     "country": "de",
     "category": "INTERNACIONAL"
   },
   {
     "id": "sole24ore",
+    "name": "Il Sole 24 Ore",
     "domain": "ilsole24ore.com",
     "country": "it",
     "category": "INTERNACIONAL"
   },
   {
     "id": "the_times",
+    "name": "The Times",
     "domain": "thetimes.co.uk",
     "country": "uk",
     "category": "INTERNACIONAL"
   },
   {
     "id": "guardian",
+    "name": "The Guardian",
     "domain": "theguardian.com/uk",
     "country": "uk",
     "category": "INTERNACIONAL"
   },
   {
     "id": "ar_clarin",
+    "name": "Clarín",
     "domain": "clarin.com",
     "country": "ar",
     "category": "INTERNACIONAL"
   },
   {
     "id": "ole",
+    "name": "Olé",
     "domain": "ole.com.ar",
     "country": "ar",
     "category": "INTERNACIONAL"

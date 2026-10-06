@@ -13,6 +13,7 @@ import sergirex.portadasperiodicos.domain.model.PeriodicoCategory
 @Serializable
 data class PeriodicoDto(
     val id: String,
+    val name: String,
     val domain: String,
     val country: String = "es",
     val category: String
@@ -20,6 +21,7 @@ data class PeriodicoDto(
 
 fun PeriodicoDto.toDomain(): Periodico = Periodico(
     id = id,
+    name = name,
     domain = domain,
     country = country,
     category = PeriodicoCategory.valueOf(category)

@@ -98,7 +98,7 @@ class PortadaCoverRepositoryImplTest {
     fun `getCovers emits in list order and skips newspapers with no cover`() = runBlocking {
         val repo = repository(published = setOf(today))
         val covers = repo.getCovers(
-            listOf(PeriodicoRef("a", "a.es", "es"), PeriodicoRef("b", "b.es", "es")),
+            listOf(PeriodicoRef("a", "A", "a.es", "es"), PeriodicoRef("b", "B", "b.es", "es")),
             today,
             forceRefresh = false
         ).toList()

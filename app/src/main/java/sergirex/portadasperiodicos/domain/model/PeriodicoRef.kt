@@ -10,6 +10,8 @@ package sergirex.portadasperiodicos.domain.model
  */
 data class PeriodicoRef(
     val id: String,
+    /** Human-readable title. Comes from the catalog; for refs built from old stored data it starts as the id. */
+    val name: String,
     val domain: String,
     val country: String
 ) {
@@ -23,12 +25,12 @@ data class PeriodicoRef(
         fun fromLegacyEncoded(raw: String): PeriodicoRef {
             val parts = raw.split(":")
             return if (parts.size > 1) {
-                PeriodicoRef(id = parts[0], domain = parts[1], country = parts.getOrElse(2) { "es" })
+                PeriodicoRef(id = parts[0], name = parts[0], domain = parts[1], country = parts.getOrElse(2) { "es" })
             } else {
-                PeriodicoRef(id = raw.substringBefore("."), domain = raw, country = "es")
+                PeriodicoRef(id = raw.substringBefore("."), name = raw.substringBefore("."), domain = raw, country = "es")
             }
         }
     }
 }
 
-fun Periodico.toRef(): PeriodicoRef = PeriodicoRef(id, domain, country)
+fun Periodico.toRef(): PeriodicoRef = PeriodicoRef(id, name, domain, country)

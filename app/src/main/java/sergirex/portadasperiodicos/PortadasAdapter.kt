@@ -33,6 +33,7 @@ class PortadasAdapter(
 
     inner class ViewHolder(private val binding: PortadaItemBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(cover: PortadaCover) {
+            binding.portadaImageView.contentDescription = cover.periodico.name
             binding.portadaImageView.load(cover.imageUrl) { size(Size.ORIGINAL) }
             binding.root.setOnClickListener { onCoverClick(cover) }
         }

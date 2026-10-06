@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
@@ -112,13 +111,6 @@ class PortadaDetalleFragment : Fragment() {
     private fun showError(message: String) {
         binding.loadingProgressBar.visibility = View.GONE
         Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        // Set the ActionBar title
-        val formattedTitle = newspaperTitle?.replace("_", " ")?.replaceFirstChar { it.uppercase() }
-        (activity as? AppCompatActivity)?.supportActionBar?.title = formattedTitle
     }
 
     override fun onDestroyView() {

@@ -172,7 +172,7 @@ class PortadaDetalle : AppCompatActivity() {
 
     private fun updateUiForPage(position: Int) {
         val portada = mSectionsPagerAdapter.getPortadaAt(position) ?: return
-        supportActionBar?.title = portada.id
+        supportActionBar?.title = portada.name
         renderFavorite()
     }
 
