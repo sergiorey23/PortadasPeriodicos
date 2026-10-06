@@ -8,13 +8,17 @@ import dagger.hilt.components.SingletonComponent
 import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import sergirex.portadasperiodicos.data.network.CoverCacheControlInterceptor
+import sergirex.portadasperiodicos.data.repository.EngagementRepositoryImpl
 import sergirex.portadasperiodicos.data.repository.FavoritePeriodicosRepositoryImpl
 import sergirex.portadasperiodicos.data.repository.PeriodicosRepositoryImpl
 import sergirex.portadasperiodicos.data.repository.PortadaCoverRepositoryImpl
+import sergirex.portadasperiodicos.data.repository.SettingsRepositoryImpl
 import sergirex.portadasperiodicos.data.repository.ThemeRepositoryImpl
+import sergirex.portadasperiodicos.domain.repository.EngagementRepository
 import sergirex.portadasperiodicos.domain.repository.FavoritePeriodicosRepository
 import sergirex.portadasperiodicos.domain.repository.PeriodicosRepository
 import sergirex.portadasperiodicos.domain.repository.PortadaCoverRepository
+import sergirex.portadasperiodicos.domain.repository.SettingsRepository
 import sergirex.portadasperiodicos.domain.repository.ThemeRepository
 import javax.inject.Singleton
 
@@ -44,6 +48,14 @@ abstract class AppModule {
     @Binds
     @Singleton
     abstract fun bindFavoritePeriodicosRepository(impl: FavoritePeriodicosRepositoryImpl): FavoritePeriodicosRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindSettingsRepository(impl: SettingsRepositoryImpl): SettingsRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindEngagementRepository(impl: EngagementRepositoryImpl): EngagementRepository
 
     companion object {
         @Provides

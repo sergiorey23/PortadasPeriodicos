@@ -1,12 +1,11 @@
 package sergirex.portadasperiodicos.domain.usecase
 
-import kotlinx.coroutines.flow.first
 import sergirex.portadasperiodicos.domain.model.PeriodicoRef
 import sergirex.portadasperiodicos.domain.repository.FavoritePeriodicosRepository
 import javax.inject.Inject
 
-class GetFavoritePeriodicosUseCase @Inject constructor(
+class ToggleFavoriteUseCase @Inject constructor(
     private val repository: FavoritePeriodicosRepository
 ) {
-    suspend operator fun invoke(): List<PeriodicoRef> = repository.favorites.first()
+    suspend operator fun invoke(periodico: PeriodicoRef) = repository.toggle(periodico)
 }

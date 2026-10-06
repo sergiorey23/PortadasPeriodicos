@@ -3,7 +3,6 @@ package sergirex.portadasperiodicos
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
@@ -11,14 +10,12 @@ import android.view.View
 import android.widget.RemoteViews
 import androidx.core.content.edit
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.launch
 import sergirex.portadasperiodicos.domain.model.EditionDate
 import sergirex.portadasperiodicos.domain.model.PeriodicoRef
 import sergirex.portadasperiodicos.domain.usecase.GetFavoritePeriodicosUseCase
 import sergirex.portadasperiodicos.domain.usecase.GetPortadaCoversUseCase
+import sergirex.portadasperiodicos.notifications.launchAsync
 import javax.inject.Inject
 
 /**
@@ -57,7 +54,7 @@ class FavoritosWidget : AppWidgetProvider() {
 
     override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
         appWidgetIds.forEach { appWidgetId ->
-            goAsync { renderWidget(context, appWidgetManager, appWidgetId) }
+            launchAsync { renderWidget(context, appWidgetManager, appWidgetId) }
         }
     }
 
@@ -70,9 +67,9 @@ class FavoritosWidget : AppWidgetProvider() {
             ACTION_RIGHT -> 1
             else -> return
         }
-        goAsync {
+        launchAsync {
             val favorites = getFavoritePeriodicos()
-            if (favorites.isEmpty()) return@goAsync
+            if (favorites.isEmpty()) return@launchAsync
             val prefs = context.getSharedPreferences(INDEX_PREFS, Context.MODE_PRIVATE)
             val newIndex = (prefs.getInt(KEY_INDEX, 0) + delta).coerceIn(0, favorites.lastIndex)
             prefs.edit { putInt(KEY_INDEX, newIndex) }
@@ -126,18 +123,6 @@ class FavoritosWidget : AppWidgetProvider() {
 
     private fun openAppPendingIntent(context: Context): PendingIntent =
         PendingIntent.getActivity(context, 0, Intent(context, Portadas::class.java), PendingIntent.FLAG_IMMUTABLE)
-
-    /** Keeps the receiver's process alive for [block]'s duration, same purpose the old `new Thread{}.start()` calls were missing. */
-    private fun BroadcastReceiver.goAsync(block: suspend () -> Unit) {
-        val pendingResult = goAsync()
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                block()
-            } finally {
-                pendingResult.finish()
-            }
-        }
-    }
 
     private companion object {
         const val INDEX_PREFS = "IndiceWDT"

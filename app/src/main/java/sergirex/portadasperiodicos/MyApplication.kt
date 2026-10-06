@@ -15,6 +15,7 @@ import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import sergirex.portadasperiodicos.domain.model.ThemeMode
 import sergirex.portadasperiodicos.domain.usecase.GetThemeModeUseCase
+import sergirex.portadasperiodicos.notifications.NotificationScheduler
 import javax.inject.Inject
 
 /**
@@ -37,6 +38,9 @@ class MyApplication : Application(), SingletonImageLoader.Factory {
     @Inject
     lateinit var okHttpClient: Lazy<OkHttpClient>
 
+    @Inject
+    lateinit var notificationScheduler: NotificationScheduler
+
     // Lives for the whole process, same as the night-mode setting it applies —
     // there's nothing to cancel it early for, unlike a ViewModel's viewModelScope.
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
@@ -46,6 +50,8 @@ class MyApplication : Application(), SingletonImageLoader.Factory {
         applicationScope.launch {
             getThemeMode().collect { mode -> AppCompatDelegate.setDefaultNightMode(mode.toNightMode()) }
         }
+        // Alarms don't survive a force-stop or update, so make sure the reminder matches the setting at every start.
+        applicationScope.launch { notificationScheduler.sync() }
     }
 
     override fun newImageLoader(context: PlatformContext): ImageLoader = ImageLoader.Builder(context)

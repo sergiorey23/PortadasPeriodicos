@@ -32,5 +32,3 @@ data class PeriodicoRef(
 }
 
 fun Periodico.toRef(): PeriodicoRef = PeriodicoRef(id, domain, country)
-
-fun PeriodicoRef.toLegacyEncodedString(): String = "$id:$domain:$country"

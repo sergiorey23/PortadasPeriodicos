@@ -3,7 +3,6 @@ package sergirex.portadasperiodicos
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -19,10 +18,12 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.browser.customtabs.CustomTabColorSchemeParams
 import androidx.browser.customtabs.CustomTabsIntent
+import androidx.core.content.IntentCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.preference.PreferenceManager
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
@@ -34,10 +35,10 @@ import com.google.android.play.core.review.ReviewManagerFactory
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import sergirex.portadasperiodicos.databinding.ActivityPortadaDetalleBinding
+import sergirex.portadasperiodicos.domain.model.CoverOpenOutcome
 import sergirex.portadasperiodicos.domain.model.CoverUrls
 import sergirex.portadasperiodicos.domain.model.EditionDate
 import java.io.File
-import java.util.Date
 
 @AndroidEntryPoint
 class PortadaDetalle : AppCompatActivity() {
@@ -48,7 +49,6 @@ class PortadaDetalle : AppCompatActivity() {
     // Using ViewModel to store UI state and survive configuration changes
     private val viewModel: PortadaDetalleViewModel by viewModels()
 
-    private lateinit var prefsPer: SharedPreferences
     private lateinit var mSectionsPagerAdapter: ViewPagerAdapter
 
     private var interstitialAd: InterstitialAd? = null
@@ -76,12 +76,16 @@ class PortadaDetalle : AppCompatActivity() {
         binding = ActivityPortadaDetalleBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        prefsPer = getSharedPreferences("periodicos", Context.MODE_PRIVATE)
-
         setupToolbar()
         setupFabs()
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) { viewModel.favoriteIds.collect { renderFavorite() } }
+        }
         loadSectionsAdapter()
-        setupAdsAndReview()
+        // Count the visit once per real open (not when the system recreates the Activity).
+        if (savedInstanceState == null) {
+            lifecycleScope.launch { onCoverOpened(viewModel.onCoverOpened()) }
+        }
     }
 
     private fun setupToolbar() {
@@ -125,26 +129,17 @@ class PortadaDetalle : AppCompatActivity() {
     }
 
     private fun loadSectionsAdapter() {
-        val portadas = intent.getStringArrayExtra("Portadas")
-        val initialPortada = intent.getStringExtra("selectedPortada")
-        val fecha = intent.getStringExtra("Fecha")
+        val portadaList = IntentCompat.getParcelableArrayListExtra(intent, EXTRA_PORTADAS, Portada::class.java).orEmpty()
+        val initialPortada = intent.getStringExtra(EXTRA_SELECTED_ID)
 
         mSectionsPagerAdapter = ViewPagerAdapter(supportFragmentManager, lifecycle)
-
-        val portadaList = portadas?.mapNotNull {
-            val parts = it.split(":")
-            val title = if (parts.size > 1) parts[0] else it.split(".")[0]
-            val web = if (parts.size > 1) parts[1] else it
-            val country = if (parts.size > 2) parts[2] else "es"
-            Portada(it, title, fecha.orEmpty(), web, country)
-        } ?: emptyList()
 
         mSectionsPagerAdapter.setPortadas(portadaList)
 
         binding.viewpager2.adapter = mSectionsPagerAdapter
 
         // Set initial position
-        val initialPosition = portadaList.indexOfFirst { it.title == initialPortada }
+        val initialPosition = portadaList.indexOfFirst { it.id == initialPortada }
         if (initialPosition != -1) {
             binding.viewpager2.setCurrentItem(initialPosition, false)
         }
@@ -160,25 +155,26 @@ class PortadaDetalle : AppCompatActivity() {
 
     private fun updateUiForPage(position: Int) {
         val portada = mSectionsPagerAdapter.getPortadaAt(position) ?: return
-        supportActionBar?.title = portada.title
-        val isFavorite = prefsPer.contains(portada.webPeriodico)
+        supportActionBar?.title = portada.id
+        renderFavorite()
+    }
+
+    private fun renderFavorite() {
+        val portada = mSectionsPagerAdapter.getPortadaAt(binding.viewpager2.currentItem) ?: return
+        val isFavorite = portada.id in viewModel.favoriteIds.value
         binding.favButton.setImageResource(if (isFavorite) R.drawable.ic_favorite_black_24dp else R.drawable.ic_favorite_border_black_24dp)
     }
 
-    private fun setupAdsAndReview() {
+    private fun onCoverOpened(outcome: CoverOpenOutcome) {
+        if (outcome.askForReview) showInAppReviewPrompt()
+
         val prefs = PreferenceManager.getDefaultSharedPreferences(this)
-        val showAd = intent.getIntExtra("showAd", 0)
-
-        if (prefs.getInt("rate", 0) == 0 && showAd % 2 == 0) {
-            showInAppReviewPrompt(prefs)
-        }
-
         if (!prefs.getBoolean("remove_fb_ads", false)) {
-            loadFacebookAds(showAd)
+            loadFacebookAds(outcome.showInterstitial)
         }
     }
 
-    private fun loadFacebookAds(showAd: Int) {
+    private fun loadFacebookAds(showInterstitial: Boolean) {
         AudienceNetworkAds.initialize(this)
         // Banner Ad
         val bottomBanner = AdView(this, "799967435028134_814221240269420", AdSize.BANNER_HEIGHT_50)
@@ -186,7 +182,7 @@ class PortadaDetalle : AppCompatActivity() {
         bottomBanner.loadAd()
 
         // Interstitial Ad
-        if (showAd % 3 == 0) {
+        if (showInterstitial) {
             val ad = InterstitialAd(this, "799967435028134_801174748240736")
             interstitialAd = ad
             val interstitialAdListener = object : InterstitialAdListener {
@@ -221,19 +217,19 @@ class PortadaDetalle : AppCompatActivity() {
         // kiosko.net/....html article page this used to point at, which is an HTML
         // document and can never decode as a Bitmap (confirmed against the real
         // kiosko.net: that URL 301-redirects to an HTML page, Content-Type text/html).
-        val coverDate = viewModel.resolvedDates[portada.title] ?: portada.fecha
-        val imageUrl = CoverUrls.full(coverDate, portada.siglaPais, portada.title)
+        val coverDate = viewModel.resolvedDates[portada.id] ?: portada.fecha
+        val imageUrl = CoverUrls.full(coverDate, portada.country, portada.id)
         val savePortada = SavePortada(this, requestStoragePermission)
 
         when (item.itemId) {
             R.id.share -> {
                 if (savePortada.isExternalStorageWritable && savePortada.checkPermissions()) {
-                    lifecycleScope.launch { savePortada.share(imageUrl, portada.title) }
+                    lifecycleScope.launch { savePortada.share(imageUrl, portada.id) }
                 }
             }
             R.id.save -> {
                 if (savePortada.isExternalStorageWritable && savePortada.checkPermissions()) {
-                    val file = File(savePortada.albumStorageDir, "${portada.title}_${coverDate.replace("/", "")}.jpg")
+                    val file = File(savePortada.albumStorageDir, "${portada.id}_${coverDate.replace("/", "")}.jpg")
                     if (file.exists()) {
                         Toast.makeText(this, "Ya se ha guardado la portada.", Toast.LENGTH_LONG).show()
                     } else {
@@ -247,10 +243,10 @@ class PortadaDetalle : AppCompatActivity() {
     }
 
     private fun showDatePicker() {
-        val today = viewModel.lastSelectedDateMillis ?: MaterialDatePicker.todayInUtcMilliseconds()
+        val initialSelection = viewModel.lastSelectedDateMillis ?: MaterialDatePicker.todayInUtcMilliseconds()
         val datePicker = MaterialDatePicker.Builder.datePicker()
             .setTitleText("Seleccionar fecha")
-            .setSelection(today)
+            .setSelection(initialSelection)
             .setCalendarConstraints(
                 CalendarConstraints.Builder()
                     .setValidator(DateValidatorPointBackward.now())
@@ -260,11 +256,11 @@ class PortadaDetalle : AppCompatActivity() {
 
         datePicker.addOnPositiveButtonClickListener { selection ->
             viewModel.lastSelectedDateMillis = selection
-            val newDate = EditionDate.format(Date(selection))
+            val newDate = EditionDate.fromUtcMillis(selection)
 
             val currentPosition = binding.viewpager2.currentItem
             mSectionsPagerAdapter.updateDateForPortada(currentPosition, newDate)
-            mSectionsPagerAdapter.getPortadaAt(currentPosition)?.let { viewModel.resolvedDates.remove(it.title) }
+            mSectionsPagerAdapter.getPortadaAt(currentPosition)?.let { viewModel.resolvedDates.remove(it.id) }
 
             // Find the current fragment and tell it to reload
             val currentFragment = supportFragmentManager.findFragmentByTag("f$currentPosition")
@@ -276,7 +272,7 @@ class PortadaDetalle : AppCompatActivity() {
 
     private fun openNewspaperWebsite() {
         val portada = mSectionsPagerAdapter.getPortadaAt(binding.viewpager2.currentItem) ?: return
-        val url = "https://www.${portada.webPeriodico}"
+        val url = "https://www.${portada.domain}"
         try {
             val typedValue = TypedValue()
             theme.resolveAttribute(androidx.appcompat.R.attr.colorPrimary, typedValue, true)
@@ -298,15 +294,7 @@ class PortadaDetalle : AppCompatActivity() {
 
     private fun toggleFavorite() {
         val portada = mSectionsPagerAdapter.getPortadaAt(binding.viewpager2.currentItem) ?: return
-        val editor = prefsPer.edit()
-        if (prefsPer.contains(portada.webPeriodico)) {
-            editor.remove(portada.webPeriodico)
-            binding.favButton.setImageResource(R.drawable.ic_favorite_border_black_24dp)
-        } else {
-            editor.putString(portada.webPeriodico, portada.periodico)
-            binding.favButton.setImageResource(R.drawable.ic_favorite_black_24dp)
-        }
-        editor.apply()
+        viewModel.toggleFavorite(portada.toRef())
     }
 
     override fun onDestroy() {
@@ -315,19 +303,16 @@ class PortadaDetalle : AppCompatActivity() {
         super.onDestroy()
     }
 
-    private fun showInAppReviewPrompt(prefs: SharedPreferences) {
+    private fun showInAppReviewPrompt() {
         val reviewManager = ReviewManagerFactory.create(this)
         val request = reviewManager.requestReviewFlow()
         request.addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 val reviewInfo = task.result
                 val flow = reviewManager.launchReviewFlow(this, reviewInfo)
-                flow.addOnCompleteListener { _ ->
-                    // The review flow has finished. The API does not indicate whether the user
-                    // reviewed or not, or even if the review dialog was shown. Thus, no matter
-                    // the result, we update the shared preferences to avoid asking again.
-                    prefs.edit().putInt("rate", 1).apply()
-                }
+                // The API doesn't say whether the dialog was shown or the user reviewed, so any
+                // completion counts as a prompt, to avoid asking again too soon.
+                flow.addOnCompleteListener { viewModel.onReviewPromptShown() }
             } else {
                 // There was some error, log it.
                 Log.e("InAppReview", "Review flow request failed.", task.exception)
@@ -356,7 +341,17 @@ class PortadaDetalle : AppCompatActivity() {
 
         override fun createFragment(position: Int): Fragment {
             val portada = portadas[position]
-            return PortadaDetalleFragment.newInstance(portada.title, portada.siglaPais, portada.fecha)
+            return PortadaDetalleFragment.newInstance(portada.id, portada.country, portada.fecha)
         }
+    }
+
+    companion object {
+        private const val EXTRA_PORTADAS = "portadas"
+        private const val EXTRA_SELECTED_ID = "selected_id"
+
+        fun createIntent(context: Context, portadas: List<Portada>, selectedId: String): Intent =
+            Intent(context, PortadaDetalle::class.java)
+                .putParcelableArrayListExtra(EXTRA_PORTADAS, ArrayList(portadas))
+                .putExtra(EXTRA_SELECTED_ID, selectedId)
     }
 }

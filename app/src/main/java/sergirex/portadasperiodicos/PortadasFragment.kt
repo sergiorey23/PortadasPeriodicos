@@ -1,13 +1,12 @@
 package sergirex.portadasperiodicos
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.core.view.isVisible
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -15,9 +14,8 @@ import androidx.recyclerview.widget.GridLayoutManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import sergirex.portadasperiodicos.databinding.PortadaLayoutBinding
-import sergirex.portadasperiodicos.domain.model.PeriodicoCategory
+import sergirex.portadasperiodicos.domain.model.HomeTab
 import sergirex.portadasperiodicos.domain.model.PortadaCover
-import sergirex.portadasperiodicos.domain.model.toLegacyEncodedString
 import sergirex.portadasperiodicos.presentation.portadas.PortadasViewModel
 
 /**
@@ -29,7 +27,8 @@ import sergirex.portadasperiodicos.presentation.portadas.PortadasViewModel
 @AndroidEntryPoint
 class PortadasFragment : Fragment() {
 
-    private val viewModel: PortadasViewModel by viewModels()
+    private val viewModel: PortadasViewModel by activityViewModels()
+    private val tab: HomeTab by lazy { HomeTab.fromKey(requireArguments().getString(ARG_TAB)) }
     private var _binding: PortadaLayoutBinding? = null
     private val binding get() = _binding!!
     private lateinit var adapter: PortadasAdapter
@@ -50,35 +49,30 @@ class PortadasFragment : Fragment() {
         adapter = PortadasAdapter(onCoverClick = ::openDetail)
         binding.recyclerView.layoutManager = GridLayoutManager(context, spanCount)
         binding.recyclerView.adapter = adapter
-        binding.refreshLayout.setOnRefreshListener { viewModel.refresh() }
+        binding.refreshLayout.setOnRefreshListener { viewModel.refresh(tab) }
         // The grid is wrapped (with the empty-state text) in a FrameLayout, so tell the
         // pull-to-refresh gesture to look at the RecyclerView's scroll position instead.
         binding.refreshLayout.setOnChildScrollUpCallback { _, _ -> binding.recyclerView.canScrollVertically(-1) }
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.uiState.collect { state ->
-                    adapter.submitList(state.covers)
-                    binding.refreshLayout.isRefreshing = state.isRefreshing
-                    binding.emptyStateText.isVisible = state.showLoadFailed
+                launch {
+                    viewModel.uiState(tab).collect { state ->
+                        adapter.submitList(state.covers)
+                        binding.refreshLayout.isRefreshing = state.isRefreshing
+                        binding.emptyStateText.isVisible = state.showLoadFailed
+                    }
                 }
+                // Fires on every start and whenever the selected date changes.
+                launch { viewModel.selectedDate.collect { viewModel.loadIfNeeded(tab) } }
             }
         }
     }
 
-    override fun onStart() {
-        super.onStart()
-        viewModel.loadIfNeeded()
-    }
-
     private fun openDetail(clicked: PortadaCover) {
-        val state = viewModel.uiState.value
-        val intent = Intent(requireContext(), PortadaDetalle::class.java).apply {
-            putExtra(EXTRA_PORTADAS, state.allPeriodicos.map { it.toLegacyEncodedString() }.toTypedArray())
-            putExtra(EXTRA_SELECTED_PORTADA, clicked.periodico.id)
-            putExtra(EXTRA_FECHA, clicked.resolvedDate)
-        }
-        startActivity(intent)
+        val state = viewModel.uiState(tab).value
+        val portadas = state.allPeriodicos.map { Portada(it.id, it.domain, it.country, state.targetDate) }
+        startActivity(PortadaDetalle.createIntent(requireContext(), portadas, clicked.periodico.id))
     }
 
     override fun onDestroyView() {
@@ -87,16 +81,10 @@ class PortadasFragment : Fragment() {
     }
 
     companion object {
-        private const val EXTRA_PORTADAS = "Portadas"
-        private const val EXTRA_SELECTED_PORTADA = "selectedPortada"
-        private const val EXTRA_FECHA = "Fecha"
+        private const val ARG_TAB = "tab"
 
-        @JvmStatic
-        fun newInstance(category: PeriodicoCategory): PortadasFragment = PortadasFragment().apply {
-            arguments = Bundle().apply { putString(PortadasViewModel.ARG_CATEGORY, category.name) }
+        fun newInstance(tab: HomeTab): PortadasFragment = PortadasFragment().apply {
+            arguments = Bundle().apply { putString(ARG_TAB, tab.key) }
         }
-
-        @JvmStatic
-        fun newInstanceFavorites(): PortadasFragment = PortadasFragment()
     }
 }

@@ -1,6 +1,5 @@
 package sergirex.portadasperiodicos
 
-import android.app.AlarmManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -10,35 +9,16 @@ import android.content.Intent
 import android.graphics.Color
 import android.os.Build
 import androidx.core.app.NotificationCompat
-import java.util.Calendar
-import java.util.Date
+import sergirex.portadasperiodicos.notifications.launchAsync
+import sergirex.portadasperiodicos.notifications.notificationScheduler
 
 class AlarmBroadcastReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         showNotification(context)
-        startAlarmBroadcastReceiver(context, forceScheduleNextDay = true)
+        val scheduler = context.notificationScheduler()
+        launchAsync { scheduler.sync(afterFiring = true) }
     }
-
-    fun startAlarmBroadcastReceiver(context: Context, forceScheduleNextDay: Boolean) {
-        val pendingIntent = PendingIntent.getBroadcast(
-            context, 0, Intent(context, AlarmBroadcastReceiver::class.java), PendingIntent.FLAG_IMMUTABLE
-        )
-        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        alarmManager.cancel(pendingIntent)
-
-        val calendar = Calendar.getInstance().apply {
-            timeInMillis = System.currentTimeMillis()
-            set(Calendar.HOUR_OF_DAY, 9)
-            set(Calendar.MINUTE, 0)
-        }
-        if (checkIfTheTimeHasPassed(calendar.timeInMillis) || forceScheduleNextDay) {
-            calendar.add(Calendar.DATE, 1)
-        }
-        alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent)
-    }
-
-    private fun checkIfTheTimeHasPassed(timeInMillis: Long): Boolean = Date().time > timeInMillis
 
     private fun showNotification(context: Context) {
         val channelId = "26081995"
@@ -59,7 +39,6 @@ class AlarmBroadcastReceiver : BroadcastReceiver() {
         val notification = NotificationCompat.Builder(context, channelId)
             .setSmallIcon(R.mipmap.news_icon)
             .setLights(Color.CYAN, 300, 300)
-            .setChannelId(channelId)
             .setContentTitle(context.getString(R.string.notification_name))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setContentIntent(contentIntent)

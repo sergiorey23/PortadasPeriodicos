@@ -55,6 +55,13 @@
 
     <!-- Favorites widget -->
     <string name="covers_load_failed">Couldn\'t load the covers. Pull down to retry.</string>
+    <string name="theme_mode">Mode</string>
+    <string name="initial_category">Initial category</string>
+    <string name="notifications">Notifications</string>
+    <string name="daily_notification_title">Daily covers reminder</string>
+    <string name="daily_notification_summary">Get a notification every morning at 9:00</string>
+    <string name="notifications_permission_denied">The daily reminder needs the notification permission. You can grant it in the system settings.</string>
+    <string name="select_date">Select date</string>
     <string name="widget_no_favorites">You haven\'t favorited any covers yet. Mark some with the ❤ in the app.</string>
 
 </resources>

@@ -4,23 +4,27 @@
     <PreferenceCategory android:title="@string/tema"
         app:iconSpaceReserved="false">
         <ListPreference
-            android:defaultValue="default"
-            android:summary="@string/default_system"
             app:iconSpaceReserved="false"
             android:entries="@array/modos_ui"
             android:entryValues="@array/modos_ui_values"
             android:key="theme"
-            android:title="Modo" />
+            android:title="@string/theme_mode" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/categories"
         app:iconSpaceReserved="false">
-    <ListPreference
-        android:defaultValue="@string/first_tab"
-        android:summary="@string/first_tab"
-        app:iconSpaceReserved="false"
-        android:entries="@array/portadas_categories"
-        android:entryValues="@array/portadas_categories"
-        android:key="init_category"
-        android:title="Categoría incial" />
+        <ListPreference
+            app:iconSpaceReserved="false"
+            android:entries="@array/portadas_categories"
+            android:entryValues="@array/portadas_category_keys"
+            android:key="init_category"
+            android:title="@string/initial_category" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/notifications"
+        app:iconSpaceReserved="false">
+        <SwitchPreferenceCompat
+            app:iconSpaceReserved="false"
+            android:key="daily_notification"
+            android:summary="@string/daily_notification_summary"
+            android:title="@string/daily_notification_title" />
     </PreferenceCategory>
 </androidx.preference.PreferenceScreen>

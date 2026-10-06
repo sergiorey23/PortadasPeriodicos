@@ -54,6 +54,13 @@
 
     <!-- Favorites widget -->
     <string name="covers_load_failed">No se han podido cargar las portadas. Desliza hacia abajo para reintentar.</string>
+    <string name="theme_mode">Modo</string>
+    <string name="initial_category">Categoría inicial</string>
+    <string name="notifications">Notificaciones</string>
+    <string name="daily_notification_title">Aviso diario de portadas</string>
+    <string name="daily_notification_summary">Recibe una notificación cada mañana a las 9:00</string>
+    <string name="notifications_permission_denied">Sin permiso de notificaciones no se puede activar el aviso diario. Puedes concederlo en los ajustes del sistema.</string>
+    <string name="select_date">Seleccionar fecha</string>
     <string name="widget_no_favorites">Aún no tienes portadas favoritas. Márcalas con el ❤ desde la app.</string>
 
 </resources>

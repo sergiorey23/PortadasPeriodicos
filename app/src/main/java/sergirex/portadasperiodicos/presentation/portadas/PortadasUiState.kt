@@ -19,7 +19,9 @@ import sergirex.portadasperiodicos.domain.model.PortadaCover
 data class PortadasUiState(
     val allPeriodicos: List<PeriodicoRef> = emptyList(),
     val covers: List<PortadaCover> = emptyList(),
-    val isRefreshing: Boolean = false
+    val isRefreshing: Boolean = false,
+    /** The edition date these covers were requested for (what the detail screen should open on). */
+    val targetDate: String = ""
 ) {
     /** A load finished, there were newspapers to show, and none of their covers could be fetched. */
     val showLoadFailed: Boolean get() = !isRefreshing && allPeriodicos.isNotEmpty() && covers.isEmpty()

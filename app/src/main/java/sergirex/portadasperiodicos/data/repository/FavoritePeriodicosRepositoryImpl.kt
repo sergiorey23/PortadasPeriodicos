@@ -1,30 +1,68 @@
 package sergirex.portadasperiodicos.data.repository
 
 import android.content.Context
+import androidx.datastore.core.DataMigration
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.emptyPreferences
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.map
+import sergirex.portadasperiodicos.data.local.FavoritesCodec
 import sergirex.portadasperiodicos.domain.model.PeriodicoRef
 import sergirex.portadasperiodicos.domain.repository.FavoritePeriodicosRepository
+import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
 
+private val FAVORITES_KEY = stringPreferencesKey("favorites")
+
 /**
- * Reads the same "periodicos" SharedPreferences file (key = domain, value =
- * legacy-encoded "id:domain:country" string) that PortadaDetalle's favorite
- * toggle and FavoritosWidget already read/write. Left as-is deliberately:
- * changing this storage format is out of scope here and would also require
- * updating FavoritosWidget (a later migration phase) in lockstep.
+ * One-time import of the old "periodicos" SharedPreferences file (key = domain, value = legacy
+ * "id:domain:country" string) so existing users keep their favorites.
  */
+private class LegacyFavoritesMigration(private val context: Context) : DataMigration<Preferences> {
+    private val legacy get() = context.getSharedPreferences(LEGACY_PREFS, Context.MODE_PRIVATE)
+
+    override suspend fun shouldMigrate(currentData: Preferences) =
+        FAVORITES_KEY !in currentData && legacy.all.isNotEmpty()
+
+    override suspend fun migrate(currentData: Preferences): Preferences {
+        val favorites = legacy.all.values.filterIsInstance<String>().map { PeriodicoRef.fromLegacyEncoded(it) }
+        return currentData.toMutablePreferences().apply { this[FAVORITES_KEY] = FavoritesCodec.encode(favorites) }
+    }
+
+    override suspend fun cleanUp() {
+        legacy.edit().clear().apply()
+    }
+
+    private companion object {
+        const val LEGACY_PREFS = "periodicos"
+    }
+}
+
+private val Context.favoritesDataStore by preferencesDataStore(
+    name = "favorites",
+    produceMigrations = { context -> listOf(LegacyFavoritesMigration(context)) }
+)
+
 @Singleton
 class FavoritePeriodicosRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context
 ) : FavoritePeriodicosRepository {
 
-    override fun getFavorites(): List<PeriodicoRef> =
-        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).all.values
-            .filterIsInstance<String>()
-            .map { PeriodicoRef.fromLegacyEncoded(it) }
+    override val favorites: Flow<List<PeriodicoRef>> = context.favoritesDataStore.data
+        .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
+        .map { FavoritesCodec.decode(it[FAVORITES_KEY]) }
 
-    private companion object {
-        const val PREFS_NAME = "periodicos"
+    override suspend fun toggle(periodico: PeriodicoRef) {
+        context.favoritesDataStore.edit { prefs ->
+            val current = FavoritesCodec.decode(prefs[FAVORITES_KEY])
+            val updated = if (current.any { it.id == periodico.id }) current.filterNot { it.id == periodico.id } else current + periodico
+            prefs[FAVORITES_KEY] = FavoritesCodec.encode(updated)
+        }
     }
 }

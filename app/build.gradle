@@ -1,6 +1,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'org.jetbrains.kotlin.android'
 apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
+apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
 apply plugin: 'com.google.devtools.ksp'
 apply plugin: 'com.google.dagger.hilt.android'
 
@@ -51,6 +52,7 @@ android {
     namespace 'sergirex.portadasperiodicos'
     kotlinOptions {
         jvmTarget = '17'
+        freeCompilerArgs += ['-Xannotation-default-target=param-property']
     }
     /*lint {
         disable 'RestrictedApi'
@@ -95,6 +97,7 @@ dependencies {
     implementation 'io.coil-kt.coil3:coil-network-okhttp:3.3.0'
 
     testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.7.0'
     implementation 'com.facebook.android:audience-network-sdk:6.22.0'
     compileOnly "com.facebook.infer.annotation:infer-annotation:0.18.0"

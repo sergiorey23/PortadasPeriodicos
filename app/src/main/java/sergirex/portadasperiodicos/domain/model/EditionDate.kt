@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import java.util.TimeZone
 
 /**
  * Edition dates are `yyyy/MM/dd` strings (they double as URL path segments).
@@ -48,6 +49,17 @@ object EditionDate {
         val calendar = Calendar.getInstance().apply { time = runCatching { formatter.parse(start) }.getOrNull() ?: Date() }
         return List(count) { formatter.format(calendar.time).also { calendar.add(Calendar.DATE, -1) } }
     }
+
+    /**
+     * Material date pickers report the chosen day as UTC midnight; formatting that in the
+     * device time zone would show the previous day anywhere west of UTC.
+     */
+    fun fromUtcMillis(millis: Long): String =
+        SimpleDateFormat(PATTERN, Locale.FRANCE).apply { timeZone = TimeZone.getTimeZone("UTC") }.format(Date(millis))
+
+    fun toUtcMillis(date: String): Long? = runCatching {
+        SimpleDateFormat(PATTERN, Locale.FRANCE).apply { timeZone = TimeZone.getTimeZone("UTC") }.parse(date)?.time
+    }.getOrNull()
 
     /** `2026/10/06` -> `06/10/2026`. */
     fun toDisplay(date: String): String = date.split("/").asReversed().joinToString("/")

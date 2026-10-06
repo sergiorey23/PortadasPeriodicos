@@ -8,6 +8,14 @@
         <item>@string/fourth_tab</item>
         <item>@string/fifth_tab</item>
     </string-array>
+    <string-array name="portadas_category_keys">
+        <item>favorites</item>
+        <item>GENERAL</item>
+        <item>DEPORTES</item>
+        <item>ECONOMIA</item>
+        <item>LOCALES</item>
+        <item>INTERNACIONAL</item>
+    </string-array>
     <string-array name="modos_ui">
         <item>@string/default_system</item>
         <item>@string/light</item>
