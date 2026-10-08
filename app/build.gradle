@@ -18,8 +18,8 @@ android {
         applicationId "sergirex.portadasperiodicos"
         minSdkVersion 23
         targetSdkVersion 36
-        versionCode 73
-        versionName "6.5.0"
+        versionCode 74
+        versionName "7.0.0"
     }
     signingConfigs {
         if (hasKeystoreProperties) {
