@@ -46,10 +46,6 @@
         <item name="colorAppBar">@color/app_bar</item>
         <item name="colorOnAppBar">@color/on_app_bar</item>
 
-        <!-- Android 14 and older draw the status bar in this color; 15+ is edge-to-edge and ignores it. -->
-        <item name="android:statusBarColor">?attr/colorAppBar</item>
-        <item name="android:windowLightStatusBar">@bool/light_status_bar</item>
-
         <!-- Legacy AppCompat attribute still read by androidx.preference for category titles. -->
         <item name="colorAccent">?attr/colorPrimary</item>
 

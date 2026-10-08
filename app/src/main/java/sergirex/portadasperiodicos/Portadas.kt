@@ -13,6 +13,7 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.ActionBarDrawerToggle
@@ -70,6 +71,7 @@ class Portadas : AppCompatActivity(), BillingManager.BillingListener {
         // Shows the launch splash and switches to Theme.Portadas (postSplashScreenTheme) once drawn.
         installSplashScreen()
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
 
         prefs = PreferenceManager.getDefaultSharedPreferences(this)
         billingManager = BillingManager(this, lifecycleScope, prefs, { binding.drawerLayout }, this)
