@@ -385,27 +385,6 @@
     "category": "INTERNACIONAL"
   },
   {
-    "id": "ft_uk",
-    "name": "Financial Times",
-    "domain": "ft.com",
-    "country": "uk",
-    "category": "INTERNACIONAL"
-  },
-  {
-    "id": "sun",
-    "name": "The Sun",
-    "domain": "thesun.co.uk",
-    "country": "uk",
-    "category": "INTERNACIONAL"
-  },
-  {
-    "id": "lemonde",
-    "name": "Le Monde",
-    "domain": "lemonde.fr",
-    "country": "fr",
-    "category": "INTERNACIONAL"
-  },
-  {
     "id": "spiegel",
     "name": "Der Spiegel",
     "domain": "spiegel.de",
@@ -417,20 +396,6 @@
     "name": "Il Sole 24 Ore",
     "domain": "ilsole24ore.com",
     "country": "it",
-    "category": "INTERNACIONAL"
-  },
-  {
-    "id": "the_times",
-    "name": "The Times",
-    "domain": "thetimes.co.uk",
-    "country": "uk",
-    "category": "INTERNACIONAL"
-  },
-  {
-    "id": "guardian",
-    "name": "The Guardian",
-    "domain": "theguardian.com/uk",
-    "country": "uk",
     "category": "INTERNACIONAL"
   },
   {
