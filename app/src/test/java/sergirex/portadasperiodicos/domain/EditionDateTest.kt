@@ -32,6 +32,7 @@ class EditionDateTest {
     @Test
     fun `display format reverses the date`() {
         assertEquals("06/10/2026", EditionDate.toDisplay("2026/10/06"))
+        assertEquals("06/10", EditionDate.toShortDisplay("2026/10/06"))
     }
 
     @Test

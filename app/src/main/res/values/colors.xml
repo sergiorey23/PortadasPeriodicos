@@ -41,4 +41,7 @@
     <!-- App-specific: the teal app bar keeps the app's identity in light mode. -->
     <color name="app_bar">#00A391</color>
     <color name="on_app_bar">#00201B</color>
+    <!-- Ribbon on covers that are not today's edition; drawn over the image, so identical in both modes. -->
+    <color name="date_ribbon">#D32F2F</color>
+    <color name="on_date_ribbon">#FFFFFF</color>
 </resources>

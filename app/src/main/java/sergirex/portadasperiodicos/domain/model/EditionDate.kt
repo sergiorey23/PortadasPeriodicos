@@ -61,6 +61,9 @@ object EditionDate {
         SimpleDateFormat(PATTERN, Locale.FRANCE).apply { timeZone = TimeZone.getTimeZone("UTC") }.parse(date)?.time
     }.getOrNull()
 
+    /** `2026/10/06` -> `06/10`: enough for a small tag, since covers are at most a few weeks old. */
+    fun toShortDisplay(date: String): String = date.split("/").drop(1).asReversed().joinToString("/")
+
     /** `2026/10/06` -> `06/10/2026`. */
     fun toDisplay(date: String): String = date.split("/").asReversed().joinToString("/")
 }

@@ -40,6 +40,19 @@
         <item name="fontFamily">sans-serif-medium</item>
     </style>
 
+    <!-- "This cover is from an earlier day": a red tag with the edition date, top-right of a cover. -->
+    <style name="Widget.Portadas.DateRibbon" parent="TextAppearance.Material3.LabelSmall">
+        <item name="android:background">@drawable/bg_date_ribbon</item>
+        <item name="android:textColor">@color/on_date_ribbon</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">10sp</item>
+        <item name="android:paddingStart">6dp</item>
+        <item name="android:paddingEnd">5dp</item>
+        <item name="android:paddingTop">2dp</item>
+        <item name="android:paddingBottom">2dp</item>
+        <item name="android:elevation">2dp</item>
+    </style>
+
     <style name="Animation.Portadas.Window" parent="">
         <item name="android:windowEnterAnimation">@android:anim/fade_in</item>
         <item name="android:windowExitAnimation">@android:anim/fade_out</item>

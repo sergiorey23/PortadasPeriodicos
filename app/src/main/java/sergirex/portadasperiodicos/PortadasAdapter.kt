@@ -2,11 +2,13 @@ package sergirex.portadasperiodicos
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import coil3.load
 import coil3.size.Size
+import sergirex.portadasperiodicos.domain.model.EditionDate
 import sergirex.portadasperiodicos.databinding.PortadaItemBinding
 import sergirex.portadasperiodicos.domain.model.PortadaCover
 
@@ -35,6 +37,9 @@ class PortadasAdapter(
         fun bind(cover: PortadaCover) {
             binding.portadaImageView.contentDescription = cover.periodico.name
             binding.portadaImageView.load(cover.imageUrl) { size(Size.ORIGINAL) }
+            val isOld = cover.resolvedDate != EditionDate.today()
+            binding.dateRibbon.isVisible = isOld
+            if (isOld) binding.dateRibbon.text = EditionDate.toShortDisplay(cover.resolvedDate)
             binding.root.setOnClickListener { onCoverClick(cover) }
         }
     }

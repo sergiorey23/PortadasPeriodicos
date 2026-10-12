@@ -39,4 +39,7 @@
 
     <color name="app_bar">#1F2624</color>
     <color name="on_app_bar">#DEE4E1</color>
+    <!-- Ribbon on covers that are not today's edition; drawn over the image, so identical in both modes. -->
+    <color name="date_ribbon">#D32F2F</color>
+    <color name="on_date_ribbon">#FFFFFF</color>
 </resources>
