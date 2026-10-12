@@ -39,7 +39,7 @@ class PortadasAdapter(
             binding.portadaImageView.load(cover.imageUrl) { size(Size.ORIGINAL) }
             val isOld = cover.resolvedDate != EditionDate.today()
             binding.dateRibbon.isVisible = isOld
-            if (isOld) binding.dateRibbon.text = EditionDate.toShortDisplay(cover.resolvedDate)
+            if (isOld) binding.dateRibbon.text = EditionDate.toRibbonDisplay(cover.resolvedDate)
             binding.root.setOnClickListener { onCoverClick(cover) }
         }
     }

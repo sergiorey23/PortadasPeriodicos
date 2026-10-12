@@ -16,14 +16,12 @@
         android:adjustViewBounds="true"
         android:contentDescription="@string/portada" />
 
-    <TextView
+    <sergirex.portadasperiodicos.ui.CornerRibbonView
         android:id="@+id/dateRibbon"
-        style="@style/Widget.Portadas.DateRibbon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="top|end"
         android:visibility="gone"
-        tools:text="03/10/2026"
         tools:visibility="visible" />
 
 </androidx.cardview.widget.CardView>

@@ -6,6 +6,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import sergirex.portadasperiodicos.domain.model.CoverUrls
 import sergirex.portadasperiodicos.domain.model.EditionDate
+import java.util.Locale
 import java.util.TimeZone
 
 class EditionDateTest {
@@ -32,7 +33,9 @@ class EditionDateTest {
     @Test
     fun `display format reverses the date`() {
         assertEquals("06/10/2026", EditionDate.toDisplay("2026/10/06"))
-        assertEquals("06/10", EditionDate.toShortDisplay("2026/10/06"))
+        assertEquals("06 Oct", EditionDate.toRibbonDisplay("2026/10/06", Locale.ENGLISH))
+        assertTrue(EditionDate.toRibbonDisplay("2026/10/06", Locale("es")).startsWith("06 oct"))
+        assertEquals("not a date", EditionDate.toRibbonDisplay("not a date"))
     }
 
     @Test

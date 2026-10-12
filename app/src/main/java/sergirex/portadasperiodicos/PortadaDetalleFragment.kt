@@ -103,7 +103,7 @@ class PortadaDetalleFragment : Fragment() {
 
     private fun showDateIfNotToday(coverDate: String) {
         if (coverDate != EditionDate.today()) {
-            binding.fechaPortada.text = EditionDate.toDisplay(coverDate)
+            binding.fechaPortada.text = EditionDate.toRibbonDisplay(coverDate)
             binding.fechaPortada.visibility = View.VISIBLE
         }
     }
