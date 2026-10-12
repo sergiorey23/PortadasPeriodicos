@@ -28,7 +28,6 @@ import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.preference.PreferenceManager
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.datepicker.CalendarConstraints
@@ -39,6 +38,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import sergirex.portadasperiodicos.databinding.ActivityPortadaDetalleBinding
 import sergirex.portadasperiodicos.domain.model.CoverUrls
+import sergirex.portadasperiodicos.presentation.ads.AdsViewModel
 import sergirex.portadasperiodicos.domain.model.EditionDate
 import java.io.File
 
@@ -53,6 +53,8 @@ class PortadaDetalle : AppCompatActivity() {
 
     private lateinit var mSectionsPagerAdapter: ViewPagerAdapter
 
+    private val adsViewModel: AdsViewModel by viewModels()
+    private var bannerRequested = false
     private val adManagerDelegate = lazy { AdManager(this) }
     private val adManager by adManagerDelegate
 
@@ -184,10 +186,28 @@ class PortadaDetalle : AppCompatActivity() {
         binding.favButton.setImageResource(if (isFavorite) R.drawable.ic_favorite_black_24dp else R.drawable.ic_favorite_border_black_24dp)
     }
 
+    /** Shows the banner unless the user owns "remove ads"; reacts if the purchase happens while this screen is open. */
     private fun showBannerAd() {
-        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
-        if (!BillingManager.isAdsRemoved(prefs)) {
-            adManager.loadBanner(binding.bannerContainerDetail, DETAIL_BANNER_PLACEMENT)
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                adsViewModel.adsRemoved.collect { removed ->
+                    when (removed) {
+                        null -> Unit
+                        true -> {
+                            if (adManagerDelegate.isInitialized()) adManager.destroy()
+                            bannerRequested = false
+                            binding.bannerContainerDetail.visibility = View.GONE
+                        }
+                        false -> {
+                            binding.bannerContainerDetail.visibility = View.VISIBLE
+                            if (!bannerRequested) {
+                                bannerRequested = true
+                                adManager.loadBanner(binding.bannerContainerDetail, DETAIL_BANNER_PLACEMENT)
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 

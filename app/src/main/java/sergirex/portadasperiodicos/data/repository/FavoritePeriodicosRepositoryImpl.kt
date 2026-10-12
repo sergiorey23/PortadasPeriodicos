@@ -7,7 +7,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
 import sergirex.portadasperiodicos.data.local.FavoritesCodec
 import sergirex.portadasperiodicos.data.local.editSafely
 import sergirex.portadasperiodicos.data.local.safeData
@@ -54,12 +54,17 @@ class FavoritePeriodicosRepositoryImpl @Inject constructor(
     private val catalog: PeriodicosRepository
 ) : FavoritePeriodicosRepository {
 
-    override val favorites: Flow<List<PeriodicoRef>> = context.favoritesDataStore.safeData
-        .map { prefs ->
-            // The catalog is the source of truth for names, so renamed papers and favorites saved before
-            // names existed show the current title.
-            FavoritesCodec.decode(prefs[FAVORITES_KEY]).map { ref ->
-                catalog.getById(ref.id)?.let { ref.copy(name = it.name) } ?: ref
+    override val favorites: Flow<List<PeriodicoRef>> =
+        combine(context.favoritesDataStore.safeData, catalog.catalogVersion) { prefs, _ ->
+            val stored = FavoritesCodec.decode(prefs[FAVORITES_KEY])
+            val byId = catalog.getAll().associateBy { it.id }
+            // An empty catalog means it couldn't be read: show favorites as saved rather than hide them all.
+            if (byId.isEmpty()) {
+                stored
+            } else {
+                // The catalog is the source of truth for names (renames, favorites saved before names existed),
+                // and papers that left it are hidden. They stay saved, so they return if the paper is re-added.
+                stored.mapNotNull { ref -> byId[ref.id]?.let { ref.copy(name = it.name) } }
             }
         }
 

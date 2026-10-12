@@ -1,11 +1,9 @@
 package sergirex.portadasperiodicos
 
 import android.app.Activity
-import android.content.SharedPreferences
 import android.util.Log
 import android.view.View
 import android.widget.Toast
-import androidx.core.content.edit
 import com.android.billingclient.api.AcknowledgePurchaseParams
 import com.android.billingclient.api.BillingClient
 import com.android.billingclient.api.BillingClient.BillingResponseCode
@@ -21,6 +19,7 @@ import com.android.billingclient.api.acknowledgePurchase
 import com.android.billingclient.api.queryProductDetails
 import com.android.billingclient.api.queryPurchasesAsync
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import sergirex.portadasperiodicos.domain.repository.AdsEntitlementRepository
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -37,20 +36,14 @@ import kotlin.coroutines.resume
  * nothing until they complete, and every completed purchase is acknowledged (Play refunds
  * unacknowledged purchases after 3 days).
  *
- * The flag is kept in [prefs] under [KEY_ADS_REMOVED]; screens read it with [isAdsRemoved].
+ * The flag is kept in [entitlement]; screens observe it, so a purchase hides the ads everywhere on its own.
  */
 class BillingManager(
     private val activity: Activity,
     private val scope: CoroutineScope,
-    private val prefs: SharedPreferences,
-    private val snackbarAnchor: () -> View,
-    private val listener: BillingListener?
+    private val entitlement: AdsEntitlementRepository,
+    private val snackbarAnchor: () -> View
 ) {
-
-    interface BillingListener {
-        /** The entitlement was just granted (purchase completed or restored). */
-        fun onAdsRemoved()
-    }
 
     private enum class SyncResult { OWNED, NOT_OWNED, ERROR }
 
@@ -171,11 +164,7 @@ class BillingManager(
         }
     }
 
-    private fun setAdsRemoved(removed: Boolean) {
-        val changed = prefs.getBoolean(KEY_ADS_REMOVED, false) != removed
-        prefs.edit { putBoolean(KEY_ADS_REMOVED, removed) }
-        if (changed && removed) listener?.onAdsRemoved()
-    }
+    private suspend fun setAdsRemoved(removed: Boolean) = entitlement.setAdsRemoved(removed)
 
     private suspend fun loadProduct() {
         if (!ensureConnected()) return
@@ -213,8 +202,5 @@ class BillingManager(
     companion object {
         private const val TAG = "BillingManager"
         private const val PRODUCT_ID = "remove_ads_id"
-        private const val KEY_ADS_REMOVED = "remove_fb_ads"
-
-        fun isAdsRemoved(prefs: SharedPreferences): Boolean = prefs.getBoolean(KEY_ADS_REMOVED, false)
     }
 }

@@ -8,11 +8,11 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.view.View
 import android.widget.RemoteViews
-import androidx.core.content.edit
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.firstOrNull
 import sergirex.portadasperiodicos.domain.model.EditionDate
 import sergirex.portadasperiodicos.domain.model.PeriodicoRef
+import sergirex.portadasperiodicos.domain.repository.WidgetStateRepository
 import sergirex.portadasperiodicos.domain.usecase.GetFavoritePeriodicosUseCase
 import sergirex.portadasperiodicos.domain.usecase.GetPortadaCoversUseCase
 import sergirex.portadasperiodicos.notifications.launchAsync
@@ -52,6 +52,9 @@ class FavoritosWidget : AppWidgetProvider() {
     @Inject
     lateinit var getPortadaCovers: GetPortadaCoversUseCase
 
+    @Inject
+    lateinit var widgetState: WidgetStateRepository
+
     override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
         appWidgetIds.forEach { appWidgetId ->
             launchAsync { renderWidget(context, appWidgetManager, appWidgetId) }
@@ -70,9 +73,8 @@ class FavoritosWidget : AppWidgetProvider() {
         launchAsync {
             val favorites = getFavoritePeriodicos()
             if (favorites.isEmpty()) return@launchAsync
-            val prefs = context.getSharedPreferences(INDEX_PREFS, Context.MODE_PRIVATE)
-            val newIndex = (prefs.getInt(KEY_INDEX, 0) + delta).coerceIn(0, favorites.lastIndex)
-            prefs.edit { putInt(KEY_INDEX, newIndex) }
+            val newIndex = (widgetState.index() + delta).coerceIn(0, favorites.lastIndex)
+            widgetState.setIndex(newIndex)
             renderWidget(context, AppWidgetManager.getInstance(context), appWidgetId)
         }
     }
@@ -87,8 +89,7 @@ class FavoritosWidget : AppWidgetProvider() {
             views.setViewVisibility(R.id.leftBtn, View.GONE)
             views.setViewVisibility(R.id.rightBtn, View.GONE)
         } else {
-            val prefs = context.getSharedPreferences(INDEX_PREFS, Context.MODE_PRIVATE)
-            val index = prefs.getInt(KEY_INDEX, 0).coerceIn(0, favorites.lastIndex)
+            val index = widgetState.index().coerceIn(0, favorites.lastIndex)
 
             views.setViewVisibility(R.id.emptyStateText, View.GONE)
             views.setViewVisibility(R.id.imageViewWidget, View.VISIBLE)
@@ -125,8 +126,6 @@ class FavoritosWidget : AppWidgetProvider() {
         PendingIntent.getActivity(context, 0, Intent(context, Portadas::class.java), PendingIntent.FLAG_IMMUTABLE)
 
     private companion object {
-        const val INDEX_PREFS = "IndiceWDT"
-        const val KEY_INDEX = "index"
         const val ACTION_LEFT = "android.appwidget.action.LEFT"
         const val ACTION_RIGHT = "android.appwidget.action.RIGHT"
     }

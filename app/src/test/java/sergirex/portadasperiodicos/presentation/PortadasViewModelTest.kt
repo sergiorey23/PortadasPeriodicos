@@ -44,6 +44,9 @@ class PortadasViewModelTest {
 
     private val catalog = object : PeriodicosRepository {
         override suspend fun getById(id: String): Periodico? = null
+        override suspend fun getAll(): List<Periodico> = emptyList()
+        override val catalogVersion = MutableStateFlow(0)
+        override suspend fun refresh(force: Boolean) = false
         override suspend fun getByCategory(category: PeriodicoCategory) =
             Result.success(listOf(Periodico("elpais", "El País", "elpais.com", "es", category), Periodico("abc", "ABC", "abc.es", "es", category)))
     }
@@ -78,7 +81,8 @@ class PortadasViewModelTest {
         GetFavoritePeriodicosUseCase(favorites),
         GetPortadaCoversUseCase(covers),
         settings,
-        ObserveFavoritesUseCase(favorites)
+        ObserveFavoritesUseCase(favorites),
+        catalog
     )
 
     @Test
@@ -163,7 +167,7 @@ class PortadasViewModelTest {
         }
         val vm = PortadasViewModel(
             GetPeriodicosByCategoryUseCase(catalog), GetFavoritePeriodicosUseCase(favorites),
-            GetPortadaCoversUseCase(failing), settings, ObserveFavoritesUseCase(favorites)
+            GetPortadaCoversUseCase(failing), settings, ObserveFavoritesUseCase(favorites), catalog
         )
         vm.loadIfNeeded(general)
         advanceUntilIdle()

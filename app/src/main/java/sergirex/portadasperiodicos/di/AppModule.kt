@@ -4,18 +4,28 @@ import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import kotlinx.serialization.json.Json
+import android.content.Context
+import sergirex.portadasperiodicos.data.catalog.BundledCatalog
+import sergirex.portadasperiodicos.data.catalog.CatalogCache
+import sergirex.portadasperiodicos.data.catalog.CatalogConfig
+import sergirex.portadasperiodicos.data.catalog.RemoteCatalogSource
+import java.io.File
 import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
 import sergirex.portadasperiodicos.data.network.CoverCacheControlInterceptor
+import sergirex.portadasperiodicos.data.repository.AdsEntitlementRepositoryImpl
 import sergirex.portadasperiodicos.data.repository.EngagementRepositoryImpl
+import sergirex.portadasperiodicos.data.repository.WidgetStateRepositoryImpl
 import sergirex.portadasperiodicos.data.repository.FavoritePeriodicosRepositoryImpl
 import sergirex.portadasperiodicos.data.repository.PeriodicosRepositoryImpl
 import sergirex.portadasperiodicos.data.repository.PortadaCoverRepositoryImpl
 import sergirex.portadasperiodicos.data.repository.SettingsRepositoryImpl
 import sergirex.portadasperiodicos.data.repository.ThemeRepositoryImpl
+import sergirex.portadasperiodicos.domain.repository.AdsEntitlementRepository
 import sergirex.portadasperiodicos.domain.repository.EngagementRepository
+import sergirex.portadasperiodicos.domain.repository.WidgetStateRepository
 import sergirex.portadasperiodicos.domain.repository.FavoritePeriodicosRepository
 import sergirex.portadasperiodicos.domain.repository.PeriodicosRepository
 import sergirex.portadasperiodicos.domain.repository.PortadaCoverRepository
@@ -59,10 +69,29 @@ abstract class AppModule {
     @Singleton
     abstract fun bindEngagementRepository(impl: EngagementRepositoryImpl): EngagementRepository
 
+    @Binds
+    @Singleton
+    abstract fun bindAdsEntitlementRepository(impl: AdsEntitlementRepositoryImpl): AdsEntitlementRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindWidgetStateRepository(impl: WidgetStateRepositoryImpl): WidgetStateRepository
+
     companion object {
         @Provides
         @Singleton
-        fun provideJson(): Json = Json { ignoreUnknownKeys = true }
+        fun provideBundledCatalog(@ApplicationContext context: Context): BundledCatalog =
+            BundledCatalog { context.assets.open("periodicos.json").bufferedReader().use { it.readText() } }
+
+        @Provides
+        @Singleton
+        fun provideCatalogCache(@ApplicationContext context: Context): CatalogCache =
+            CatalogCache(File(context.filesDir, "catalog"))
+
+        @Provides
+        @Singleton
+        fun provideRemoteCatalogSource(client: OkHttpClient): RemoteCatalogSource =
+            RemoteCatalogSource(client, CatalogConfig.URL)
 
         /** Shared by Coil (image downloads) and the cover-date probes, so both reuse connections. */
         @Provides

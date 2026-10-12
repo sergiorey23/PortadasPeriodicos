@@ -3,6 +3,9 @@ package sergirex.portadasperiodicos
 import android.app.Application
 import android.util.Log
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ProcessLifecycleOwner
 import coil3.ImageLoader
 import coil3.PlatformContext
 import coil3.SingletonImageLoader
@@ -16,6 +19,7 @@ import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
 import sergirex.portadasperiodicos.domain.model.ThemeMode
 import sergirex.portadasperiodicos.domain.usecase.GetThemeModeUseCase
+import sergirex.portadasperiodicos.domain.usecase.RefreshCatalogUseCase
 import sergirex.portadasperiodicos.notifications.NotificationScheduler
 import javax.inject.Inject
 
@@ -42,6 +46,9 @@ class MyApplication : Application(), SingletonImageLoader.Factory {
     @Inject
     lateinit var notificationScheduler: NotificationScheduler
 
+    @Inject
+    lateinit var refreshCatalog: RefreshCatalogUseCase
+
     // Lives for the whole process, same as the night-mode setting it applies —
     // there's nothing to cancel it early for, unlike a ViewModel's viewModelScope.
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
@@ -51,6 +58,20 @@ class MyApplication : Application(), SingletonImageLoader.Factory {
         applicationScope.launch {
             getThemeMode().collect { mode -> AppCompatDelegate.setDefaultNightMode(mode.toNightMode()) }
         }
+        // The app stays alive for days (back only minimizes it), so check for a newer catalog every time it
+        // comes to the foreground, not just at process start. The repository skips the request if it
+        // checked recently, and keeps the current catalog if anything fails.
+        ProcessLifecycleOwner.get().lifecycle.addObserver(object : DefaultLifecycleObserver {
+            override fun onStart(owner: LifecycleOwner) {
+                applicationScope.launch {
+                    try {
+                        refreshCatalog()
+                    } catch (error: Exception) {
+                        Log.w("MyApplication", "Catalog refresh failed", error)
+                    }
+                }
+            }
+        })
         // Alarms don't survive a force-stop or update, so make sure the reminder matches the setting at every start.
         applicationScope.launch {
             try {

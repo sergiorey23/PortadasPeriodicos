@@ -2,7 +2,6 @@ package sergirex.portadasperiodicos
 
 import android.Manifest
 import android.content.Intent
-import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
@@ -28,37 +27,42 @@ import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.DiffUtil
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.DateValidatorPointBackward
 import com.google.android.material.datepicker.MaterialDatePicker
-import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayoutMediator
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 import sergirex.portadasperiodicos.databinding.AboutBinding
 import sergirex.portadasperiodicos.databinding.ActivityPortadasBinding
 import sergirex.portadasperiodicos.domain.model.EditionDate
 import sergirex.portadasperiodicos.domain.model.HomeTab
+import sergirex.portadasperiodicos.domain.repository.AdsEntitlementRepository
+import sergirex.portadasperiodicos.presentation.ads.AdsViewModel
 import sergirex.portadasperiodicos.presentation.portadas.PortadasViewModel
 import sergirex.portadasperiodicos.presentation.portadas.titleRes
 import sergirex.portadasperiodicos.presentation.settings.SettingsViewModel
 
 /** The home screen: a pager of newspaper-cover tabs, the navigation drawer and the toolbar actions. */
 @AndroidEntryPoint
-class Portadas : AppCompatActivity(), BillingManager.BillingListener {
+class Portadas : AppCompatActivity() {
 
     private lateinit var binding: ActivityPortadasBinding
-    private lateinit var prefs: SharedPreferences
     private var billingManager: BillingManager? = null
     private var adManager: AdManager? = null
     private var alertDialog: AlertDialog? = null
 
     private val viewModel: PortadasViewModel by viewModels()
     private val settingsViewModel: SettingsViewModel by viewModels()
+    private val adsViewModel: AdsViewModel by viewModels()
+
+    @Inject
+    lateinit var adsEntitlement: AdsEntitlementRepository
+    private var bannerRequested = false
     private lateinit var tabsAdapter: TabsAdapter
 
     // Must be registered before STARTED per the Activity Result API contract.
@@ -73,17 +77,12 @@ class Portadas : AppCompatActivity(), BillingManager.BillingListener {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        prefs = PreferenceManager.getDefaultSharedPreferences(this)
-        billingManager = BillingManager(this, lifecycleScope, prefs, { binding.drawerLayout }, this)
+        billingManager = BillingManager(this, lifecycleScope, adsEntitlement) { binding.drawerLayout }
         adManager = AdManager(this)
 
         binding = ActivityPortadasBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
-
-        if (BillingManager.isAdsRemoved(prefs)) {
-            hideRemoveAdsMenuItem(binding.navView)
-        }
 
         setUpTabs()
 
@@ -128,9 +127,7 @@ class Portadas : AppCompatActivity(), BillingManager.BillingListener {
 
         askNotificationPermissionOnce()
 
-        if (!BillingManager.isAdsRemoved(prefs)) {
-            adManager?.loadBanner(binding.bannerContainer, MAIN_BANNER_PLACEMENT)
-        }
+        observeAdsEntitlement()
     }
 
     private fun setUpTabs() {
@@ -177,8 +174,31 @@ class Portadas : AppCompatActivity(), BillingManager.BillingListener {
         }
     }
 
-    private fun hideRemoveAdsMenuItem(navigationView: NavigationView) {
-        navigationView.menu.findItem(R.id.nav_remove_ads).isVisible = false
+    /** Shows the banner (and the "Remove ads" item) until the user owns the purchase; reacts if that changes. */
+    private fun observeAdsEntitlement() {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                adsViewModel.adsRemoved.collect { removed ->
+                    when (removed) {
+                        null -> Unit
+                        true -> {
+                            adManager?.destroy()
+                            bannerRequested = false
+                            binding.bannerContainer.visibility = View.GONE
+                            binding.navView.menu.findItem(R.id.nav_remove_ads).isVisible = false
+                        }
+                        false -> {
+                            binding.bannerContainer.visibility = View.VISIBLE
+                            binding.navView.menu.findItem(R.id.nav_remove_ads).isVisible = true
+                            if (!bannerRequested) {
+                                bannerRequested = true
+                                adManager?.loadBanner(binding.bannerContainer, MAIN_BANNER_PLACEMENT)
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private fun showAboutInfo() {
@@ -236,12 +256,6 @@ class Portadas : AppCompatActivity(), BillingManager.BillingListener {
 
     private fun launchMarket() {
         startActivityOrToast(Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$packageName")))
-    }
-
-    override fun onAdsRemoved() {
-        adManager?.destroy()
-        binding.bannerContainer.visibility = View.GONE
-        hideRemoveAdsMenuItem(binding.navView)
     }
 
     /** Pager adapter over [HomeTab]s; changes are diffed so only the affected pages are added or removed. */

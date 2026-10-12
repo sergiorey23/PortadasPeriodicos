@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -20,6 +21,7 @@ import sergirex.portadasperiodicos.domain.model.EditionDate
 import sergirex.portadasperiodicos.domain.model.HomeTab
 import sergirex.portadasperiodicos.domain.model.PeriodicoRef
 import sergirex.portadasperiodicos.domain.model.toRef
+import sergirex.portadasperiodicos.domain.repository.PeriodicosRepository
 import sergirex.portadasperiodicos.domain.repository.SettingsRepository
 import sergirex.portadasperiodicos.domain.usecase.GetFavoritePeriodicosUseCase
 import sergirex.portadasperiodicos.domain.usecase.GetPeriodicosByCategoryUseCase
@@ -42,10 +44,11 @@ class PortadasViewModel @Inject constructor(
     private val getFavoritePeriodicos: GetFavoritePeriodicosUseCase,
     private val getPortadaCovers: GetPortadaCoversUseCase,
     private val settings: SettingsRepository,
-    observeFavorites: ObserveFavoritesUseCase
+    observeFavorites: ObserveFavoritesUseCase,
+    catalog: PeriodicosRepository
 ) : ViewModel() {
 
-    private class TabLoader {
+    private class TabLoader(val tab: HomeTab) {
         val state = MutableStateFlow(PortadasUiState())
         var job: Job? = null
 
@@ -69,6 +72,14 @@ class PortadasViewModel @Inject constructor(
 
     /** True once the initial-tab setting has been applied, so later tab changes don't re-select it. */
     var initialTabApplied = false
+
+    init {
+        // A newer catalog arrived: tabs that were already loaded re-check their newspaper list (loadIfNeeded
+        // only fetches when the list actually changed, and tabs never opened still load lazily).
+        viewModelScope.launch {
+            catalog.catalogVersion.drop(1).collect { loaders.values.toList().forEach { loadIfNeeded(it.tab) } }
+        }
+    }
 
     suspend fun initialTab(): HomeTab = settings.initialTab.first()
 
@@ -100,7 +111,7 @@ class PortadasViewModel @Inject constructor(
         loader.job = viewModelScope.launch { fetch(loader, periodicosFor(tab), currentTarget(), forceRefresh = true) }
     }
 
-    private fun loader(tab: HomeTab) = loaders.getOrPut(tab.key) { TabLoader() }
+    private fun loader(tab: HomeTab) = loaders.getOrPut(tab.key) { TabLoader(tab) }
 
     private fun currentTarget() = _selectedDate.value ?: EditionDate.today()
 
