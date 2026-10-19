@@ -9,6 +9,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.graphics.drawable.LayerDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -89,6 +90,7 @@ class Portadas : AppCompatActivity() {
 
         binding = ActivityPortadasBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        limitAppBarColorToStatusBar()
         setSupportActionBar(binding.toolbar)
 
         setUpTabs()
@@ -240,6 +242,18 @@ class Portadas : AppCompatActivity() {
             .show()
     }
 
+    /**
+     * The window background paints the app-bar color behind the status bar; keep that strip exactly as tall as
+     * the status bar so it can't show through behind the cover list.
+     */
+    private fun limitAppBarColorToStatusBar() {
+        val background = binding.root.background.mutate() as? LayerDrawable ?: return
+        binding.root.background = background
+        binding.root.addOnLayoutChangeListener { view, _, _, _, _, _, _, _, _ ->
+            background.setLayerHeight(STATUS_STRIP_LAYER, view.paddingTop)
+        }
+    }
+
     private fun showHelp() {
         val help = DialogHelpBinding.inflate(layoutInflater, binding.drawerLayout, false)
         help.tipSwipe.icon.setImageResource(R.drawable.ic_swap_horiz_24)
@@ -372,6 +386,7 @@ class Portadas : AppCompatActivity() {
     }
 
     private companion object {
+        const val STATUS_STRIP_LAYER = 1
         const val MAIN_BANNER_PLACEMENT = "799967435028134_799969321694612"
     }
 }

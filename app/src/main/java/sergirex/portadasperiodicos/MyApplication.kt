@@ -1,6 +1,8 @@
 package sergirex.portadasperiodicos
 
 import android.app.Application
+import android.app.UiModeManager
+import android.os.Build
 import android.util.Log
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -56,7 +58,10 @@ class MyApplication : Application(), SingletonImageLoader.Factory {
     override fun onCreate() {
         super.onCreate()
         applicationScope.launch {
-            getThemeMode().collect { mode -> AppCompatDelegate.setDefaultNightMode(mode.toNightMode()) }
+            getThemeMode().collect { mode ->
+                AppCompatDelegate.setDefaultNightMode(mode.toNightMode())
+                applyToSplashScreen(mode)
+            }
         }
         // The app stays alive for days (back only minimizes it), so check for a newer catalog every time it
         // comes to the foreground, not just at process start. The repository skips the request if it
@@ -85,6 +90,22 @@ class MyApplication : Application(), SingletonImageLoader.Factory {
     override fun newImageLoader(context: PlatformContext): ImageLoader = ImageLoader.Builder(context)
         .components { add(OkHttpNetworkFetcherFactory(callFactory = { okHttpClient.get() })) }
         .build()
+
+    /**
+     * The launch splash is drawn by the system before this process exists, so it follows the system theme
+     * unless the system itself knows the app's own setting: Android 12+ remembers it per app.
+     */
+    private fun applyToSplashScreen(mode: ThemeMode) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return
+        val uiMode = getSystemService(UiModeManager::class.java) ?: return
+        uiMode.setApplicationNightMode(
+            when (mode) {
+                ThemeMode.LIGHT -> UiModeManager.MODE_NIGHT_NO
+                ThemeMode.DARK -> UiModeManager.MODE_NIGHT_YES
+                ThemeMode.SYSTEM -> UiModeManager.MODE_NIGHT_AUTO
+            }
+        )
+    }
 
     private fun ThemeMode.toNightMode(): Int = when (this) {
         ThemeMode.LIGHT -> AppCompatDelegate.MODE_NIGHT_NO

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Window background with the app-bar color behind the status bar only (the navigation bar keeps the plain background). -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="?android:attr/windowBackground" />
+    <item android:gravity="top" android:height="200dp">
+        <shape>
+            <solid android:color="?attr/colorAppBar" />
+        </shape>
+    </item>
+</layer-list>

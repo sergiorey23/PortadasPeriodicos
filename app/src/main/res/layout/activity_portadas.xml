@@ -2,6 +2,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/bg_status_bar_strip"
     android:fitsSystemWindows="true"
     android:orientation="vertical">
 
@@ -71,8 +72,10 @@
             android:layout_width="300dp"
             android:layout_height="match_parent"
             android:layout_gravity="start"
+            app:drawerLayoutCornerSize="0dp"
             app:headerLayout="@layout/nav_header"
-            app:menu="@menu/drawer" />
+            app:menu="@menu/drawer"
+            app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.Portadas.Square" />
 
     </androidx.drawerlayout.widget.DrawerLayout>
 

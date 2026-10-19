@@ -58,4 +58,10 @@
         <item name="android:windowExitAnimation">@android:anim/fade_out</item>
     </style>
 
+
+    <!-- Square corners (the Material 3 drawer rounds its trailing edge by default). -->
+    <style name="ShapeAppearanceOverlay.Portadas.Square" parent="">
+        <item name="cornerSize">0dp</item>
+    </style>
+
 </resources>

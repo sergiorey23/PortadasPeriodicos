@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Dark scheme: same role names as values/colors.xml. -->
 <resources>
-    <color name="primary">#4FDBC8</color>
-    <color name="on_primary">#003731</color>
-    <color name="primary_container">#005047</color>
-    <color name="on_primary_container">#71F8E4</color>
-    <color name="secondary">#B1CCC6</color>
-    <color name="on_secondary">#1C3531</color>
-    <color name="secondary_container">#334B47</color>
-    <color name="on_secondary_container">#CCE8E3</color>
+    <color name="primary">#60D5E9</color>
+    <color name="on_primary">#00363E</color>
+    <color name="primary_container">#004E5A</color>
+    <color name="on_primary_container">#A8EDFF</color>
+    <color name="secondary">#B2CBD2</color>
+    <color name="on_secondary">#1C343A</color>
+    <color name="secondary_container">#334B52</color>
+    <color name="on_secondary_container">#CEE7EE</color>
     <color name="tertiary">#AECAE6</color>
     <color name="on_tertiary">#153349</color>
     <color name="tertiary_container">#2D4960</color>
@@ -18,27 +18,27 @@
     <color name="error_container">#93000A</color>
     <color name="on_error_container">#FFDAD6</color>
 
-    <color name="background">#0E1513</color>
-    <color name="on_background">#DEE4E1</color>
-    <color name="surface">#0E1513</color>
-    <color name="on_surface">#DEE4E1</color>
-    <color name="surface_variant">#3F4946</color>
-    <color name="on_surface_variant">#BEC9C5</color>
-    <color name="outline">#899390</color>
-    <color name="outline_variant">#3F4946</color>
-    <color name="inverse_surface">#DEE4E1</color>
-    <color name="inverse_on_surface">#2B3230</color>
-    <color name="inverse_primary">#006B5E</color>
-    <color name="surface_dim">#0E1513</color>
-    <color name="surface_bright">#343B39</color>
-    <color name="surface_container_lowest">#090F0E</color>
-    <color name="surface_container_low">#161D1B</color>
-    <color name="surface_container">#1A211F</color>
-    <color name="surface_container_high">#252B2A</color>
-    <color name="surface_container_highest">#303634</color>
+    <color name="background">#0F1415</color>
+    <color name="on_background">#DEE3E5</color>
+    <color name="surface">#0F1415</color>
+    <color name="on_surface">#DEE3E5</color>
+    <color name="surface_variant">#3F484B</color>
+    <color name="on_surface_variant">#BFC8CC</color>
+    <color name="outline">#899296</color>
+    <color name="outline_variant">#3F484B</color>
+    <color name="inverse_surface">#DEE3E5</color>
+    <color name="inverse_on_surface">#2C3133</color>
+    <color name="inverse_primary">#006A7A</color>
+    <color name="surface_dim">#0F1415</color>
+    <color name="surface_bright">#353A3B</color>
+    <color name="surface_container_lowest">#090F10</color>
+    <color name="surface_container_low">#171D1E</color>
+    <color name="surface_container">#1B2122</color>
+    <color name="surface_container_high">#252B2C</color>
+    <color name="surface_container_highest">#303637</color>
 
-    <color name="app_bar">#1F2624</color>
-    <color name="on_app_bar">#DEE4E1</color>
+    <color name="app_bar">#1F2629</color>
+    <color name="on_app_bar">#DEE3E5</color>
     <!-- Ribbon on covers that are not today's edition; drawn over the image, so identical in both modes. -->
     <color name="date_ribbon">#D32F2F</color>
     <color name="on_date_ribbon">#FFFFFF</color>
