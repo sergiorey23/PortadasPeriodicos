@@ -25,6 +25,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDialog
 import androidx.core.content.ContextCompat
@@ -282,6 +283,7 @@ class Portadas : AppCompatActivity() {
     }
 
     /** Asks the launcher to pin the widget; the system confirmation doesn't tell us the outcome, so a callback toasts it. */
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun pinFavoritesWidget(widgets: AppWidgetManager) {
         unregisterWidgetPinReceiver()
         val action = "$packageName.WIDGET_PINNED"
