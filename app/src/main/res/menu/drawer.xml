@@ -1,4 +1,5 @@
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item android:title="@string/settings"
         android:id="@+id/nav_settings"
@@ -6,7 +7,8 @@
 
     <item android:title="@string/removeAds"
         android:id="@+id/nav_remove_ads"
-        android:icon="@drawable/baseline_block_24"/>
+        android:icon="@drawable/ic_star_24"
+        app:actionLayout="@layout/nav_remove_ads_badge"/>
 
     <item android:title="@string/rate"
         android:id="@+id/nav_rate"
@@ -18,10 +20,10 @@
 
     <item android:title="@string/help"
         android:id="@+id/nav_help"
-        android:icon="@drawable/ic_help_outline_black_24dp"/>
+        android:icon="@drawable/ic_help_24"/>
 
     <item
         android:id="@+id/nav_about"
         android:title="@string/about"
-        android:icon="@drawable/ic_info_outline_black_24dp"/>
+        android:icon="@drawable/ic_info_24"/>
 </menu>

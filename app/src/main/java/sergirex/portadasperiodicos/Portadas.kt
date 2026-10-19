@@ -1,25 +1,31 @@
 package sergirex.portadasperiodicos
 
 import android.Manifest
+import android.app.PendingIntent
+import android.appwidget.AppWidgetManager
+import android.content.BroadcastReceiver
+import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.text.Html
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.ActionBarDrawerToggle
-import androidx.appcompat.app.AlertDialog
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDialog
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.Fragment
@@ -38,6 +44,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import sergirex.portadasperiodicos.databinding.AboutBinding
+import sergirex.portadasperiodicos.databinding.DialogHelpBinding
 import sergirex.portadasperiodicos.databinding.ActivityPortadasBinding
 import sergirex.portadasperiodicos.domain.model.EditionDate
 import sergirex.portadasperiodicos.domain.model.HomeTab
@@ -53,8 +60,8 @@ class Portadas : AppCompatActivity() {
 
     private lateinit var binding: ActivityPortadasBinding
     private var billingManager: BillingManager? = null
+    private var widgetPinReceiver: BroadcastReceiver? = null
     private var adManager: AdManager? = null
-    private var alertDialog: AlertDialog? = null
 
     private val viewModel: PortadasViewModel by viewModels()
     private val settingsViewModel: SettingsViewModel by viewModels()
@@ -99,7 +106,7 @@ class Portadas : AppCompatActivity() {
         binding.navView.setNavigationItemSelectedListener { menuItem ->
             binding.drawerLayout.closeDrawers()
             when (menuItem.itemId) {
-                R.id.nav_help -> showDialog().show()
+                R.id.nav_help -> showHelp()
                 R.id.nav_remove_ads -> billingManager?.showPurchaseDialog()
                 R.id.nav_rate -> launchMarket()
                 R.id.nav_share -> {
@@ -229,29 +236,64 @@ class Portadas : AppCompatActivity() {
         }
 
         MaterialAlertDialogBuilder(this)
-            .setPositiveButton(R.string.close, null)
             .setView(aboutBinding.root)
             .show()
     }
 
-    private fun showDialog(): AlertDialog {
-        alertDialog?.let { return it }
+    private fun showHelp() {
+        val help = DialogHelpBinding.inflate(layoutInflater, binding.drawerLayout, false)
+        help.tipSwipe.icon.setImageResource(R.drawable.ic_swap_horiz_24)
+        help.tipSwipe.text.setText(R.string.help_description)
+        help.tipOpen.icon.setImageResource(R.drawable.ic_fullscreen_24)
+        help.tipOpen.text.setText(R.string.help_tip_open)
+        help.tipFavorites.icon.setImageResource(R.drawable.ic_favorite_black_24dp)
+        help.tipFavorites.text.setText(R.string.help_tip_favorites)
 
-        val message = "<Big>${getString(R.string.help_description)}<br/><br/>" +
-            "${getString(R.string.help_description2)}</Big><br/><br/>${getString(R.string.rate_app)}"
-        val dialog = MaterialAlertDialogBuilder(this)
-            .setTitle(R.string.help)
-            .setIcon(R.mipmap.news_icon)
-            .setPositiveButton("OK", null)
-            .create()
-        dialog.setMessage(
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-                Html.fromHtml(message, Html.FROM_HTML_MODE_LEGACY)
-            else
-                @Suppress("DEPRECATION") Html.fromHtml(message)
+        help.tipWidget.icon.setImageResource(R.drawable.ic_widgets_24)
+        help.tipWidget.text.setText(R.string.help_tip_widget)
+
+        val dialog = AppCompatDialog(this, R.style.Theme_Portadas_FullScreenDialog).apply { setContentView(help.root) }
+        val widgets = AppWidgetManager.getInstance(this)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && widgets.isRequestPinAppWidgetSupported) {
+            help.addWidget.visibility = View.VISIBLE
+            help.addWidget.setOnClickListener {
+                dialog.dismiss()
+                pinFavoritesWidget(widgets)
+            }
+        }
+        help.rate.setOnClickListener { dialog.dismiss(); launchMarket() }
+        help.gotIt.setOnClickListener { dialog.dismiss() }
+        dialog.show()
+        dialog.window?.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+    }
+
+    /** Asks the launcher to pin the widget; the system confirmation doesn't tell us the outcome, so a callback toasts it. */
+    private fun pinFavoritesWidget(widgets: AppWidgetManager) {
+        unregisterWidgetPinReceiver()
+        val action = "$packageName.WIDGET_PINNED"
+        val receiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                Toast.makeText(applicationContext, R.string.widget_added, Toast.LENGTH_LONG).show()
+                unregisterWidgetPinReceiver()
+            }
+        }
+        ContextCompat.registerReceiver(this, receiver, IntentFilter(action), ContextCompat.RECEIVER_NOT_EXPORTED)
+        widgetPinReceiver = receiver
+
+        val callback = PendingIntent.getBroadcast(
+            this, 0, Intent(action).setPackage(packageName),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
-        alertDialog = dialog
-        return dialog
+        val requested = widgets.requestPinAppWidget(ComponentName(this, FavoritosWidget::class.java), null, callback)
+        if (!requested) {
+            unregisterWidgetPinReceiver()
+            Toast.makeText(this, R.string.widget_add_failed, Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun unregisterWidgetPinReceiver() {
+        widgetPinReceiver?.let { unregisterReceiver(it) }
+        widgetPinReceiver = null
     }
 
     private fun launchMarket() {
@@ -323,7 +365,7 @@ class Portadas : AppCompatActivity() {
 
     override fun onDestroy() {
         // A dialog still showing when the Activity goes away would leak its window.
-        alertDialog?.dismiss()
+        unregisterWidgetPinReceiver()
         billingManager?.destroy()
         adManager?.destroy()
         super.onDestroy()

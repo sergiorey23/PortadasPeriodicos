@@ -19,10 +19,17 @@
     <string name="action_share">Compartir</string>
 
     <!-- Help dialog -->
-    <string name="close">Cerrar</string>
-    <string name="help_description">Desliza entre las pestañas para ver las portadas de cada categoría: General, Deportes, Economía, Locales e Internacional.</string>
-    <string name="help_description2">Toca una portada para verla en grande, guardarla o compartirla, y marca tus periódicos favoritos para encontrarlos rápido en la pestaña Favoritos.</string>
-    <string name="rate_app">Si te gusta la aplicación, valórala en Google Play. ¡Nos ayuda mucho!</string>
+    <string name="help_title">Cómo funciona</string>
+    <string name="help_tip_open">Toca una portada para verla a pantalla completa, hacer zoom, guardarla o compartirla.</string>
+    <string name="help_tip_favorites">Elige tus periódicos favoritos con el corazón y los tendrás juntos en la pestaña Favoritos.</string>
+    <string name="help_tip_widget">Añade el widget de Favoritos a tu pantalla de inicio y ve tus portadas sin abrir la app.</string>
+    <string name="help_add_widget">Añadir widget</string>
+    <string name="widget_added">Widget añadido a tu pantalla de inicio</string>
+    <string name="widget_add_failed">No se ha podido añadir el widget</string>
+    <string name="help_got_it">Entendido</string>
+    <string name="nav_header_tagline">Las portadas de cada día</string>
+    <string name="help_description">Desliza entre pestañas para recorrer las portadas por categoría: General, Deportes, Economía, Locales e Internacional.</string>
+    <string name="rate_app">¿Te gusta la app? Una valoración en Google Play nos ayuda mucho. ¡Gracias!</string>
 
     <!-- Menu actions -->
     <string name="date">Fecha</string>
@@ -44,7 +51,7 @@
 
     <!-- About screen -->
     <string name="app_full_name">Portadas de prensa</string>
-    <string name="about_desc">Consulta cada día las portadas de los principales periódicos españoles, guárdalas o compártelas, y marca tus favoritos para tenerlos siempre a mano.</string>
+    <string name="about_desc">Las portadas de los principales periódicos de España y del mundo, cada día en tu bolsillo. Guárdalas, compártelas y marca tus favoritas para tenerlas siempre a mano.</string>
     <string name="contact">Contacto</string>
     <string name="mas_apps">Más aplicaciones</string>
     <string name="portadas_revistas">Portadas de revistas</string>
@@ -61,10 +68,16 @@
     <string name="daily_notification_summary">Recibe una notificación cada mañana a las 9:00</string>
     <string name="notifications_permission_denied">Sin permiso de notificaciones no se puede activar el aviso diario. Puedes concederlo en los ajustes del sistema.</string>
     <string name="select_date">Seleccionar fecha</string>
-    <string name="billing_remove_ads_message">Deshazte de la publicidad por %1$s de por vida</string>
-    <string name="billing_cancel">Cancelar</string>
+    <string name="remove_ads_badge">Pago único</string>
+    <string name="billing_dialog_title">Disfruta sin anuncios</string>
+    <string name="billing_dialog_subtitle">Un solo pago y la publicidad desaparece para siempre.</string>
+    <string name="billing_price_caption">pago único · de por vida</string>
+    <string name="billing_benefit_no_ads">Sin banners en ninguna pantalla</string>
+    <string name="billing_benefit_once">Sin suscripciones ni cuotas</string>
+    <string name="billing_benefit_devices">Válido en todos tus dispositivos con tu cuenta de Google</string>
+    <string name="billing_benefit_support">Apoyas el desarrollo de la app</string>
+    <string name="billing_not_now">Ahora no</string>
     <string name="billing_restore">Restaurar compra</string>
-    <string name="billing_buy">Comprar</string>
     <string name="billing_no_products">No hay productos disponibles ahora mismo. Inténtalo más tarde.</string>
     <string name="billing_restored">Compra restaurada</string>
     <string name="billing_nothing_to_restore">No se ha encontrado ninguna compra</string>

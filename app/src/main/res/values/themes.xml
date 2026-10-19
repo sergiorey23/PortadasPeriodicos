@@ -53,11 +53,17 @@
         <item name="appBarLayoutStyle">@style/Widget.Portadas.AppBarLayout</item>
     </style>
 
-    <!-- Launch theme (AndroidX SplashScreen): the app icon on the app-bar color, then Theme.Portadas. -->
+    <!-- Launch theme (AndroidX SplashScreen): the newspaper logo (no tile) on the app-bar color, then Theme.Portadas. -->
     <style name="Theme.Portadas.Starting" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/app_bar</item>
-        <item name="windowSplashScreenAnimatedIcon">@mipmap/news_icon_foreground</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_logo</item>
         <item name="postSplashScreenTheme">@style/Theme.Portadas</item>
+    </style>
+
+    <!-- Full-screen dialogs (Help): an opaque surface instead of a floating card. -->
+    <style name="Theme.Portadas.FullScreenDialog" parent="Theme.Portadas">
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowBackground">?attr/colorSurface</item>
     </style>
 
     <!-- Applied to toolbars so their icons and overflow dots use the app-bar content color. -->

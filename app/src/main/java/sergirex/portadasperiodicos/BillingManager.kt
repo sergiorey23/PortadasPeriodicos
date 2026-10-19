@@ -2,6 +2,7 @@ package sergirex.portadasperiodicos
 
 import android.app.Activity
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
 import android.widget.Toast
 import com.android.billingclient.api.AcknowledgePurchaseParams
@@ -19,6 +20,7 @@ import com.android.billingclient.api.acknowledgePurchase
 import com.android.billingclient.api.queryProductDetails
 import com.android.billingclient.api.queryPurchasesAsync
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import sergirex.portadasperiodicos.databinding.DialogRemoveAdsBinding
 import sergirex.portadasperiodicos.domain.repository.AdsEntitlementRepository
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.CoroutineScope
@@ -72,14 +74,18 @@ class BillingManager(
                 Toast.makeText(activity, R.string.billing_no_products, Toast.LENGTH_LONG).show()
                 return@launch
             }
-            MaterialAlertDialogBuilder(activity)
-                .setTitle(details.name)
-                .setMessage(activity.getString(R.string.billing_remove_ads_message, price))
-                .setIcon(R.mipmap.news_icon)
-                .setNegativeButton(R.string.billing_cancel, null)
-                .setNeutralButton(R.string.billing_restore) { _, _ -> restorePurchases() }
-                .setPositiveButton(R.string.billing_buy) { _, _ -> launchPurchaseFlow(details) }
-                .show()
+            val content = DialogRemoveAdsBinding.inflate(LayoutInflater.from(activity)).apply {
+                this.price.text = price
+                benefitNoAds.text.setText(R.string.billing_benefit_no_ads)
+                benefitOnce.text.setText(R.string.billing_benefit_once)
+                benefitDevices.text.setText(R.string.billing_benefit_devices)
+                benefitSupport.text.setText(R.string.billing_benefit_support)
+            }
+            val dialog = MaterialAlertDialogBuilder(activity).setView(content.root).create()
+            content.buy.setOnClickListener { dialog.dismiss(); launchPurchaseFlow(details) }
+            content.notNow.setOnClickListener { dialog.dismiss() }
+            content.restore.setOnClickListener { dialog.dismiss(); restorePurchases() }
+            dialog.show()
         }
     }
 

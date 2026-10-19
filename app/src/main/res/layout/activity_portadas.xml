@@ -68,27 +68,11 @@
 
         <com.google.android.material.navigation.NavigationView
             android:id="@+id/navView"
-            android:layout_width="250dp"
+            android:layout_width="300dp"
             android:layout_height="match_parent"
             android:layout_gravity="start"
             app:headerLayout="@layout/nav_header"
-            app:menu="@menu/drawer">
-
-            <TextView
-                android:id="@+id/appSource"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="16dp"
-                android:layout_marginRight="16dp"
-                android:layout_marginBottom="60dp"
-                android:gravity="center_horizontal"
-                android:lineSpacingExtra="4sp"
-                android:layout_gravity="bottom"
-                android:text="@string/appSource"
-                android:textAllCaps="false"
-                android:textAppearance="@style/TextAppearance.Material3.BodyLarge" />
-
-        </com.google.android.material.navigation.NavigationView>
+            app:menu="@menu/drawer" />
 
     </androidx.drawerlayout.widget.DrawerLayout>
 
