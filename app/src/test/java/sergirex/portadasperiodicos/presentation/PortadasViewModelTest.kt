@@ -58,6 +58,7 @@ class PortadasViewModelTest {
     private val favorites = object : FavoritePeriodicosRepository {
         override val favorites: Flow<List<PeriodicoRef>> = favoritesFlow
         override suspend fun toggle(periodico: PeriodicoRef) = Unit
+        override suspend fun clear() = Unit
     }
     private val covers = object : PortadaCoverRepository {
         override fun getCovers(periodicos: List<PeriodicoRef>, targetDate: String, forceRefresh: Boolean): Flow<PortadaCover> {

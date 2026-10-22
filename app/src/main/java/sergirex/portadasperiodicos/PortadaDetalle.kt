@@ -48,6 +48,7 @@ import sergirex.portadasperiodicos.domain.model.CoverUrls
 import sergirex.portadasperiodicos.presentation.ads.AdsViewModel
 import sergirex.portadasperiodicos.domain.model.EditionDate
 import java.io.File
+import sergirex.portadasperiodicos.ui.ActivityTransitions
 import sergirex.portadasperiodicos.ui.PureBlackTheme
 import sergirex.portadasperiodicos.ui.SpringMotion
 
@@ -81,6 +82,7 @@ class PortadaDetalle : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         PureBlackTheme.apply(this)
+        ActivityTransitions.asChild(this)
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         binding = ActivityPortadaDetalleBinding.inflate(layoutInflater)
@@ -163,7 +165,7 @@ class PortadaDetalle : AppCompatActivity() {
             return
         }
 
-        SpringMotion.animateProperty(addIcon, ICON_LEVEL, if (isExpanded) ADD_ICON_OPEN_LEVEL else 0f, SpringMotion.SPATIAL)
+        SpringMotion.animateProperty(this, addIcon, ICON_LEVEL, if (isExpanded) ADD_ICON_OPEN_LEVEL else 0f, SpringMotion.Spring.FAST_SPATIAL)
         minis.forEachIndexed { index, fab ->
             if (isExpanded && fab.visibility != View.VISIBLE) {
                 // Start from just below and small, so the springs have somewhere to travel from.
@@ -178,10 +180,10 @@ class PortadaDetalle : AppCompatActivity() {
             fab.postDelayed({
                 if (viewModel.areFabsExpanded.value != isExpanded) return@postDelayed // toggled again meanwhile
                 val scale = if (isExpanded) 1f else FAB_HIDDEN_SCALE
-                SpringMotion.animate(fab, DynamicAnimation.TRANSLATION_Y, if (isExpanded) 0f else fabTravel(), SpringMotion.SPATIAL)
-                SpringMotion.animate(fab, DynamicAnimation.SCALE_X, scale, SpringMotion.SPATIAL)
-                SpringMotion.animate(fab, DynamicAnimation.SCALE_Y, scale, SpringMotion.SPATIAL)
-                SpringMotion.animate(fab, DynamicAnimation.ALPHA, if (isExpanded) 1f else 0f, SpringMotion.EFFECTS) {
+                SpringMotion.animate(fab, DynamicAnimation.TRANSLATION_Y, if (isExpanded) 0f else fabTravel(), SpringMotion.Spring.DEFAULT_SPATIAL)
+                SpringMotion.animate(fab, DynamicAnimation.SCALE_X, scale, SpringMotion.Spring.DEFAULT_SPATIAL)
+                SpringMotion.animate(fab, DynamicAnimation.SCALE_Y, scale, SpringMotion.Spring.DEFAULT_SPATIAL)
+                SpringMotion.animate(fab, DynamicAnimation.ALPHA, if (isExpanded) 1f else 0f, SpringMotion.Spring.DEFAULT_EFFECTS) {
                     if (!isExpanded) fab.visibility = View.INVISIBLE
                 }
             }, delay)

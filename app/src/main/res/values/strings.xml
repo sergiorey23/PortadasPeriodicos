@@ -133,4 +133,17 @@
     <string name="feedback_summary">Sugerencias o avisar de una portada que falta</string>
     <string name="feedback_subject">Comentarios sobre Portadas de prensa</string>
     <string name="feedback_body">Escribe aquí tu comentario o la portada que falta (periódico y país):\n\n\n\n— Datos de la app, no los borres —\nVersión: %1$s (%2$d)\nCatálogo: v%3$d (%4$d periódicos)\nAndroid: %5$s · %6$s</string>
+    <string name="clear_favorites_title">Borrar todos los favoritos</string>
+    <string name="clear_favorites_none">No tienes favoritos</string>
+    <string name="clear_favorites_dialog_title">¿Borrar todos los favoritos?</string>
+    <string name="clear_favorites_confirm">Borrar</string>
+    <string name="clear_favorites_done">Favoritos borrados</string>
+    <plurals name="clear_favorites_summary">
+        <item quantity="one">Tienes %d favorito</item>
+        <item quantity="other">Tienes %d favoritos</item>
+    </plurals>
+    <plurals name="clear_favorites_message">
+        <item quantity="one">Se quitará %d periódico de tus favoritos. Esta acción no se puede deshacer.</item>
+        <item quantity="other">Se quitarán %d periódicos de tus favoritos. Esta acción no se puede deshacer.</item>
+    </plurals>
 </resources>

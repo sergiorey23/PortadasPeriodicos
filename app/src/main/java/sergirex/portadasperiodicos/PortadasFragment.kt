@@ -18,6 +18,7 @@ import sergirex.portadasperiodicos.domain.model.HomeTab
 import sergirex.portadasperiodicos.domain.model.PortadaCover
 import sergirex.portadasperiodicos.presentation.portadas.PortadasViewModel
 import sergirex.portadasperiodicos.presentation.settings.SettingsViewModel
+import sergirex.portadasperiodicos.ui.ActivityTransitions
 
 /**
  * Replaces General/Deportes/Economia/Locales/Internacional/Favoritos.java —
@@ -91,7 +92,7 @@ class PortadasFragment : Fragment() {
     private fun openDetail(clicked: PortadaCover) {
         val state = viewModel.uiState(tab).value
         val portadas = state.allPeriodicos.map { Portada(it.id, it.name, it.domain, it.country, state.targetDate) }
-        startActivity(PortadaDetalle.createIntent(requireContext(), portadas, clicked.periodico.id))
+        ActivityTransitions.launch(requireActivity(), PortadaDetalle.createIntent(requireContext(), portadas, clicked.periodico.id))
     }
 
     override fun onDestroyView() {

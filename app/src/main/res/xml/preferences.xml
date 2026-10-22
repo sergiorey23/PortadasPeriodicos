@@ -103,6 +103,10 @@
             android:key="clear_image_cache"
             android:title="@string/cache_clear_title"
             app:iconSpaceReserved="false" />
+        <Preference
+            android:key="clear_favorites"
+            android:title="@string/clear_favorites_title"
+            app:iconSpaceReserved="false" />
     </PreferenceCategory>
 
     <PreferenceCategory

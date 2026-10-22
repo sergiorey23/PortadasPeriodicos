@@ -32,7 +32,6 @@
             android:layout_height="match_parent" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
-            style="@style/Widget.Material3Expressive.FloatingActionButton"
             android:id="@+id/favButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -48,7 +47,6 @@
             android:layout_marginEnd="15dp" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
-            style="@style/Widget.Material3Expressive.FloatingActionButton"
             android:id="@+id/httpButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -66,7 +64,6 @@
             android:layout_marginEnd="15dp" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
-            style="@style/Widget.Material3Expressive.FloatingActionButton"
             android:id="@+id/addFab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

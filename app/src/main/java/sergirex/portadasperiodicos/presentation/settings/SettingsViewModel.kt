@@ -6,6 +6,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import sergirex.portadasperiodicos.data.local.ImageCacheControl
@@ -15,6 +16,8 @@ import sergirex.portadasperiodicos.domain.model.HomeTab
 import sergirex.portadasperiodicos.domain.model.ReminderSchedule
 import sergirex.portadasperiodicos.domain.repository.PeriodicosRepository
 import sergirex.portadasperiodicos.domain.repository.SettingsRepository
+import sergirex.portadasperiodicos.domain.usecase.ClearFavoritesUseCase
+import sergirex.portadasperiodicos.domain.usecase.ObserveFavoritesUseCase
 import sergirex.portadasperiodicos.notifications.NotificationScheduler
 import javax.inject.Inject
 
@@ -23,7 +26,9 @@ class SettingsViewModel @Inject constructor(
     private val settings: SettingsRepository,
     private val scheduler: NotificationScheduler,
     private val catalog: PeriodicosRepository,
-    private val imageCache: ImageCacheControl
+    private val imageCache: ImageCacheControl,
+    observeFavorites: ObserveFavoritesUseCase,
+    private val clearAllFavorites: ClearFavoritesUseCase
 ) : ViewModel() {
 
     val initialTab: StateFlow<HomeTab> =
@@ -41,6 +46,18 @@ class SettingsViewModel @Inject constructor(
     val gridColumns: StateFlow<Int> = settings.gridColumns.stateIn(viewModelScope, SharingStarted.Eagerly, 0)
 
     val pureBlack: StateFlow<Boolean> = settings.pureBlack.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    /** How many favorites the user has (the ones shown, i.e. whose newspaper is still in the catalog). */
+    val favoritesCount: StateFlow<Int> =
+        observeFavorites().map { it.size }.stateIn(viewModelScope, SharingStarted.Eagerly, 0)
+
+    /** Deletes every favorite, then calls [onDone] on the main thread. */
+    fun clearFavorites(onDone: () -> Unit) {
+        viewModelScope.launch {
+            clearAllFavorites()
+            onDone()
+        }
+    }
 
     fun setInitialTab(tab: HomeTab) {
         viewModelScope.launch { settings.setInitialTab(tab) }
