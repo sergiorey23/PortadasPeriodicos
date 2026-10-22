@@ -4,6 +4,7 @@ import android.app.Activity
 import android.app.ActivityOptions
 import android.content.Intent
 import android.view.Window
+import androidx.annotation.IdRes
 import com.google.android.material.transition.platform.MaterialSharedAxis
 
 /**
@@ -14,25 +15,25 @@ import com.google.android.material.transition.platform.MaterialSharedAxis
  * Call [asParent] / [asChild] in `onCreate` before `super.onCreate`, and open children with [launch].
  */
 object ActivityTransitions {
-    fun asParent(activity: Activity) = with(activity.window) {
+    /** [rootId] is the screen's root view: the transition moves that one view instead of every child separately. */
+    fun asParent(activity: Activity, @IdRes rootId: Int) = with(activity.window) {
         requestFeature(Window.FEATURE_ACTIVITY_TRANSITIONS)
-        exitTransition = axis(forward = true)
-        reenterTransition = axis(forward = false)
+        exitTransition = axis(forward = true, rootId)
+        reenterTransition = axis(forward = false, rootId)
     }
 
-    fun asChild(activity: Activity) = with(activity.window) {
+    fun asChild(activity: Activity, @IdRes rootId: Int) = with(activity.window) {
         requestFeature(Window.FEATURE_ACTIVITY_TRANSITIONS)
-        enterTransition = axis(forward = true)
-        returnTransition = axis(forward = false)
+        enterTransition = axis(forward = true, rootId)
+        returnTransition = axis(forward = false, rootId)
     }
 
     fun launch(activity: Activity, intent: Intent) {
         activity.startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(activity).toBundle())
     }
 
-    private fun axis(forward: Boolean) = MaterialSharedAxis(MaterialSharedAxis.X, forward).apply {
-        // The system bars stay put instead of sliding with the content.
-        excludeTarget(android.R.id.statusBarBackground, true)
-        excludeTarget(android.R.id.navigationBarBackground, true)
-    }
+    // Targeting only the root keeps the system bars still, and matters for correctness: a visibility transition that
+    // animates every view can leave one stuck on screen if it was hidden while the transition ran (a loading spinner).
+    private fun axis(forward: Boolean, @IdRes rootId: Int) =
+        MaterialSharedAxis(MaterialSharedAxis.X, forward).apply { addTarget(rootId) }
 }

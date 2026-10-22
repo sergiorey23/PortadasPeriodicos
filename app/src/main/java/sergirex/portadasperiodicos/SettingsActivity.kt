@@ -66,7 +66,7 @@ class SettingsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         PureBlackTheme.apply(this)
-        ActivityTransitions.asChild(this)
+        ActivityTransitions.asChild(this, R.id.settingsRoot)
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_settings)

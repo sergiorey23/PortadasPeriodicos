@@ -82,7 +82,7 @@ class PortadaDetalle : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         PureBlackTheme.apply(this)
-        ActivityTransitions.asChild(this)
+        ActivityTransitions.asChild(this, R.id.detailRoot)
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         binding = ActivityPortadaDetalleBinding.inflate(layoutInflater)
