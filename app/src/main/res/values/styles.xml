@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Widget.Portadas.AppBarLayout" parent="Widget.Material3.AppBarLayout">
+    <style name="Widget.Portadas.AppBarLayout" parent="Widget.Material3Expressive.AppBarLayout">
         <item name="android:background">?attr/colorAppBar</item>
         <item name="liftOnScroll">false</item>
     </style>
 
-    <style name="Widget.Portadas.Toolbar" parent="Widget.Material3.Toolbar">
+    <style name="Widget.Portadas.Toolbar" parent="Widget.Material3Expressive.Toolbar">
         <item name="android:background">?attr/colorAppBar</item>
         <item name="titleTextColor">?attr/colorOnAppBar</item>
         <item name="subtitleTextColor">?attr/colorOnAppBar</item>

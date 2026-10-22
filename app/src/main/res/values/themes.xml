@@ -6,7 +6,7 @@
     values/colors.xml and values-night/colors.xml, and AppCompatDelegate.setDefaultNightMode()
     (driven by the user's theme setting in MyApplication) picks which set applies to every Activity.
     -->
-    <style name="Theme.Portadas" parent="Theme.Material3.DayNight.NoActionBar">
+    <style name="Theme.Portadas" parent="Theme.Material3Expressive.DayNight.NoActionBar">
         <item name="colorPrimary">@color/primary</item>
         <item name="colorOnPrimary">@color/on_primary</item>
         <item name="colorPrimaryContainer">@color/primary_container</item>
