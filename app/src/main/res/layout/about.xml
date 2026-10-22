@@ -60,15 +60,6 @@
             android:text="@string/contact"
             app:icon="@drawable/ic_contact_mail_black_24dp" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/appSource"
-            style="@style/Widget.Material3Expressive.Button.TonalButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/appSource"
-            app:icon="@drawable/ic_language_black_24dp" />
-
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/portadas_revistas"
             style="@style/Widget.Material3.CardView.Outlined"
