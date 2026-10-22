@@ -233,9 +233,6 @@ class Portadas : AppCompatActivity() {
         }
         aboutBinding.appVersion.text = "v${versionName ?: "N/A"}"
 
-        aboutBinding.appSource.setOnClickListener {
-            startActivityOrToast(Intent(Intent.ACTION_VIEW, Uri.parse("https://www.lasportadas.es/")))
-        }
 
         aboutBinding.privacyPolicy.setOnClickListener {
             startActivityOrToast(Intent(Intent.ACTION_VIEW, Uri.parse(PRIVACY_POLICY_URL)))
