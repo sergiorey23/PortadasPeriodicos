@@ -24,10 +24,9 @@ class AdManager(private val context: Context) {
         initializeSdk(context)
     }
 
-    /** Adds a banner for [placementId] to [container] and requests an ad (phones get 320x50, tablets 320x90). */
+    /** Adds a 90dp-tall banner for [placementId] to [container] (the next size up from 50) and requests an ad. */
     fun loadBanner(container: ViewGroup, placementId: String) {
-        val size = if (context.resources.getBoolean(R.bool.isPhone)) AdSize.BANNER_HEIGHT_50 else AdSize.BANNER_HEIGHT_90
-        val banner = AdView(context, placementId, size)
+        val banner = AdView(context, placementId, AdSize.BANNER_HEIGHT_90)
         adView = banner
         container.removeAllViews()
         container.addView(banner)
