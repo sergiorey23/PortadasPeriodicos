@@ -13,4 +13,7 @@ interface FavoritePeriodicosRepository {
 
     /** Adds [periodico] to the favorites, or removes it if it is already there. */
     suspend fun toggle(periodico: PeriodicoRef)
+
+    /** Removes every favorite, including saved ones whose newspaper has left the catalog. */
+    suspend fun clear()
 }

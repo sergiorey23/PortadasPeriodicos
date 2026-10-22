@@ -75,4 +75,8 @@ class FavoritePeriodicosRepositoryImpl @Inject constructor(
             prefs[FAVORITES_KEY] = FavoritesCodec.encode(updated)
         }
     }
+
+    override suspend fun clear() {
+        context.favoritesDataStore.editSafely { prefs -> prefs[FAVORITES_KEY] = FavoritesCodec.encode(emptyList()) }
+    }
 }

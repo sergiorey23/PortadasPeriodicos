@@ -55,6 +55,7 @@ import sergirex.portadasperiodicos.presentation.ads.AdsViewModel
 import sergirex.portadasperiodicos.presentation.portadas.PortadasViewModel
 import sergirex.portadasperiodicos.presentation.portadas.titleRes
 import sergirex.portadasperiodicos.presentation.settings.SettingsViewModel
+import sergirex.portadasperiodicos.ui.ActivityTransitions
 import sergirex.portadasperiodicos.ui.PureBlackTheme
 
 /** The home screen: a pager of newspaper-cover tabs, the navigation drawer and the toolbar actions. */
@@ -85,6 +86,7 @@ class Portadas : AppCompatActivity() {
         // Shows the launch splash and switches to Theme.Portadas (postSplashScreenTheme) once drawn.
         installSplashScreen()
         PureBlackTheme.apply(this)
+        ActivityTransitions.asParent(this)
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
@@ -126,7 +128,7 @@ class Portadas : AppCompatActivity() {
                     startActivityOrToast(Intent.createChooser(intent, null))
                 }
                 R.id.nav_about -> showAboutInfo()
-                R.id.nav_settings -> startActivity(Intent(applicationContext, SettingsActivity::class.java))
+                R.id.nav_settings -> ActivityTransitions.launch(this, Intent(applicationContext, SettingsActivity::class.java))
             }
             true
         }

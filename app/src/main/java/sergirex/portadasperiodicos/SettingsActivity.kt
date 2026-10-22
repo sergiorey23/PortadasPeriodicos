@@ -1,6 +1,9 @@
 package sergirex.portadasperiodicos
 
 import android.Manifest
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -39,6 +42,7 @@ import sergirex.portadasperiodicos.notifications.NotificationChannels
 import sergirex.portadasperiodicos.presentation.ads.AdsViewModel
 import sergirex.portadasperiodicos.presentation.settings.SettingsViewModel
 import sergirex.portadasperiodicos.presentation.theme.ThemeViewModel
+import sergirex.portadasperiodicos.ui.ActivityTransitions
 import sergirex.portadasperiodicos.ui.PureBlackTheme
 import java.text.DateFormatSymbols
 import java.util.Calendar
@@ -62,6 +66,7 @@ class SettingsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         PureBlackTheme.apply(this)
+        ActivityTransitions.asChild(this)
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_settings)
@@ -167,6 +172,7 @@ class SettingsActivity : AppCompatActivity() {
             findPreference<Preference>(KEY_RESTORE_PURCHASE)?.setOnPreferenceClickListener { billing.restorePurchases(); true }
             findPreference<Preference>(KEY_CATALOG_REFRESH)?.setOnPreferenceClickListener { refreshCatalog(); true }
             findPreference<Preference>(KEY_CLEAR_CACHE)?.setOnPreferenceClickListener { clearImageCache(); true }
+            findPreference<Preference>(KEY_CLEAR_FAVORITES)?.setOnPreferenceClickListener { confirmClearFavorites(); true }
             findPreference<Preference>(KEY_FEEDBACK)?.setOnPreferenceClickListener { sendFeedback(); true }
         }
 
@@ -180,6 +186,7 @@ class SettingsActivity : AppCompatActivity() {
             val timePreference = findPreference<Preference>(KEY_NOTIFICATION_TIME)
             val daysPreference = findPreference<Preference>(KEY_NOTIFICATION_DAYS)
             val removeAdsPreference = findPreference<Preference>(KEY_REMOVE_ADS)
+            val clearFavoritesPreference = findPreference<Preference>(KEY_CLEAR_FAVORITES)
 
             viewLifecycleOwner.lifecycleScope.launch {
                 viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -207,6 +214,18 @@ class SettingsActivity : AppCompatActivity() {
                             removeAdsPreference?.apply {
                                 isEnabled = removed != true
                                 setSummary(if (removed == true) R.string.ads_removed_summary else R.string.remove_ads_summary)
+                            }
+                        }
+                    }
+                    launch {
+                        settingsViewModel.favoritesCount.collect { count ->
+                            clearFavoritesPreference?.apply {
+                                isEnabled = count > 0
+                                summary = if (count == 0) {
+                                    getString(R.string.clear_favorites_none)
+                                } else {
+                                    resources.getQuantityString(R.plurals.clear_favorites_summary, count, count)
+                                }
                             }
                         }
                     }
@@ -347,6 +366,36 @@ class SettingsActivity : AppCompatActivity() {
             }
         }
 
+        // --- Favorites ---
+
+        private fun confirmClearFavorites() {
+            val count = settingsViewModel.favoritesCount.value
+            if (count == 0) return
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle(R.string.clear_favorites_dialog_title)
+                .setMessage(resources.getQuantityString(R.plurals.clear_favorites_message, count, count))
+                .setNegativeButton(android.R.string.cancel, null)
+                .setPositiveButton(R.string.clear_favorites_confirm) { _, _ ->
+                    val context = requireContext().applicationContext
+                    settingsViewModel.clearFavorites {
+                        refreshFavoritesWidgets(context)
+                        Toast.makeText(context, R.string.clear_favorites_done, Toast.LENGTH_SHORT).show()
+                    }
+                }
+                .show()
+        }
+
+        /** Widgets don't watch the favorites: ask them to redraw so they show their empty state right away. */
+        private fun refreshFavoritesWidgets(context: Context) {
+            val ids = AppWidgetManager.getInstance(context).getAppWidgetIds(ComponentName(context, FavoritosWidget::class.java))
+            if (ids.isEmpty()) return
+            context.sendBroadcast(
+                Intent(context, FavoritosWidget::class.java)
+                    .setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE)
+                    .putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
+            )
+        }
+
         // --- Feedback ---
 
         private fun sendFeedback() {
@@ -398,6 +447,7 @@ class SettingsActivity : AppCompatActivity() {
             const val KEY_CATALOG_STATUS = "catalog_status"
             const val KEY_CATALOG_REFRESH = "catalog_refresh"
             const val KEY_CLEAR_CACHE = "clear_image_cache"
+            const val KEY_CLEAR_FAVORITES = "clear_favorites"
             const val KEY_FEEDBACK = "send_feedback"
             const val TAG_TIME_PICKER = "reminder_time"
         }

@@ -135,4 +135,17 @@
     <string name="feedback_summary">Suggestions, or report a missing front page</string>
     <string name="feedback_subject">Feedback about Portadas de prensa</string>
     <string name="feedback_body">Write your feedback or the missing front page here (newspaper and country):\n\n\n\n— App details, please keep them —\nVersion: %1$s (%2$d)\nCatalog: v%3$d (%4$d newspapers)\nAndroid: %5$s · %6$s</string>
+    <string name="clear_favorites_title">Delete all favorites</string>
+    <string name="clear_favorites_none">You have no favorites</string>
+    <string name="clear_favorites_dialog_title">Delete all favorites?</string>
+    <string name="clear_favorites_confirm">Delete</string>
+    <string name="clear_favorites_done">Favorites deleted</string>
+    <plurals name="clear_favorites_summary">
+        <item quantity="one">You have %d favorite</item>
+        <item quantity="other">You have %d favorites</item>
+    </plurals>
+    <plurals name="clear_favorites_message">
+        <item quantity="one">%d newspaper will be removed from your favorites. This can\'t be undone.</item>
+        <item quantity="other">%d newspapers will be removed from your favorites. This can\'t be undone.</item>
+    </plurals>
 </resources>
