@@ -3,6 +3,7 @@ package sergirex.portadasperiodicos
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
+import android.graphics.drawable.RotateDrawable
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -10,16 +11,22 @@ import android.util.TypedValue
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.view.animation.Animation
-import android.view.animation.AnimationUtils
 import android.widget.Toast
+import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.color.MaterialColors
+import androidx.core.content.ContextCompat
+import androidx.appcompat.widget.TooltipCompat
+import android.content.res.ColorStateList
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.browser.customtabs.CustomTabColorSchemeParams
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.content.IntentCompat
+import androidx.dynamicanimation.animation.DynamicAnimation
+import androidx.dynamicanimation.animation.FloatPropertyCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
@@ -41,6 +48,8 @@ import sergirex.portadasperiodicos.domain.model.CoverUrls
 import sergirex.portadasperiodicos.presentation.ads.AdsViewModel
 import sergirex.portadasperiodicos.domain.model.EditionDate
 import java.io.File
+import sergirex.portadasperiodicos.ui.PureBlackTheme
+import sergirex.portadasperiodicos.ui.SpringMotion
 
 @AndroidEntryPoint
 class PortadaDetalle : AppCompatActivity() {
@@ -70,13 +79,8 @@ class PortadaDetalle : AppCompatActivity() {
             }
         }
 
-    // Animations are loaded once
-    private val rotateOpen: Animation by lazy { AnimationUtils.loadAnimation(this, R.anim.rotate_open_anim) }
-    private val rotateClose: Animation by lazy { AnimationUtils.loadAnimation(this, R.anim.rotate_close_anim) }
-    private val fromBottom: Animation by lazy { AnimationUtils.loadAnimation(this, R.anim.from_bottom_anim) }
-    private val toBottom: Animation by lazy { AnimationUtils.loadAnimation(this, R.anim.to_bottom_anim) }
-
     override fun onCreate(savedInstanceState: Bundle?) {
+        PureBlackTheme.apply(this)
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         binding = ActivityPortadaDetalleBinding.inflate(layoutInflater)
@@ -110,7 +114,22 @@ class PortadaDetalle : AppCompatActivity() {
         binding.toolbar.setNavigationOnClickListener { onBackPressedDispatcher.onBackPressed() }
     }
 
+    // The "+" turns into an "x" by rotating only the icon (not the whole button, whose shape would turn into a diamond).
+    // The drawable's level 0..10000 maps to 0..90 degrees, so a bouncy spring can overshoot the resting 45.
+    private val addIcon: RotateDrawable by lazy {
+        RotateDrawable().apply {
+            drawable = AppCompatResources.getDrawable(this@PortadaDetalle, R.drawable.baseline_add_24)
+            fromDegrees = 0f
+            toDegrees = 90f
+            isPivotXRelative = true
+            pivotX = 0.5f
+            isPivotYRelative = true
+            pivotY = 0.5f
+        }
+    }
+
     private fun setupFabs() {
+        binding.addFab.setImageDrawable(addIcon)
         binding.addFab.setOnClickListener {
             val isExpanded = viewModel.areFabsExpanded.value ?: false
             viewModel.areFabsExpanded.value = !isExpanded
@@ -129,20 +148,48 @@ class PortadaDetalle : AppCompatActivity() {
     }
 
     private fun toggleFabs(isExpanded: Boolean, animate: Boolean = true) {
-        val visibility = if (isExpanded) View.VISIBLE else View.INVISIBLE
-        val clickable = isExpanded
+        val minis = listOf(binding.httpButton, binding.favButton)
+        minis.forEach { it.isClickable = isExpanded }
 
-        if (animate) {
-            binding.httpButton.startAnimation(if (isExpanded) fromBottom else toBottom)
-            binding.favButton.startAnimation(if (isExpanded) fromBottom else toBottom)
-            binding.addFab.startAnimation(if (isExpanded) rotateOpen else rotateClose)
+        if (!animate) {
+            addIcon.level = if (isExpanded) ADD_ICON_OPEN_LEVEL.toInt() else 0
+            minis.forEach { fab ->
+                fab.visibility = if (isExpanded) View.VISIBLE else View.INVISIBLE
+                fab.translationY = if (isExpanded) 0f else fabTravel()
+                fab.alpha = if (isExpanded) 1f else 0f
+                fab.scaleX = if (isExpanded) 1f else FAB_HIDDEN_SCALE
+                fab.scaleY = fab.scaleX
+            }
+            return
         }
 
-        binding.httpButton.visibility = visibility
-        binding.favButton.visibility = visibility
-        binding.httpButton.isClickable = clickable
-        binding.favButton.isClickable = clickable
+        SpringMotion.animateProperty(addIcon, ICON_LEVEL, if (isExpanded) ADD_ICON_OPEN_LEVEL else 0f, SpringMotion.SPATIAL)
+        minis.forEachIndexed { index, fab ->
+            if (isExpanded && fab.visibility != View.VISIBLE) {
+                // Start from just below and small, so the springs have somewhere to travel from.
+                fab.translationY = fabTravel()
+                fab.alpha = 0f
+                fab.scaleX = FAB_HIDDEN_SCALE
+                fab.scaleY = FAB_HIDDEN_SCALE
+                fab.visibility = View.VISIBLE
+            }
+            // Each button starts a moment after the previous one; they leave in the opposite order.
+            val delay = (if (isExpanded) index else minis.lastIndex - index) * FAB_STAGGER_MS
+            fab.postDelayed({
+                if (viewModel.areFabsExpanded.value != isExpanded) return@postDelayed // toggled again meanwhile
+                val scale = if (isExpanded) 1f else FAB_HIDDEN_SCALE
+                SpringMotion.animate(fab, DynamicAnimation.TRANSLATION_Y, if (isExpanded) 0f else fabTravel(), SpringMotion.SPATIAL)
+                SpringMotion.animate(fab, DynamicAnimation.SCALE_X, scale, SpringMotion.SPATIAL)
+                SpringMotion.animate(fab, DynamicAnimation.SCALE_Y, scale, SpringMotion.SPATIAL)
+                SpringMotion.animate(fab, DynamicAnimation.ALPHA, if (isExpanded) 1f else 0f, SpringMotion.EFFECTS) {
+                    if (!isExpanded) fab.visibility = View.INVISIBLE
+                }
+            }, delay)
+        }
     }
+
+    /** How far below its place a hidden menu button waits. */
+    private fun fabTravel() = FAB_TRAVEL_DP * resources.displayMetrics.density
 
     private fun loadSectionsAdapter() {
         val portadaList = IntentCompat.getParcelableArrayListExtra(intent, EXTRA_PORTADAS, Portada::class.java).orEmpty()
@@ -159,19 +206,21 @@ class PortadaDetalle : AppCompatActivity() {
 
         binding.viewpager2.adapter = mSectionsPagerAdapter
 
-        // Set initial position
-        val initialPosition = portadaList.indexOfFirst { it.id == initialPortada }
-        if (initialPosition != -1) {
-            binding.viewpager2.setCurrentItem(initialPosition, false)
-        }
-
-        // Use a callback to react to page changes
+        // Listen before choosing the first page: ViewPager2 reports a page change synchronously inside
+        // setCurrentItem(), and doesn't report the initial page at all when it is the first one.
         binding.viewpager2.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
                 updateUiForPage(position)
             }
         })
+
+        val initialPosition = portadaList.indexOfFirst { it.id == initialPortada }
+        if (initialPosition != -1) {
+            binding.viewpager2.setCurrentItem(initialPosition, false)
+        }
+        // Don't depend on any callback for the page that is showing from the start (also after a rotation).
+        updateUiForPage(binding.viewpager2.currentItem)
     }
 
     private fun updateUiForPage(position: Int) {
@@ -183,7 +232,16 @@ class PortadaDetalle : AppCompatActivity() {
     private fun renderFavorite() {
         val portada = mSectionsPagerAdapter.getPortadaAt(binding.viewpager2.currentItem) ?: return
         val isFavorite = portada.id in viewModel.favoriteIds.value
-        binding.favButton.setImageResource(if (isFavorite) R.drawable.ic_favorite_black_24dp else R.drawable.ic_favorite_border_black_24dp)
+        // Same heart in both states: the color tells them apart (a favorite is colored, otherwise it's muted).
+        val tint = if (isFavorite) {
+            ContextCompat.getColor(this, R.color.favorite_active)
+        } else {
+            MaterialColors.getColor(binding.favButton, com.google.android.material.R.attr.colorOnSurfaceVariant)
+        }
+        binding.favButton.imageTintList = ColorStateList.valueOf(tint)
+        val label = getString(if (isFavorite) R.string.fav_remove else R.string.fav_add)
+        binding.favButton.contentDescription = label
+        TooltipCompat.setTooltipText(binding.favButton, label)
     }
 
     /** Shows the banner unless the user owns "remove ads"; reacts if the purchase happens while this screen is open. */
@@ -299,7 +357,12 @@ class PortadaDetalle : AppCompatActivity() {
 
     private fun toggleFavorite() {
         val portada = mSectionsPagerAdapter.getPortadaAt(binding.viewpager2.currentItem) ?: return
+        val wasFavorite = portada.id in viewModel.favoriteIds.value
         viewModel.toggleFavorite(portada.toRef())
+        Snackbar.make(binding.root, if (wasFavorite) R.string.fav_removed else R.string.fav_added, Snackbar.LENGTH_SHORT)
+            .setAnchorView(binding.addFab)
+            .apply { animationMode = Snackbar.ANIMATION_MODE_FADE }
+            .show()
     }
 
     override fun onDestroy() {
@@ -354,6 +417,19 @@ class PortadaDetalle : AppCompatActivity() {
         private const val EXTRA_PORTADAS = "portadas"
         private const val EXTRA_SELECTED_ID = "selected_id"
         private const val DETAIL_BANNER_PLACEMENT = "799967435028134_814221240269420"
+
+        // Button menu motion
+        private const val ADD_ICON_OPEN_LEVEL = 5000f // 45 degrees of the 0..90 range
+        private const val FAB_HIDDEN_SCALE = 0.5f
+        private const val FAB_TRAVEL_DP = 56f
+        private const val FAB_STAGGER_MS = 40L
+
+        private val ICON_LEVEL = object : FloatPropertyCompat<RotateDrawable>("level") {
+            override fun getValue(drawable: RotateDrawable) = drawable.level.toFloat()
+            override fun setValue(drawable: RotateDrawable, value: Float) {
+                drawable.level = value.toInt().coerceIn(0, 10_000)
+            }
+        }
 
         fun createIntent(context: Context, portadas: List<Portada>, selectedId: String): Intent =
             Intent(context, PortadaDetalle::class.java)

@@ -39,6 +39,12 @@
 
     <color name="app_bar">#1F2629</color>
     <color name="on_app_bar">#DEE3E5</color>
+    <!-- No gradient in dark mode: both ends are the app-bar color. -->
+    <color name="app_bar_gradient_end">#1F2629</color>
+    <!-- Heart of a favorite newspaper: the state is shown by color, not by fill. -->
+    <color name="favorite_active">#FF6B7A</color>
+    <!-- Globe of the "website" button: the usual link blue. -->
+    <color name="web_link">#8AB4F8</color>
     <!-- Ribbon on covers that are not today's edition; drawn over the image, so identical in both modes. -->
     <color name="date_ribbon">#D32F2F</color>
     <color name="on_date_ribbon">#FFFFFF</color>

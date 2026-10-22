@@ -45,6 +45,7 @@
 
         <item name="colorAppBar">@color/app_bar</item>
         <item name="colorOnAppBar">@color/on_app_bar</item>
+        <item name="colorAppBarEnd">@color/app_bar_gradient_end</item>
 
         <!-- Legacy AppCompat attribute still read by androidx.preference for category titles. -->
         <item name="colorAccent">?attr/colorPrimary</item>

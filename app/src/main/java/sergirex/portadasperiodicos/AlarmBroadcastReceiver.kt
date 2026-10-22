@@ -1,36 +1,32 @@
 package sergirex.portadasperiodicos
 
-import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
-import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
+import sergirex.portadasperiodicos.notifications.NotificationChannels
 import sergirex.portadasperiodicos.notifications.launchAsync
 import sergirex.portadasperiodicos.notifications.notificationScheduler
 
 class AlarmBroadcastReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
-        showNotification(context)
         val scheduler = context.notificationScheduler()
-        launchAsync { scheduler.sync(afterFiring = true) }
+        launchAsync {
+            // The alarm is inexact and the settings may have changed since it was set: check today is still a reminder day.
+            if (scheduler.isAllowedToday()) showNotification(context)
+            scheduler.sync(afterFiring = true)
+        }
     }
 
     private fun showNotification(context: Context) {
-        val channelId = "26081995"
+        val channelId = NotificationChannels.DAILY
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                channelId, context.getString(R.string.app_name), NotificationManager.IMPORTANCE_HIGH
-            )
-            notificationManager.createNotificationChannel(channel)
-        }
+        NotificationChannels.ensureDaily(context)
 
         val notificationIntent = Intent(context, Portadas::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK

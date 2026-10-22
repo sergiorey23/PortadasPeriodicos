@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Subtle vertical gradient around the app-bar color for the drawer header. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <gradient
+        android:angle="270"
+        android:endColor="?attr/colorAppBarEnd"
+        android:startColor="?attr/colorAppBar" />
+</shape>

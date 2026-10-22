@@ -55,6 +55,7 @@ import sergirex.portadasperiodicos.presentation.ads.AdsViewModel
 import sergirex.portadasperiodicos.presentation.portadas.PortadasViewModel
 import sergirex.portadasperiodicos.presentation.portadas.titleRes
 import sergirex.portadasperiodicos.presentation.settings.SettingsViewModel
+import sergirex.portadasperiodicos.ui.PureBlackTheme
 
 /** The home screen: a pager of newspaper-cover tabs, the navigation drawer and the toolbar actions. */
 @AndroidEntryPoint
@@ -83,6 +84,7 @@ class Portadas : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         // Shows the launch splash and switches to Theme.Portadas (postSplashScreenTheme) once drawn.
         installSplashScreen()
+        PureBlackTheme.apply(this)
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
@@ -195,11 +197,11 @@ class Portadas : AppCompatActivity() {
                             adManager?.destroy()
                             bannerRequested = false
                             binding.bannerContainer.visibility = View.GONE
-                            binding.navView.menu.findItem(R.id.nav_remove_ads).isVisible = false
+                            setRemoveAdsItemVisible(false)
                         }
                         false -> {
                             binding.bannerContainer.visibility = View.VISIBLE
-                            binding.navView.menu.findItem(R.id.nav_remove_ads).isVisible = true
+                            setRemoveAdsItemVisible(true)
                             if (!bannerRequested) {
                                 bannerRequested = true
                                 adManager?.loadBanner(binding.bannerContainer, MAIN_BANNER_PLACEMENT)
@@ -209,6 +211,16 @@ class Portadas : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    /**
+     * Hiding the item isn't enough: NavigationView recycles its rows and a recycled row keeps the previous
+     * item's action view, so the "one-time" badge would stay drawn on the neighbouring item.
+     */
+    private fun setRemoveAdsItemVisible(visible: Boolean) {
+        val item = binding.navView.menu.findItem(R.id.nav_remove_ads)
+        item.isVisible = visible
+        item.actionView?.visibility = if (visible) View.VISIBLE else View.GONE
     }
 
     private fun showAboutInfo() {
@@ -230,7 +242,7 @@ class Portadas : AppCompatActivity() {
         }
 
         aboutBinding.contact.setOnClickListener {
-            val uri = Uri.parse("mailto:sssergiooo23@gmail.com")
+            val uri = Uri.parse("mailto:$SUPPORT_EMAIL")
             startActivityOrToast(Intent(Intent.ACTION_SENDTO, uri))
         }
 
@@ -351,7 +363,7 @@ class Portadas : AppCompatActivity() {
                 if (favoritesIndex >= 0) {
                     binding.viewpager.currentItem = favoritesIndex
                 } else {
-                    Snackbar.make(binding.drawerLayout, "No tienes ninguna portada favorita", Snackbar.LENGTH_SHORT)
+                    Snackbar.make(binding.drawerLayout, R.string.fav_empty, Snackbar.LENGTH_LONG)
                         .apply { animationMode = Snackbar.ANIMATION_MODE_FADE }
                         .show()
                 }

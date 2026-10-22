@@ -17,12 +17,17 @@ import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
 import sergirex.portadasperiodicos.domain.model.ThemeMode
 import sergirex.portadasperiodicos.domain.usecase.GetThemeModeUseCase
 import sergirex.portadasperiodicos.domain.usecase.RefreshCatalogUseCase
+import sergirex.portadasperiodicos.domain.repository.SettingsRepository
+import sergirex.portadasperiodicos.notifications.NotificationChannels
 import sergirex.portadasperiodicos.notifications.NotificationScheduler
+import sergirex.portadasperiodicos.ui.PureBlackTheme
 import javax.inject.Inject
 
 /**
@@ -51,12 +56,19 @@ class MyApplication : Application(), SingletonImageLoader.Factory {
     @Inject
     lateinit var refreshCatalog: RefreshCatalogUseCase
 
+    @Inject
+    lateinit var settings: SettingsRepository
+
     // Lives for the whole process, same as the night-mode setting it applies —
     // there's nothing to cancel it early for, unlike a ViewModel's viewModelScope.
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     override fun onCreate() {
         super.onCreate()
+        NotificationChannels.ensureDaily(this)
+        // Read once up front (a tiny file) so the very first Activity already gets the right theme.
+        PureBlackTheme.install(this, initial = runBlocking { settings.pureBlack.first() })
+        applicationScope.launch { settings.pureBlack.collect(PureBlackTheme::setEnabled) }
         applicationScope.launch {
             getThemeMode().collect { mode ->
                 AppCompatDelegate.setDefaultNightMode(mode.toNightMode())

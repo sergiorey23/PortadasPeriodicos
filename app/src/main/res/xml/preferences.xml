@@ -1,30 +1,115 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <PreferenceCategory android:title="@string/tema"
+
+    <PreferenceCategory
+        android:title="@string/tema"
         app:iconSpaceReserved="false">
         <ListPreference
-            app:iconSpaceReserved="false"
             android:entries="@array/modos_ui"
             android:entryValues="@array/modos_ui_values"
             android:key="theme"
-            android:title="@string/theme_mode" />
+            android:title="@string/theme_mode"
+            app:iconSpaceReserved="false" />
+        <SwitchPreferenceCompat
+            android:key="pure_black"
+            android:summary="@string/pure_black_summary"
+            android:title="@string/pure_black_title"
+            app:iconSpaceReserved="false" />
+        <Preference
+            android:key="app_language"
+            android:summary="@string/language_summary"
+            android:title="@string/language_title"
+            app:iconSpaceReserved="false" />
     </PreferenceCategory>
-    <PreferenceCategory android:title="@string/categories"
+
+    <PreferenceCategory
+        android:title="@string/categories"
         app:iconSpaceReserved="false">
         <ListPreference
-            app:iconSpaceReserved="false"
             android:entries="@array/portadas_categories"
             android:entryValues="@array/portadas_category_keys"
             android:key="init_category"
-            android:title="@string/initial_category" />
+            android:title="@string/initial_category"
+            app:iconSpaceReserved="false" />
+        <ListPreference
+            android:entries="@array/grid_columns"
+            android:entryValues="@array/grid_columns_values"
+            android:key="grid_columns"
+            android:title="@string/grid_columns_title"
+            app:iconSpaceReserved="false" />
     </PreferenceCategory>
-    <PreferenceCategory android:title="@string/notifications"
+
+    <PreferenceCategory
+        android:title="@string/notifications"
         app:iconSpaceReserved="false">
         <SwitchPreferenceCompat
-            app:iconSpaceReserved="false"
             android:key="daily_notification"
             android:summary="@string/daily_notification_summary"
-            android:title="@string/daily_notification_title" />
+            android:title="@string/daily_notification_title"
+            app:iconSpaceReserved="false" />
+        <Preference
+            android:dependency="daily_notification"
+            android:key="daily_notification_time"
+            android:title="@string/notification_time_title"
+            app:iconSpaceReserved="false" />
+        <Preference
+            android:dependency="daily_notification"
+            android:key="daily_notification_days"
+            android:title="@string/notification_days_title"
+            app:iconSpaceReserved="false" />
+        <Preference
+            android:key="notification_sound"
+            android:summary="@string/notification_sound_summary"
+            android:title="@string/notification_sound_title"
+            app:iconSpaceReserved="false" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/purchase_title"
+        app:iconSpaceReserved="false">
+        <Preference
+            android:key="remove_ads"
+            android:summary="@string/remove_ads_summary"
+            android:title="@string/removeAds"
+            app:iconSpaceReserved="false" />
+        <Preference
+            android:key="restore_purchase"
+            android:summary="@string/restore_purchase_summary"
+            android:title="@string/billing_restore"
+            app:iconSpaceReserved="false" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/catalog_title"
+        app:iconSpaceReserved="false">
+        <Preference
+            android:key="catalog_status"
+            android:selectable="false"
+            android:title="@string/catalog_status_title"
+            app:iconSpaceReserved="false" />
+        <Preference
+            android:key="catalog_refresh"
+            android:title="@string/catalog_refresh_title"
+            app:iconSpaceReserved="false" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/storage_title"
+        app:iconSpaceReserved="false">
+        <Preference
+            android:key="clear_image_cache"
+            android:title="@string/cache_clear_title"
+            app:iconSpaceReserved="false" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/support_title"
+        app:iconSpaceReserved="false">
+        <Preference
+            android:key="send_feedback"
+            android:summary="@string/feedback_summary"
+            android:title="@string/feedback_title"
+            app:iconSpaceReserved="false" />
     </PreferenceCategory>
 </androidx.preference.PreferenceScreen>

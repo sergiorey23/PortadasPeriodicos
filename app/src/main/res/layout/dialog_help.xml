@@ -30,9 +30,16 @@
             android:layout_weight="1"
             android:orientation="vertical">
 
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="0.5" />
             <include
                 android:id="@+id/tipSwipe"
                 layout="@layout/item_tip"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            <Space
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1" />
@@ -40,11 +47,17 @@
                 android:id="@+id/tipOpen"
                 layout="@layout/item_tip"
                 android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            <Space
+                android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1" />
             <include
                 android:id="@+id/tipFavorites"
                 layout="@layout/item_tip"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            <Space
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1" />
@@ -52,8 +65,11 @@
                 android:id="@+id/tipWidget"
                 layout="@layout/item_tip"
                 android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            <Space
+                android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="1" />
+                android:layout_weight="0.5" />
         </LinearLayout>
 
         <com.google.android.material.button.MaterialButton

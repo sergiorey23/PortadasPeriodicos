@@ -15,6 +15,8 @@ import sergirex.portadasperiodicos.data.catalog.CatalogParser
 import sergirex.portadasperiodicos.data.catalog.ParsedCatalog
 import sergirex.portadasperiodicos.data.catalog.RemoteCatalog
 import sergirex.portadasperiodicos.data.catalog.RemoteCatalogSource
+import sergirex.portadasperiodicos.domain.model.CatalogRefreshResult
+import sergirex.portadasperiodicos.domain.model.CatalogStatus
 import sergirex.portadasperiodicos.domain.model.Periodico
 import sergirex.portadasperiodicos.domain.model.PeriodicoCategory
 import sergirex.portadasperiodicos.domain.repository.PeriodicosRepository
@@ -56,24 +58,35 @@ class PeriodicosRepositoryImpl @Inject constructor(
     override suspend fun getById(id: String): Periodico? =
         withContext(Dispatchers.IO) { catalog().periodicos.firstOrNull { it.id == id } }
 
-    override suspend fun refresh(force: Boolean): Boolean = refreshLock.withLock {
+    override suspend fun refresh(force: Boolean): Boolean = update(force) == CatalogRefreshResult.UPDATED
+
+    override suspend fun refreshNow(): CatalogRefreshResult = update(force = true)
+
+    override suspend fun status(): CatalogStatus = withContext(Dispatchers.IO) {
+        val now = catalog()
+        CatalogStatus(version = now.version, entries = now.periodicos.size, lastCheckedAt = cache.lastCheckedAt())
+    }
+
+    private suspend fun update(force: Boolean): CatalogRefreshResult = refreshLock.withLock {
         withContext(Dispatchers.IO) {
             val now = clock()
-            if (!force && now - cache.lastCheckedAt() < CatalogConfig.MIN_CHECK_INTERVAL_MS) return@withContext false
+            if (!force && now - cache.lastCheckedAt() < CatalogConfig.MIN_CHECK_INTERVAL_MS) {
+                return@withContext CatalogRefreshResult.UP_TO_DATE
+            }
 
             when (val result = remote.fetch(cache.readEtag())) {
                 RemoteCatalog.NotModified -> {
                     markChecked(now)
-                    false
+                    CatalogRefreshResult.UP_TO_DATE
                 }
                 is RemoteCatalog.Failed -> {
                     // Not marked as checked: offline now, so try again at the next opportunity.
                     onProblem("Catalog download failed: ${result.reason}")
-                    false
+                    CatalogRefreshResult.FAILED
                 }
                 is RemoteCatalog.Updated -> {
                     markChecked(now)
-                    adopt(result.text, result.etag)
+                    if (adopt(result.text, result.etag)) CatalogRefreshResult.UPDATED else CatalogRefreshResult.UP_TO_DATE
                 }
             }
         }

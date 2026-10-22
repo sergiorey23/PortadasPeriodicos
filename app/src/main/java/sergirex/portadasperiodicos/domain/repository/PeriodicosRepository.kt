@@ -1,6 +1,8 @@
 package sergirex.portadasperiodicos.domain.repository
 
 import kotlinx.coroutines.flow.StateFlow
+import sergirex.portadasperiodicos.domain.model.CatalogRefreshResult
+import sergirex.portadasperiodicos.domain.model.CatalogStatus
 import sergirex.portadasperiodicos.domain.model.Periodico
 import sergirex.portadasperiodicos.domain.model.PeriodicoCategory
 
@@ -27,4 +29,10 @@ interface PeriodicosRepository {
      * (unless [force]). Never throws: if anything goes wrong the current catalog stays. Returns true if it changed.
      */
     suspend fun refresh(force: Boolean = false): Boolean
+
+    /** Like [refresh] with `force`, but says what happened (for the "Update now" button). */
+    suspend fun refreshNow(): CatalogRefreshResult
+
+    /** Version, size and last check of the catalog currently in use. */
+    suspend fun status(): CatalogStatus
 }

@@ -39,11 +39,10 @@
             android:layout_marginBottom="150dp"
             android:clickable="true"
             android:focusable="true"
-            android:src="@drawable/ic_favorite_border_black_24dp"
-            android:tooltipText="@string/action_fav"
+            android:src="@drawable/ic_favorite_black_24dp"
             android:visibility="invisible"
             ads:maxImageSize="40dp"
-            android:contentDescription="@string/action_fav"
+            android:contentDescription="@string/fav_add"
             android:layout_marginRight="15dp"
             android:layout_marginEnd="15dp" />
 
@@ -59,6 +58,7 @@
             android:tooltipText="@string/website"
             android:visibility="invisible"
             ads:maxImageSize="40dp"
+            ads:tint="@color/web_link"
             android:contentDescription="@string/website"
             android:layout_marginRight="15dp"
             android:layout_marginEnd="15dp" />

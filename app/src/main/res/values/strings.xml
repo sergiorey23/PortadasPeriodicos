@@ -20,8 +20,13 @@
 
     <!-- Help dialog -->
     <string name="help_title">Cómo funciona</string>
+    <string name="fav_added">Añadida a favoritos</string>
+    <string name="fav_removed">Quitada de favoritos</string>
+    <string name="fav_add">Añadir a favoritos</string>
+    <string name="fav_remove">Quitar de favoritos</string>
+    <string name="fav_empty">Aún no tienes favoritos. Abre una portada y toca el corazón para añadirla.</string>
     <string name="help_tip_open">Toca una portada para verla a pantalla completa, hacer zoom, guardarla o compartirla.</string>
-    <string name="help_tip_favorites">Elige tus periódicos favoritos con el corazón y los tendrás juntos en la pestaña Favoritos.</string>
+    <string name="help_tip_favorites">Toca el corazón al ver una portada para marcarla como favorita. El corazón de la barra superior te lleva a tu pestaña Favoritos.</string>
     <string name="help_tip_widget">Añade el widget de Favoritos a tu pantalla de inicio y ve tus portadas sin abrir la app.</string>
     <string name="help_add_widget">Añadir widget</string>
     <string name="widget_added">Widget añadido a tu pantalla de inicio</string>
@@ -34,7 +39,6 @@
     <!-- Menu actions -->
     <string name="date">Fecha</string>
     <string name="save">Guardar</string>
-    <string name="action_fav">Favorito</string>
     <string name="website">Página web</string>
     <string name="add">Añadir</string>
 
@@ -65,7 +69,7 @@
     <string name="initial_category">Categoría inicial</string>
     <string name="notifications">Notificaciones</string>
     <string name="daily_notification_title">Aviso diario de portadas</string>
-    <string name="daily_notification_summary">Recibe una notificación cada mañana a las 9:00</string>
+    <string name="daily_notification_summary">Recibe una notificación con las portadas del día</string>
     <string name="notifications_permission_denied">Sin permiso de notificaciones no se puede activar el aviso diario. Puedes concederlo en los ajustes del sistema.</string>
     <string name="select_date">Seleccionar fecha</string>
     <string name="remove_ads_badge">Pago único</string>
@@ -87,4 +91,47 @@
     <string name="share_failed">No se pudo compartir la portada</string>
     <string name="widget_no_favorites">Aún no tienes portadas favoritas. Márcalas con el ❤ desde la app.</string>
 
+
+    <!-- Settings: reminder, appearance, purchase, catalog, storage, support -->
+    <string name="notification_channel_daily">Aviso diario de portadas</string>
+    <string name="pure_black_title">Negro puro (AMOLED)</string>
+    <string name="pure_black_summary">Fondo totalmente negro en modo oscuro. Ahorra batería en pantallas AMOLED.</string>
+    <string name="language_title">Idioma de la app</string>
+    <string name="language_summary">Se cambia en los ajustes del sistema</string>
+    <string name="grid_columns_title">Columnas de portadas</string>
+    <string name="grid_columns_auto">Automático</string>
+    <string name="grid_columns_1">1 columna</string>
+    <string name="grid_columns_2">2 columnas</string>
+    <string name="grid_columns_3">3 columnas</string>
+    <string name="notification_time_title">Hora del aviso</string>
+    <string name="notification_time_picker_title">Hora del aviso diario</string>
+    <string name="notification_days_title">Días del aviso</string>
+    <string name="notification_days_dialog_title">Días en que recibir el aviso</string>
+    <string name="notification_days_weekdays_only">Solo laborables</string>
+    <string name="notification_days_every_day">Todos los días</string>
+    <string name="notification_days_weekdays">Laborables (de lunes a viernes)</string>
+    <string name="notification_days_pick_one">Elige al menos un día</string>
+    <string name="notification_sound_title">Sonido y vibración</string>
+    <string name="notification_sound_summary">Se configuran en los ajustes del sistema</string>
+    <string name="purchase_title">Compra</string>
+    <string name="remove_ads_summary">Pago único, para siempre</string>
+    <string name="restore_purchase_summary">¿Has cambiado de móvil? Recupera tu compra desde Google Play</string>
+    <string name="ads_removed_summary">Ya has quitado los anuncios. ¡Gracias por tu apoyo!</string>
+    <string name="catalog_title">Catálogo de periódicos</string>
+    <string name="catalog_status_title">Estado del catálogo</string>
+    <string name="catalog_status_summary">Versión %1$d · Periódicos: %2$d\nÚltima comprobación: %3$s</string>
+    <string name="catalog_never_checked">nunca</string>
+    <string name="catalog_refresh_title">Actualizar ahora</string>
+    <string name="catalog_refresh_updated">Catálogo actualizado</string>
+    <string name="catalog_refresh_up_to_date">Ya tienes el catálogo más reciente</string>
+    <string name="catalog_refresh_failed">No se ha podido comprobar. Revisa tu conexión.</string>
+    <string name="storage_title">Almacenamiento</string>
+    <string name="cache_clear_title">Limpiar caché de imágenes</string>
+    <string name="cache_clear_summary">Ocupa %1$s</string>
+    <string name="cache_cleared">Caché de imágenes limpiada</string>
+    <string name="support_title">Soporte</string>
+    <string name="feedback_title">Enviar comentarios</string>
+    <string name="feedback_summary">Sugerencias o avisar de una portada que falta</string>
+    <string name="feedback_subject">Comentarios sobre Portadas de prensa</string>
+    <string name="feedback_body">Escribe aquí tu comentario o la portada que falta (periódico y país):\n\n\n\n— Datos de la app, no los borres —\nVersión: %1$s (%2$d)\nCatálogo: v%3$d (%4$d periódicos)\nAndroid: %5$s · %6$s</string>
 </resources>

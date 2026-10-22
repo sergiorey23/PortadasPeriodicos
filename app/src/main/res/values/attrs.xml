@@ -4,4 +4,6 @@
     <attr name="colorAppBar" format="color" />
     <!-- Content (title, icons, tab labels) drawn on [colorAppBar]. -->
     <attr name="colorOnAppBar" format="color" />
+    <!-- Where the drawer header gradient ends; it starts at [colorAppBar]. -->
+    <attr name="colorAppBarEnd" format="color" />
 </resources>

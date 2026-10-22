@@ -21,8 +21,13 @@
 
     <!-- Help dialog -->
     <string name="help_title">How it works</string>
+    <string name="fav_added">Added to favorites</string>
+    <string name="fav_removed">Removed from favorites</string>
+    <string name="fav_add">Add to favorites</string>
+    <string name="fav_remove">Remove from favorites</string>
+    <string name="fav_empty">You have no favorites yet. Open a cover and tap the heart to add it.</string>
     <string name="help_tip_open">Tap a cover to view it full-screen, zoom in, save it or share it.</string>
-    <string name="help_tip_favorites">Pick your favorite newspapers with the heart and keep them together in the Favorites tab.</string>
+    <string name="help_tip_favorites">Tap the heart on a cover to mark it as a favorite. The heart in the top bar takes you to your Favorites tab.</string>
     <string name="help_tip_widget">Add the Favorites widget to your home screen and see your covers without opening the app.</string>
     <string name="help_add_widget">Add widget</string>
     <string name="widget_added">Widget added to your home screen</string>
@@ -35,7 +40,6 @@
     <!-- Menu actions -->
     <string name="date">Date</string>
     <string name="save">Save</string>
-    <string name="action_fav">Favorite</string>
     <string name="website">Website</string>
     <string name="add">Add</string>
 
@@ -66,7 +70,7 @@
     <string name="initial_category">Initial category</string>
     <string name="notifications">Notifications</string>
     <string name="daily_notification_title">Daily covers reminder</string>
-    <string name="daily_notification_summary">Get a notification every morning at 9:00</string>
+    <string name="daily_notification_summary">Get a notification with the day\'s front pages</string>
     <string name="notifications_permission_denied">The daily reminder needs the notification permission. You can grant it in the system settings.</string>
     <string name="select_date">Select date</string>
     <string name="remove_ads_badge">One-time</string>
@@ -88,4 +92,47 @@
     <string name="share_failed">Couldn\'t share the cover</string>
     <string name="widget_no_favorites">You haven\'t favorited any covers yet. Mark some with the ❤ in the app.</string>
 
+
+    <!-- Settings: reminder, appearance, purchase, catalog, storage, support -->
+    <string name="notification_channel_daily">Daily front-page reminder</string>
+    <string name="pure_black_title">Pure black (AMOLED)</string>
+    <string name="pure_black_summary">Fully black background in dark mode. Saves battery on AMOLED screens.</string>
+    <string name="language_title">App language</string>
+    <string name="language_summary">Changed in the system settings</string>
+    <string name="grid_columns_title">Cover columns</string>
+    <string name="grid_columns_auto">Automatic</string>
+    <string name="grid_columns_1">1 column</string>
+    <string name="grid_columns_2">2 columns</string>
+    <string name="grid_columns_3">3 columns</string>
+    <string name="notification_time_title">Reminder time</string>
+    <string name="notification_time_picker_title">Daily reminder time</string>
+    <string name="notification_days_title">Reminder days</string>
+    <string name="notification_days_dialog_title">Days to get the reminder</string>
+    <string name="notification_days_weekdays_only">Weekdays only</string>
+    <string name="notification_days_every_day">Every day</string>
+    <string name="notification_days_weekdays">Weekdays (Monday to Friday)</string>
+    <string name="notification_days_pick_one">Pick at least one day</string>
+    <string name="notification_sound_title">Sound and vibration</string>
+    <string name="notification_sound_summary">Set in the system settings</string>
+    <string name="purchase_title">Purchase</string>
+    <string name="remove_ads_summary">One-time payment, forever</string>
+    <string name="restore_purchase_summary">Switched phones? Get your purchase back from Google Play</string>
+    <string name="ads_removed_summary">Ads are already removed. Thank you for your support!</string>
+    <string name="catalog_title">Newspaper catalog</string>
+    <string name="catalog_status_title">Catalog status</string>
+    <string name="catalog_status_summary">Version %1$d · Newspapers: %2$d\nLast checked: %3$s</string>
+    <string name="catalog_never_checked">never</string>
+    <string name="catalog_refresh_title">Update now</string>
+    <string name="catalog_refresh_updated">Catalog updated</string>
+    <string name="catalog_refresh_up_to_date">You already have the latest catalog</string>
+    <string name="catalog_refresh_failed">Couldn\'t check. Please check your connection.</string>
+    <string name="storage_title">Storage</string>
+    <string name="cache_clear_title">Clear image cache</string>
+    <string name="cache_clear_summary">Using %1$s</string>
+    <string name="cache_cleared">Image cache cleared</string>
+    <string name="support_title">Support</string>
+    <string name="feedback_title">Send feedback</string>
+    <string name="feedback_summary">Suggestions, or report a missing front page</string>
+    <string name="feedback_subject">Feedback about Portadas de prensa</string>
+    <string name="feedback_body">Write your feedback or the missing front page here (newspaper and country):\n\n\n\n— App details, please keep them —\nVersion: %1$s (%2$d)\nCatalog: v%3$d (%4$d newspapers)\nAndroid: %5$s · %6$s</string>
 </resources>

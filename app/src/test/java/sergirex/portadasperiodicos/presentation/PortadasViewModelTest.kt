@@ -20,11 +20,14 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import sergirex.portadasperiodicos.domain.model.EditionDate
+import sergirex.portadasperiodicos.domain.model.CatalogRefreshResult
+import sergirex.portadasperiodicos.domain.model.CatalogStatus
 import sergirex.portadasperiodicos.domain.model.HomeTab
 import sergirex.portadasperiodicos.domain.model.Periodico
 import sergirex.portadasperiodicos.domain.model.PeriodicoCategory
 import sergirex.portadasperiodicos.domain.model.PeriodicoRef
 import sergirex.portadasperiodicos.domain.model.PortadaCover
+import sergirex.portadasperiodicos.domain.model.ReminderSchedule
 import sergirex.portadasperiodicos.domain.repository.FavoritePeriodicosRepository
 import sergirex.portadasperiodicos.domain.repository.PeriodicosRepository
 import sergirex.portadasperiodicos.domain.repository.PortadaCoverRepository
@@ -47,6 +50,8 @@ class PortadasViewModelTest {
         override suspend fun getAll(): List<Periodico> = emptyList()
         override val catalogVersion = MutableStateFlow(0)
         override suspend fun refresh(force: Boolean) = false
+        override suspend fun refreshNow() = CatalogRefreshResult.UP_TO_DATE
+        override suspend fun status() = CatalogStatus(version = 0, entries = 0, lastCheckedAt = 0)
         override suspend fun getByCategory(category: PeriodicoCategory) =
             Result.success(listOf(Periodico("elpais", "El País", "elpais.com", "es", category), Periodico("abc", "ABC", "abc.es", "es", category)))
     }
@@ -65,6 +70,14 @@ class PortadasViewModelTest {
         override val initialTab = flowOf(HomeTab.default)
         override val dailyNotificationEnabled = flowOf(true)
         override val notificationPermissionRequested = flowOf(false)
+        override val dailyNotificationMinutes = flowOf(ReminderSchedule.DEFAULT_MINUTES)
+        override val dailyNotificationDays = flowOf(ReminderSchedule.ALL_DAYS)
+        override val gridColumns = flowOf(0)
+        override val pureBlack = flowOf(false)
+        override suspend fun setDailyNotificationMinutes(minutes: Int) = Unit
+        override suspend fun setDailyNotificationDays(days: Set<Int>) = Unit
+        override suspend fun setGridColumns(columns: Int) = Unit
+        override suspend fun setPureBlack(enabled: Boolean) = Unit
         override suspend fun setInitialTab(tab: HomeTab) = Unit
         override suspend fun setDailyNotificationEnabled(enabled: Boolean) = Unit
         override suspend fun setNotificationPermissionRequested() = Unit
