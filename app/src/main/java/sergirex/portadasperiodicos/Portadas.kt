@@ -238,7 +238,7 @@ class Portadas : AppCompatActivity() {
         }
 
         aboutBinding.privacyPolicy.setOnClickListener {
-            startActivityOrToast(Intent(Intent.ACTION_VIEW, Uri.parse("https://www.lasportadas.es/privacy.php")))
+            startActivityOrToast(Intent(Intent.ACTION_VIEW, Uri.parse(PRIVACY_POLICY_URL)))
         }
 
         aboutBinding.contact.setOnClickListener {
