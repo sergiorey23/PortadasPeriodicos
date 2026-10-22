@@ -24,6 +24,7 @@
                 android:fitsSystemWindows="true">
 
                 <com.google.android.material.appbar.CollapsingToolbarLayout
+                    style="@style/Widget.Material3Expressive.CollapsingToolbar"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:fitsSystemWindows="true"
