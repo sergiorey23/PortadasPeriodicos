@@ -3,13 +3,12 @@ package sergirex.portadasperiodicos.presentation.theme
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import sergirex.portadasperiodicos.domain.model.ThemeMode
 import sergirex.portadasperiodicos.domain.usecase.GetThemeModeUseCase
 import sergirex.portadasperiodicos.domain.usecase.SetThemeModeUseCase
+import sergirex.portadasperiodicos.presentation.LoadTracker
 import javax.inject.Inject
 
 /**
@@ -25,8 +24,12 @@ class ThemeViewModel @Inject constructor(
     private val setThemeModeUseCase: SetThemeModeUseCase
 ) : ViewModel() {
 
-    val themeMode: StateFlow<ThemeMode> = getThemeMode()
-        .stateIn(viewModelScope, SharingStarted.Eagerly, ThemeMode.SYSTEM)
+    private val tracker = LoadTracker(expected = 1)
+
+    val themeMode: StateFlow<ThemeMode> = tracker.track(viewModelScope, getThemeMode(), ThemeMode.SYSTEM)
+
+    /** Waits until [themeMode] holds the stored mode rather than the placeholder. */
+    suspend fun awaitLoaded() = tracker.await()
 
     fun setThemeMode(mode: ThemeMode) {
         viewModelScope.launch {

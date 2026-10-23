@@ -18,6 +18,8 @@ import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.viewModels
+import androidx.core.view.doOnPreDraw
 import androidx.core.content.ContextCompat
 import androidx.core.content.pm.PackageInfoCompat
 import androidx.fragment.app.activityViewModels
@@ -33,8 +35,12 @@ import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.filterNotNull
 import sergirex.portadasperiodicos.domain.model.CatalogRefreshResult
 import sergirex.portadasperiodicos.domain.model.HomeTab
+import sergirex.portadasperiodicos.domain.model.CatalogStatus
 import sergirex.portadasperiodicos.domain.model.ReminderSchedule
 import sergirex.portadasperiodicos.domain.model.ThemeMode
 import sergirex.portadasperiodicos.domain.repository.AdsEntitlementRepository
@@ -60,6 +66,10 @@ class SettingsActivity : AppCompatActivity() {
     @Inject
     lateinit var adsEntitlement: AdsEntitlementRepository
 
+    private val settingsViewModel: SettingsViewModel by viewModels()
+    private val themeViewModel: ThemeViewModel by viewModels()
+    private val adsViewModel: AdsViewModel by viewModels()
+
     /** Google Play purchase handling (restore and buy), shared with the preferences fragment. */
     lateinit var billing: BillingManager
         private set
@@ -73,10 +83,25 @@ class SettingsActivity : AppCompatActivity() {
         setSupportActionBar(findViewById(R.id.toolbar))
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         billing = BillingManager(this, lifecycleScope, adsEntitlement) { findViewById(android.R.id.content) }
-        if (savedInstanceState == null) {
-            supportFragmentManager.beginTransaction()
-                .replace(R.id.settingsContainer, PreferencesFragment())
-                .commit()
+
+        // Show the screen only once every stored value it displays has been read, so nothing changes after it is
+        // drawn (a switch flipping, an entry getting disabled): hold the enter transition until then.
+        postponeEnterTransition()
+        lifecycleScope.launch {
+            try {
+                withTimeoutOrNull(LOAD_TIMEOUT_MS) {
+                    settingsViewModel.prepare()
+                    themeViewModel.awaitLoaded()
+                    adsViewModel.adsRemoved.filterNotNull().first()
+                }
+                if (savedInstanceState == null) {
+                    supportFragmentManager.beginTransaction()
+                        .replace(R.id.settingsContainer, PreferencesFragment())
+                        .commitNow()
+                }
+            } finally {
+                findViewById<View>(R.id.settingsRoot).doOnPreDraw { startPostponedEnterTransition() }
+            }
         }
     }
 
@@ -88,6 +113,11 @@ class SettingsActivity : AppCompatActivity() {
     override fun onSupportNavigateUp(): Boolean {
         onBackPressedDispatcher.onBackPressed()
         return true
+    }
+
+    private companion object {
+        /** Longest the screen waits for stored values before showing anyway. */
+        const val LOAD_TIMEOUT_MS = 1_500L
     }
 
     @AndroidEntryPoint
@@ -188,15 +218,44 @@ class SettingsActivity : AppCompatActivity() {
             val removeAdsPreference = findPreference<Preference>(KEY_REMOVE_ADS)
             val clearFavoritesPreference = findPreference<Preference>(KEY_CLEAR_FAVORITES)
 
+            fun applyTheme(mode: ThemeMode) {
+                themePreference?.show(mode.toPreferenceValue())
+                // Pure black only exists in dark mode.
+                pureBlackPreference?.isEnabled = mode != ThemeMode.LIGHT
+            }
+            fun applyAds(removed: Boolean?) {
+                removeAdsPreference?.apply {
+                    isEnabled = removed != true
+                    setSummary(if (removed == true) R.string.ads_removed_summary else R.string.remove_ads_summary)
+                }
+            }
+            fun applyFavorites(count: Int) {
+                clearFavoritesPreference?.apply {
+                    isEnabled = count > 0
+                    summary = if (count == 0) {
+                        getString(R.string.clear_favorites_none)
+                    } else {
+                        resources.getQuantityString(R.plurals.clear_favorites_summary, count, count)
+                    }
+                }
+            }
+
+            // The first frame already shows the stored state: the activity waited for it (see SettingsActivity).
+            applyTheme(themeViewModel.themeMode.value)
+            pureBlackPreference?.isChecked = settingsViewModel.pureBlack.value
+            tabPreference?.show(settingsViewModel.initialTab.value.key)
+            gridPreference?.show(settingsViewModel.gridColumns.value.toString())
+            notificationPreference?.isChecked = settingsViewModel.dailyNotificationEnabled.value
+            timePreference?.summary = formatTime(settingsViewModel.dailyNotificationMinutes.value)
+            daysPreference?.summary = daysSummary(settingsViewModel.dailyNotificationDays.value)
+            applyAds(adsViewModel.adsRemoved.value)
+            applyFavorites(settingsViewModel.favoritesCount.value)
+            settingsViewModel.preparedCatalogStatus?.let(::showCatalogStatus)
+            settingsViewModel.preparedImageCacheSize?.let(::showCacheSize)
+
             viewLifecycleOwner.lifecycleScope.launch {
                 viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                    launch {
-                        themeViewModel.themeMode.collect { mode ->
-                            themePreference?.show(mode.toPreferenceValue())
-                            // Pure black only exists in dark mode.
-                            pureBlackPreference?.isEnabled = mode != ThemeMode.LIGHT
-                        }
-                    }
+                    launch { themeViewModel.themeMode.collect(::applyTheme) }
                     launch { settingsViewModel.pureBlack.collect { pureBlackPreference?.isChecked = it } }
                     launch { settingsViewModel.initialTab.collect { tab -> tabPreference?.show(tab.key) } }
                     launch { settingsViewModel.gridColumns.collect { gridPreference?.show(it.toString()) } }
@@ -209,26 +268,8 @@ class SettingsActivity : AppCompatActivity() {
                     launch {
                         settingsViewModel.dailyNotificationDays.collect { daysPreference?.summary = daysSummary(it) }
                     }
-                    launch {
-                        adsViewModel.adsRemoved.collect { removed ->
-                            removeAdsPreference?.apply {
-                                isEnabled = removed != true
-                                setSummary(if (removed == true) R.string.ads_removed_summary else R.string.remove_ads_summary)
-                            }
-                        }
-                    }
-                    launch {
-                        settingsViewModel.favoritesCount.collect { count ->
-                            clearFavoritesPreference?.apply {
-                                isEnabled = count > 0
-                                summary = if (count == 0) {
-                                    getString(R.string.clear_favorites_none)
-                                } else {
-                                    resources.getQuantityString(R.plurals.clear_favorites_summary, count, count)
-                                }
-                            }
-                        }
-                    }
+                    launch { adsViewModel.adsRemoved.collect(::applyAds) }
+                    launch { settingsViewModel.favoritesCount.collect(::applyFavorites) }
                     launch { updateCatalogStatus() }
                     launch { updateCacheSummary() }
                 }
@@ -324,9 +365,10 @@ class SettingsActivity : AppCompatActivity() {
 
         // --- Catalog ---
 
-        private suspend fun updateCatalogStatus() {
+        private suspend fun updateCatalogStatus() = showCatalogStatus(settingsViewModel.catalogStatus())
+
+        private fun showCatalogStatus(status: CatalogStatus) {
             val preference = findPreference<Preference>(KEY_CATALOG_STATUS) ?: return
-            val status = settingsViewModel.catalogStatus()
             val checked = if (status.lastCheckedAt == 0L) {
                 getString(R.string.catalog_never_checked)
             } else {
@@ -352,8 +394,9 @@ class SettingsActivity : AppCompatActivity() {
 
         // --- Storage ---
 
-        private suspend fun updateCacheSummary() {
-            val size = settingsViewModel.imageCacheSize()
+        private suspend fun updateCacheSummary() = showCacheSize(settingsViewModel.imageCacheSize())
+
+        private fun showCacheSize(size: Long) {
             findPreference<Preference>(KEY_CLEAR_CACHE)?.summary =
                 getString(R.string.cache_clear_summary, Formatter.formatShortFileSize(requireContext(), size))
         }

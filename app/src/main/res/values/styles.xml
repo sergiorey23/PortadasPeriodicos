@@ -14,6 +14,8 @@
         <item name="titleTextAppearance">@style/TextAppearance.Portadas.AppTitle</item>
         <item name="subtitleTextAppearance">@style/TextAppearance.Material3.BodyMedium</item>
         <item name="android:theme">@style/ThemeOverlay.Portadas.AppBar</item>
+        <!-- The Expressive toolbar style leaves 4dp at its end, which shows the layout background beside the app bar. -->
+        <item name="android:layout_marginEnd">0dp</item>
     </style>
 
     <style name="Widget.Portadas.Toolbar.Detail">
@@ -32,6 +34,7 @@
         <item name="android:textSize">30sp</item>
         <item name="android:fontFamily">cursive</item>
         <item name="fontFamily">cursive</item>
+        <item name="android:layout_marginBottom">2dp</item>
     </style>
 
     <style name="TextAppearance.Portadas.DetailTitle" parent="TextAppearance.Material3.TitleLarge">

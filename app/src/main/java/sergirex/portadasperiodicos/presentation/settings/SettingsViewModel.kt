@@ -3,11 +3,9 @@ package sergirex.portadasperiodicos.presentation.settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import sergirex.portadasperiodicos.data.local.ImageCacheControl
 import sergirex.portadasperiodicos.domain.model.CatalogRefreshResult
@@ -19,6 +17,7 @@ import sergirex.portadasperiodicos.domain.repository.SettingsRepository
 import sergirex.portadasperiodicos.domain.usecase.ClearFavoritesUseCase
 import sergirex.portadasperiodicos.domain.usecase.ObserveFavoritesUseCase
 import sergirex.portadasperiodicos.notifications.NotificationScheduler
+import sergirex.portadasperiodicos.presentation.LoadTracker
 import javax.inject.Inject
 
 @HiltViewModel
@@ -31,25 +30,40 @@ class SettingsViewModel @Inject constructor(
     private val clearAllFavorites: ClearFavoritesUseCase
 ) : ViewModel() {
 
-    val initialTab: StateFlow<HomeTab> =
-        settings.initialTab.stateIn(viewModelScope, SharingStarted.Eagerly, HomeTab.default)
+    // One tracker for everything the Settings screen shows, so it can wait until the values are the stored ones.
+    private val tracker = LoadTracker(expected = 7)
+
+    val initialTab: StateFlow<HomeTab> = tracker.track(viewModelScope, settings.initialTab, HomeTab.default)
 
     val dailyNotificationEnabled: StateFlow<Boolean> =
-        settings.dailyNotificationEnabled.stateIn(viewModelScope, SharingStarted.Eagerly, true)
+        tracker.track(viewModelScope, settings.dailyNotificationEnabled, true)
 
     val dailyNotificationMinutes: StateFlow<Int> =
-        settings.dailyNotificationMinutes.stateIn(viewModelScope, SharingStarted.Eagerly, ReminderSchedule.DEFAULT_MINUTES)
+        tracker.track(viewModelScope, settings.dailyNotificationMinutes, ReminderSchedule.DEFAULT_MINUTES)
 
     val dailyNotificationDays: StateFlow<Set<Int>> =
-        settings.dailyNotificationDays.stateIn(viewModelScope, SharingStarted.Eagerly, ReminderSchedule.ALL_DAYS)
+        tracker.track(viewModelScope, settings.dailyNotificationDays, ReminderSchedule.ALL_DAYS)
 
-    val gridColumns: StateFlow<Int> = settings.gridColumns.stateIn(viewModelScope, SharingStarted.Eagerly, 0)
+    val gridColumns: StateFlow<Int> = tracker.track(viewModelScope, settings.gridColumns, 0)
 
-    val pureBlack: StateFlow<Boolean> = settings.pureBlack.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+    val pureBlack: StateFlow<Boolean> = tracker.track(viewModelScope, settings.pureBlack, false)
 
     /** How many favorites the user has (the ones shown, i.e. whose newspaper is still in the catalog). */
     val favoritesCount: StateFlow<Int> =
-        observeFavorites().map { it.size }.stateIn(viewModelScope, SharingStarted.Eagerly, 0)
+        tracker.track(viewModelScope, observeFavorites().map { it.size }, 0)
+
+    /** Catalog and cache details, read by [prepare] so the screen can show them from its first frame. */
+    var preparedCatalogStatus: CatalogStatus? = null
+        private set
+    var preparedImageCacheSize: Long? = null
+        private set
+
+    /** Waits until every value the Settings screen shows has been read, including the slower catalog and cache details. */
+    suspend fun prepare() {
+        tracker.await()
+        preparedCatalogStatus = catalog.status()
+        preparedImageCacheSize = imageCache.sizeBytes()
+    }
 
     /** Deletes every favorite, then calls [onDone] on the main thread. */
     fun clearFavorites(onDone: () -> Unit) {
