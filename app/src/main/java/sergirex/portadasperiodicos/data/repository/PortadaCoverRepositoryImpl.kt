@@ -61,7 +61,7 @@ class PortadaCoverRepositoryImpl @Inject constructor(
                 p to async { gate.withPermit { resolveDate(p.id, p.country, targetDate, forceRefresh) } }
             }
             for ((p, date) in pending) {
-                date.await()?.let { emit(PortadaCover(p, it, CoverUrls.thumbnail(it, p.country, p.id))) }
+                date.await()?.let { emit(PortadaCover(p, it, CoverUrls.thumbnail(it, p.country, p.id), targetDate)) }
             }
         }
     }.flowOn(Dispatchers.IO)

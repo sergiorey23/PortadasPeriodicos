@@ -10,5 +10,7 @@ package sergirex.portadasperiodicos.domain.model
 data class PortadaCover(
     val periodico: PeriodicoRef,
     val resolvedDate: String,
-    val imageUrl: String
+    val imageUrl: String,
+    /** The date the cover was asked for; [resolvedDate] differs when that day had no edition. */
+    val requestedDate: String = resolvedDate
 )

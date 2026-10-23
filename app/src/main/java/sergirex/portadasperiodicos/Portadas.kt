@@ -158,6 +158,10 @@ class Portadas : AppCompatActivity() {
                 launch {
                     viewModel.selectedDate.collect { date ->
                         supportActionBar?.subtitle = date?.let(EditionDate::toDisplay)
+                        // The subtitle brings its own space below it; drop the margin so it sits closer to the tabs.
+                        binding.toolbar.titleMarginBottom = resources.getDimensionPixelSize(
+                            if (date != null) R.dimen.toolbar_title_margin_with_date else R.dimen.toolbar_title_margin
+                        )
                     }
                 }
             }

@@ -89,7 +89,7 @@ class PortadaDetalle : AppCompatActivity() {
         setContentView(binding.root)
         ActivityTransitions.expandFrom(this, binding.detailContent, R.id.detailAppBar)
 
-        keepBannerAboveNavigationBar()
+        keepContentAboveNavigationBar()
         setupToolbar()
         setupFabs()
         lifecycleScope.launch {
@@ -103,12 +103,26 @@ class PortadaDetalle : AppCompatActivity() {
         }
     }
 
-    /** The banner is the bottom-most view: pad it by the navigation/gesture bar so it isn't drawn under it. */
-    private fun keepBannerAboveNavigationBar() {
-        ViewCompat.setOnApplyWindowInsetsListener(binding.bannerContainerDetail) { view, insets ->
-            view.updatePadding(bottom = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom)
+    private var navigationBarInset = 0
+
+    /**
+     * Keeps the bottom-most content off the navigation/gesture bar: the banner is padded by it, and without a banner the
+     * content area is, plus a little extra so the image and buttons aren't glued to the bottom of the screen.
+     */
+    private fun keepContentAboveNavigationBar() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, insets ->
+            navigationBarInset = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
+            updateBottomSpace()
             insets
         }
+    }
+
+    private fun updateBottomSpace() {
+        val bannerShown = binding.bannerContainerDetail.visibility == View.VISIBLE
+        binding.bannerContainerDetail.updatePadding(bottom = if (bannerShown) navigationBarInset else 0)
+        binding.detailContent.updatePadding(
+            bottom = if (bannerShown) 0 else navigationBarInset + resources.getDimensionPixelSize(R.dimen.detail_no_banner_bottom_space)
+        )
     }
 
     private fun setupToolbar() {
@@ -258,9 +272,11 @@ class PortadaDetalle : AppCompatActivity() {
                             if (adManagerDelegate.isInitialized()) adManager.destroy()
                             bannerRequested = false
                             binding.bannerContainerDetail.visibility = View.GONE
+                            updateBottomSpace()
                         }
                         false -> {
                             binding.bannerContainerDetail.visibility = View.VISIBLE
+                            updateBottomSpace()
                             if (!bannerRequested) {
                                 bannerRequested = true
                                 adManager.loadBanner(binding.bannerContainerDetail, DETAIL_BANNER_PLACEMENT)
@@ -282,6 +298,12 @@ class PortadaDetalle : AppCompatActivity() {
         if (showing != null && showing != intent.getStringExtra(EXTRA_SELECTED_ID)) {
             ActivityTransitions.stopSharing(this, binding.detailContent, R.id.detailRoot)
         }
+        // The detail window's opaque background normally fades out over the whole return, which keeps the home screen (and
+        // its toolbar) hidden until the end; drop it right away so the toolbars swap as the return starts.
+        window.setTransitionBackgroundFadeDuration(0)
+        // Don't leave the app bar to the window transition, which keeps it on screen until the return is over: fade it
+        // out ourselves right now, so the home toolbar underneath shows from the start.
+        binding.detailAppBar.animate().alpha(0f).setDuration(APP_BAR_FADE_MS).start()
         super.finishAfterTransition()
     }
 
@@ -432,6 +454,7 @@ class PortadaDetalle : AppCompatActivity() {
     companion object {
         private const val EXTRA_PORTADAS = "portadas"
         private const val EXTRA_SELECTED_ID = "selected_id"
+        private const val APP_BAR_FADE_MS = 150L
         private const val DETAIL_BANNER_PLACEMENT = "799967435028134_814221240269420"
 
         // Button menu motion

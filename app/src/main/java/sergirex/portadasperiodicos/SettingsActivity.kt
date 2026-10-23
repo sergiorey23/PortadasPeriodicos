@@ -19,7 +19,10 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.activity.viewModels
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.doOnPreDraw
+import androidx.core.view.updatePadding
 import androidx.core.content.ContextCompat
 import androidx.core.content.pm.PackageInfoCompat
 import androidx.fragment.app.activityViewModels
@@ -208,6 +211,15 @@ class SettingsActivity : AppCompatActivity() {
 
         override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
             super.onViewCreated(view, savedInstanceState)
+            // Edge-to-edge: let the list scroll under the navigation bar, but stop its last item above it.
+            val extraBottom = resources.getDimensionPixelSize(R.dimen.settings_list_bottom_padding)
+            listView.clipToPadding = false
+            ViewCompat.setOnApplyWindowInsetsListener(listView) { list, insets ->
+                list.updatePadding(
+                    bottom = extraBottom + insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
+                )
+                insets
+            }
             val themePreference = findPreference<ListPreference>(KEY_THEME)
             val pureBlackPreference = findPreference<SwitchPreferenceCompat>(KEY_PURE_BLACK)
             val tabPreference = findPreference<ListPreference>(KEY_INIT_CATEGORY)

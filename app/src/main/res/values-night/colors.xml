@@ -48,4 +48,6 @@
     <!-- Ribbon on covers that are not today's edition; drawn over the image, so identical in both modes. -->
     <color name="date_ribbon">#D32F2F</color>
     <color name="on_date_ribbon">#FFFFFF</color>
+    <!-- Picked date under the app title: a light red, since a dark one would vanish on the dark app bar. -->
+    <color name="app_bar_date">#FF8A80</color>
 </resources>

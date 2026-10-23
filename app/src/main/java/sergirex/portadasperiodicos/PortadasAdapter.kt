@@ -38,7 +38,8 @@ class PortadasAdapter(
         fun bind(cover: PortadaCover) {
             binding.portadaImageView.contentDescription = cover.periodico.name
             binding.portadaImageView.load(cover.imageUrl) { size(Size.ORIGINAL) }
-            val isOld = cover.resolvedDate != EditionDate.today()
+            // Judged against the day the cover was asked for: a picked date is named in the toolbar, so its covers need no ribbon.
+            val isOld = cover.resolvedDate != cover.requestedDate
             binding.dateRibbon.isVisible = isOld
             if (isOld) binding.dateRibbon.text = EditionDate.toRibbonDisplay(cover.resolvedDate)
             binding.root.setOnClickListener { onCoverClick(cover, binding.root) }

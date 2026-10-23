@@ -37,7 +37,7 @@
                         style="@style/Widget.Portadas.Toolbar"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        app:titleMarginBottom="18dp"
+                        app:titleMarginBottom="@dimen/toolbar_title_margin"
                         app:layout_collapseMode="pin" />
 
                 </com.google.android.material.appbar.CollapsingToolbarLayout>
@@ -79,6 +79,11 @@
             android:layout_gravity="start"
             app:drawerLayoutCornerSize="0dp"
             app:headerLayout="@layout/nav_header"
+            app:itemIconSize="26dp"
+            app:itemShapeInsetBottom="2dp"
+            app:itemShapeInsetTop="2dp"
+            app:itemTextAppearance="@style/TextAppearance.Portadas.DrawerItem"
+            app:itemVerticalPadding="14dp"
             app:menu="@menu/drawer"
             app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.Portadas.Square" />
 
