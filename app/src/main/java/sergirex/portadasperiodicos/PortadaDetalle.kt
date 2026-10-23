@@ -82,11 +82,12 @@ class PortadaDetalle : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         PureBlackTheme.apply(this)
-        ActivityTransitions.asChild(this, R.id.detailRoot)
+        ActivityTransitions.prepareExpandingChild(this)
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         binding = ActivityPortadaDetalleBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        ActivityTransitions.expandFrom(this, binding.detailContent, R.id.detailAppBar)
 
         keepBannerAboveNavigationBar()
         setupToolbar()
@@ -269,6 +270,19 @@ class PortadaDetalle : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    override fun finishAfterTransition() {
+        // The cover grew out of one grid cell; if the user swiped to another cover, don't shrink into the wrong cell.
+        val showing = if (::mSectionsPagerAdapter.isInitialized) {
+            mSectionsPagerAdapter.getPortadaAt(binding.viewpager2.currentItem)?.id
+        } else {
+            null
+        }
+        if (showing != null && showing != intent.getStringExtra(EXTRA_SELECTED_ID)) {
+            ActivityTransitions.stopSharing(this, binding.detailContent, R.id.detailRoot)
+        }
+        super.finishAfterTransition()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

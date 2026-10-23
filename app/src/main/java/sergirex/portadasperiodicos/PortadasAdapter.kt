@@ -1,6 +1,7 @@
 package sergirex.portadasperiodicos
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
@@ -21,7 +22,7 @@ import sergirex.portadasperiodicos.domain.model.PortadaCover
  * used to carry pre-decoded.
  */
 class PortadasAdapter(
-    private val onCoverClick: (PortadaCover) -> Unit
+    private val onCoverClick: (PortadaCover, View) -> Unit
 ) : ListAdapter<PortadaCover, PortadasAdapter.ViewHolder>(DIFF_CALLBACK) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -40,7 +41,7 @@ class PortadasAdapter(
             val isOld = cover.resolvedDate != EditionDate.today()
             binding.dateRibbon.isVisible = isOld
             if (isOld) binding.dateRibbon.text = EditionDate.toRibbonDisplay(cover.resolvedDate)
-            binding.root.setOnClickListener { onCoverClick(cover) }
+            binding.root.setOnClickListener { onCoverClick(cover, binding.root) }
         }
     }
 

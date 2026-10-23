@@ -89,10 +89,10 @@ class PortadasFragment : Fragment() {
 
     private fun defaultSpanCount() = if (resources.getBoolean(R.bool.isTablet)) 3 else 2
 
-    private fun openDetail(clicked: PortadaCover) {
+    private fun openDetail(clicked: PortadaCover, cell: View) {
         val state = viewModel.uiState(tab).value
         val portadas = state.allPeriodicos.map { Portada(it.id, it.name, it.domain, it.country, state.targetDate) }
-        ActivityTransitions.launch(requireActivity(), PortadaDetalle.createIntent(requireContext(), portadas, clicked.periodico.id))
+        ActivityTransitions.launchFrom(requireActivity(), PortadaDetalle.createIntent(requireContext(), portadas, clicked.periodico.id), cell)
     }
 
     override fun onDestroyView() {

@@ -86,7 +86,7 @@ class Portadas : AppCompatActivity() {
         // Shows the launch splash and switches to Theme.Portadas (postSplashScreenTheme) once drawn.
         installSplashScreen()
         PureBlackTheme.apply(this)
-        ActivityTransitions.asParent(this, R.id.homeRoot)
+        ActivityTransitions.asParent(this, R.id.viewpager)
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
