@@ -14,18 +14,17 @@ import com.facebook.ads.AudienceNetworkAds
 
 /**
  * Meta Audience Network banners, shared by every screen that shows one. One instance per
- * Activity: it owns the [AdView] it creates and releases it in [destroy].
+ * Activity: it owns the [AdView] it creates and releases it in [destroy]. It does not touch the SDK until
+ * [loadBanner] is called, and screens only call that with the user's consent (see AdsPolicy).
  */
 class AdManager(private val context: Context) {
 
     private var adView: AdView? = null
 
-    init {
-        initializeSdk(context)
-    }
-
     /** Adds a 90dp-tall banner for [placementId] to [container] (the next size up from 50) and requests an ad. */
     fun loadBanner(container: ViewGroup, placementId: String) {
+        // The SDK is only started here, which callers reach once the user has consented: never at construction.
+        initializeSdk(context)
         val banner = AdView(context, placementId, AdSize.BANNER_HEIGHT_90)
         adView = banner
         container.removeAllViews()

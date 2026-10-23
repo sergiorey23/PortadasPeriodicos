@@ -16,6 +16,7 @@ import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
 import sergirex.portadasperiodicos.data.network.CoverCacheControlInterceptor
 import sergirex.portadasperiodicos.data.repository.AdsEntitlementRepositoryImpl
+import sergirex.portadasperiodicos.data.repository.ConsentRepositoryImpl
 import sergirex.portadasperiodicos.data.repository.EngagementRepositoryImpl
 import sergirex.portadasperiodicos.data.repository.WidgetStateRepositoryImpl
 import sergirex.portadasperiodicos.data.repository.FavoritePeriodicosRepositoryImpl
@@ -24,6 +25,7 @@ import sergirex.portadasperiodicos.data.repository.PortadaCoverRepositoryImpl
 import sergirex.portadasperiodicos.data.repository.SettingsRepositoryImpl
 import sergirex.portadasperiodicos.data.repository.ThemeRepositoryImpl
 import sergirex.portadasperiodicos.domain.repository.AdsEntitlementRepository
+import sergirex.portadasperiodicos.domain.repository.ConsentRepository
 import sergirex.portadasperiodicos.domain.repository.EngagementRepository
 import sergirex.portadasperiodicos.domain.repository.WidgetStateRepository
 import sergirex.portadasperiodicos.domain.repository.FavoritePeriodicosRepository
@@ -72,6 +74,10 @@ abstract class AppModule {
     @Binds
     @Singleton
     abstract fun bindAdsEntitlementRepository(impl: AdsEntitlementRepositoryImpl): AdsEntitlementRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindConsentRepository(impl: ConsentRepositoryImpl): ConsentRepository
 
     @Binds
     @Singleton

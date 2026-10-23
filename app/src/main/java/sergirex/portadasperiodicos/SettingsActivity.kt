@@ -37,13 +37,16 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
+import sergirex.portadasperiodicos.domain.model.AdConsent
 import sergirex.portadasperiodicos.domain.model.CatalogRefreshResult
-import sergirex.portadasperiodicos.domain.model.HomeTab
 import sergirex.portadasperiodicos.domain.model.CatalogStatus
+import sergirex.portadasperiodicos.domain.model.ConsentStatus
+import sergirex.portadasperiodicos.domain.model.HomeTab
 import sergirex.portadasperiodicos.domain.model.ReminderSchedule
 import sergirex.portadasperiodicos.domain.model.ThemeMode
 import sergirex.portadasperiodicos.domain.repository.AdsEntitlementRepository
@@ -51,10 +54,12 @@ import sergirex.portadasperiodicos.notifications.NotificationChannels
 import sergirex.portadasperiodicos.presentation.ads.AdsViewModel
 import sergirex.portadasperiodicos.presentation.settings.SettingsViewModel
 import sergirex.portadasperiodicos.presentation.theme.ThemeViewModel
+import sergirex.portadasperiodicos.PRIVACY_POLICY_URL
 import sergirex.portadasperiodicos.ui.ActivityTransitions
 import sergirex.portadasperiodicos.ui.PureBlackTheme
 import java.text.DateFormatSymbols
 import java.util.Calendar
+import java.util.Date
 import javax.inject.Inject
 
 /**
@@ -201,6 +206,17 @@ class SettingsActivity : AppCompatActivity() {
                 isVisible = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
                 setOnPreferenceClickListener { openChannelSettings(); true }
             }
+            findPreference<SwitchPreferenceCompat>(KEY_ADS_CONSENT)?.apply {
+                isPersistent = false
+                setOnPreferenceChangeListener { _, newValue ->
+                    adsViewModel.setConsent(newValue as Boolean)
+                    true
+                }
+            }
+            findPreference<Preference>(KEY_PRIVACY_POLICY)?.setOnPreferenceClickListener {
+                requireContext().startActivityOrToast(Intent(Intent.ACTION_VIEW, Uri.parse(PRIVACY_POLICY_URL)))
+                true
+            }
             findPreference<Preference>(KEY_REMOVE_ADS)?.setOnPreferenceClickListener { billing.showPurchaseDialog(); true }
             findPreference<Preference>(KEY_RESTORE_PURCHASE)?.setOnPreferenceClickListener { billing.restorePurchases(); true }
             findPreference<Preference>(KEY_CATALOG_REFRESH)?.setOnPreferenceClickListener { refreshCatalog(); true }
@@ -228,6 +244,7 @@ class SettingsActivity : AppCompatActivity() {
             val timePreference = findPreference<Preference>(KEY_NOTIFICATION_TIME)
             val daysPreference = findPreference<Preference>(KEY_NOTIFICATION_DAYS)
             val removeAdsPreference = findPreference<Preference>(KEY_REMOVE_ADS)
+            val consentPreference = findPreference<SwitchPreferenceCompat>(KEY_ADS_CONSENT)
             val clearFavoritesPreference = findPreference<Preference>(KEY_CLEAR_FAVORITES)
 
             fun applyTheme(mode: ThemeMode) {
@@ -281,6 +298,16 @@ class SettingsActivity : AppCompatActivity() {
                         settingsViewModel.dailyNotificationDays.collect { daysPreference?.summary = daysSummary(it) }
                     }
                     launch { adsViewModel.adsRemoved.collect(::applyAds) }
+                    launch {
+                        combine(adsViewModel.adsRemoved, adsViewModel.adConsent) { removed, consent -> removed to consent }
+                            .collect { (removed, consent) ->
+                                consentPreference?.apply {
+                                    isEnabled = removed != true
+                                    isChecked = consent?.status == ConsentStatus.GRANTED
+                                    summary = consentSummary(removed == true, consent)
+                                }
+                            }
+                    }
                     launch { settingsViewModel.favoritesCount.collect(::applyFavorites) }
                     launch { updateCatalogStatus() }
                     launch { updateCacheSummary() }
@@ -297,6 +324,17 @@ class SettingsActivity : AppCompatActivity() {
             Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
                 ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.POST_NOTIFICATIONS) ==
                 PackageManager.PERMISSION_GRANTED
+
+        private fun consentSummary(adsRemoved: Boolean, consent: AdConsent?): String {
+            if (adsRemoved) return getString(R.string.ads_consent_not_needed)
+            val date = consent?.takeIf { it.decidedAt > 0 }
+                ?.let { DateFormat.getMediumDateFormat(requireContext()).format(Date(it.decidedAt)) }
+            return when (consent?.status) {
+                ConsentStatus.GRANTED -> getString(R.string.ads_consent_granted, date ?: "")
+                ConsentStatus.DENIED -> getString(R.string.ads_consent_denied, date ?: "")
+                else -> getString(R.string.ads_consent_unknown)
+            }
+        }
 
         // --- Reminder time and days ---
 
@@ -497,6 +535,8 @@ class SettingsActivity : AppCompatActivity() {
             const val KEY_NOTIFICATION_TIME = "daily_notification_time"
             const val KEY_NOTIFICATION_DAYS = "daily_notification_days"
             const val KEY_NOTIFICATION_SOUND = "notification_sound"
+            const val KEY_ADS_CONSENT = "ads_consent"
+            const val KEY_PRIVACY_POLICY = "privacy_policy"
             const val KEY_REMOVE_ADS = "remove_ads"
             const val KEY_RESTORE_PURCHASE = "restore_purchase"
             const val KEY_CATALOG_STATUS = "catalog_status"

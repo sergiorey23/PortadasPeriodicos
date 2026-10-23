@@ -148,4 +148,17 @@
         <item quantity="one">%d newspaper will be removed from your favorites. This can\'t be undone.</item>
         <item quantity="other">%d newspapers will be removed from your favorites. This can\'t be undone.</item>
     </plurals>
+
+    <!-- Ads consent -->
+    <string name="consent_title">Your privacy and ads</string>
+    <string name="consent_intro">Portadas de prensa is free and is funded by Meta Audience Network ads. To show them to you, Meta needs your permission.</string>
+    <string name="consent_points">• Meta may store and read information on your device, such as the advertising ID.\n• It uses it to measure ads and show you the ones you may like most.\n• If you decline, the app works the same but without ads.\n• You can change this at any time in Settings.</string>
+    <string name="consent_accept">Accept</string>
+    <string name="consent_reject">Decline</string>
+    <string name="privacy_settings_title">Privacy</string>
+    <string name="ads_consent_title">Meta ads</string>
+    <string name="ads_consent_granted">Allowed since %1$s</string>
+    <string name="ads_consent_denied">Not allowed (declined on %1$s)</string>
+    <string name="ads_consent_unknown">Not decided yet</string>
+    <string name="ads_consent_not_needed">Not needed: you already removed the ads</string>
 </resources>

@@ -147,4 +147,17 @@
         <item quantity="one">Se quitará %d periódico de tus favoritos. Esta acción no se puede deshacer.</item>
         <item quantity="other">Se quitarán %d periódicos de tus favoritos. Esta acción no se puede deshacer.</item>
     </plurals>
+
+    <!-- Ads consent -->
+    <string name="consent_title">Tu privacidad y los anuncios</string>
+    <string name="consent_intro">Portadas de prensa es gratuita y se financia con anuncios de Meta Audience Network. Para mostrártelos, Meta necesita tu permiso.</string>
+    <string name="consent_points">• Meta puede guardar y leer información de tu dispositivo, como el identificador de publicidad.\n• La usa para medir los anuncios y mostrarte los que más te interesen.\n• Si no aceptas, la app funciona igual pero sin anuncios.\n• Puedes cambiarlo cuando quieras en Ajustes.</string>
+    <string name="consent_accept">Aceptar</string>
+    <string name="consent_reject">Rechazar</string>
+    <string name="privacy_settings_title">Privacidad</string>
+    <string name="ads_consent_title">Anuncios de Meta</string>
+    <string name="ads_consent_granted">Permitidos desde el %1$s</string>
+    <string name="ads_consent_denied">No permitidos (rechazados el %1$s)</string>
+    <string name="ads_consent_unknown">Sin decidir</string>
+    <string name="ads_consent_not_needed">No hace falta: ya has quitado los anuncios</string>
 </resources>

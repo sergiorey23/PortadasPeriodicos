@@ -261,26 +261,26 @@ class PortadaDetalle : AppCompatActivity() {
         TooltipCompat.setTooltipText(binding.favButton, label)
     }
 
-    /** Shows the banner unless the user owns "remove ads"; reacts if the purchase happens while this screen is open. */
+    /** Shows the banner when the user hasn't bought "remove ads" and has consented; reacts if either changes while this screen is open. */
     private fun showBannerAd() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                adsViewModel.adsRemoved.collect { removed ->
-                    when (removed) {
+                adsViewModel.showBanner.collect { show ->
+                    when (show) {
                         null -> Unit
                         true -> {
-                            if (adManagerDelegate.isInitialized()) adManager.destroy()
-                            bannerRequested = false
-                            binding.bannerContainerDetail.visibility = View.GONE
-                            updateBottomSpace()
-                        }
-                        false -> {
                             binding.bannerContainerDetail.visibility = View.VISIBLE
                             updateBottomSpace()
                             if (!bannerRequested) {
                                 bannerRequested = true
                                 adManager.loadBanner(binding.bannerContainerDetail, DETAIL_BANNER_PLACEMENT)
                             }
+                        }
+                        false -> {
+                            if (adManagerDelegate.isInitialized()) adManager.destroy()
+                            bannerRequested = false
+                            binding.bannerContainerDetail.visibility = View.GONE
+                            updateBottomSpace()
                         }
                     }
                 }

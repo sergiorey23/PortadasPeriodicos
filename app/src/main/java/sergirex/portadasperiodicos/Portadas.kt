@@ -26,6 +26,7 @@ import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDialog
 import androidx.core.content.ContextCompat
@@ -56,6 +57,7 @@ import sergirex.portadasperiodicos.presentation.portadas.PortadasViewModel
 import sergirex.portadasperiodicos.presentation.portadas.titleRes
 import sergirex.portadasperiodicos.presentation.settings.SettingsViewModel
 import sergirex.portadasperiodicos.ui.ActivityTransitions
+import sergirex.portadasperiodicos.ui.ConsentDialog
 import sergirex.portadasperiodicos.ui.PureBlackTheme
 
 /** The home screen: a pager of newspaper-cover tabs, the navigation drawer and the toolbar actions. */
@@ -65,6 +67,7 @@ class Portadas : AppCompatActivity() {
     private lateinit var binding: ActivityPortadasBinding
     private var billingManager: BillingManager? = null
     private var widgetPinReceiver: BroadcastReceiver? = null
+    private var consentDialog: AlertDialog? = null
     private var adManager: AdManager? = null
 
     private val viewModel: PortadasViewModel by viewModels()
@@ -192,31 +195,39 @@ class Portadas : AppCompatActivity() {
         }
     }
 
-    /** Shows the banner (and the "Remove ads" item) until the user owns the purchase; reacts if that changes. */
     private fun observeAdsEntitlement() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                adsViewModel.adsRemoved.collect { removed ->
-                    when (removed) {
-                        null -> Unit
-                        true -> {
-                            adManager?.destroy()
-                            bannerRequested = false
-                            binding.bannerContainer.visibility = View.GONE
-                            setRemoveAdsItemVisible(false)
-                        }
-                        false -> {
-                            binding.bannerContainer.visibility = View.VISIBLE
-                            setRemoveAdsItemVisible(true)
-                            if (!bannerRequested) {
-                                bannerRequested = true
-                                adManager?.loadBanner(binding.bannerContainer, MAIN_BANNER_PLACEMENT)
+                // The purchase decides whether the "remove ads" item is offered...
+                launch { adsViewModel.adsRemoved.collect { removed -> removed?.let { setRemoveAdsItemVisible(!it) } } }
+                // ...and the banner needs both no purchase and the user's consent.
+                launch {
+                    adsViewModel.showBanner.collect { show ->
+                        when (show) {
+                            null -> Unit
+                            true -> {
+                                binding.bannerContainer.visibility = View.VISIBLE
+                                if (!bannerRequested) {
+                                    bannerRequested = true
+                                    adManager?.loadBanner(binding.bannerContainer, MAIN_BANNER_PLACEMENT)
+                                }
+                            }
+                            false -> {
+                                adManager?.destroy()
+                                bannerRequested = false
+                                binding.bannerContainer.visibility = View.GONE
                             }
                         }
                     }
                 }
+                launch { adsViewModel.askConsent.collect { ask -> if (ask) askForConsent() } }
             }
         }
+    }
+
+    private fun askForConsent() {
+        if (consentDialog?.isShowing == true) return
+        consentDialog = ConsentDialog.show(this) { granted -> adsViewModel.setConsent(granted) }
     }
 
     /**
@@ -396,6 +407,7 @@ class Portadas : AppCompatActivity() {
 
     override fun onDestroy() {
         // A dialog still showing when the Activity goes away would leak its window.
+        consentDialog?.dismiss()
         unregisterWidgetPinReceiver()
         billingManager?.destroy()
         adManager?.destroy()
