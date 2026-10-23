@@ -53,9 +53,6 @@ class PortadasFragment : Fragment() {
         binding.recyclerView.layoutManager = grid
         binding.recyclerView.adapter = adapter
         binding.refreshLayout.setOnRefreshListener { viewModel.refresh(tab) }
-        // The grid is wrapped (with the empty-state text) in a FrameLayout, so tell the
-        // pull-to-refresh gesture to look at the RecyclerView's scroll position instead.
-        binding.refreshLayout.setOnChildScrollUpCallback { _, _ -> binding.recyclerView.canScrollVertically(-1) }
 
         // The user can pick 1 to 3 columns in Settings; 0 keeps the screen-size default.
         viewLifecycleOwner.lifecycleScope.launch {

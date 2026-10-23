@@ -65,6 +65,7 @@
 
     <!-- Favorites widget -->
     <string name="covers_load_failed">Couldn\'t load the covers. Pull down to retry.</string>
+    <string name="refreshing">Refreshing covers</string>
     <string name="theme_mode">Mode</string>
     <string name="initial_category">Initial category</string>
     <string name="notifications">Notifications</string>

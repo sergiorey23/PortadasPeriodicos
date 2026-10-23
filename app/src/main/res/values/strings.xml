@@ -64,6 +64,7 @@
 
     <!-- Favorites widget -->
     <string name="covers_load_failed">No se han podido cargar las portadas. Desliza hacia abajo para reintentar.</string>
+    <string name="refreshing">Actualizando portadas</string>
     <string name="theme_mode">Modo</string>
     <string name="initial_category">Categoría inicial</string>
     <string name="notifications">Notificaciones</string>
