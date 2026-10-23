@@ -37,6 +37,7 @@
                         style="@style/Widget.Portadas.Toolbar"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        app:titleMarginBottom="18dp"
                         app:layout_collapseMode="pin" />
 
                 </com.google.android.material.appbar.CollapsingToolbarLayout>
