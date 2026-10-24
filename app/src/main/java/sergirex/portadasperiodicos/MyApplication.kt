@@ -17,9 +17,9 @@ import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
 import sergirex.portadasperiodicos.domain.model.ThemeMode
 import sergirex.portadasperiodicos.domain.usecase.GetThemeModeUseCase
@@ -66,8 +66,9 @@ class MyApplication : Application(), SingletonImageLoader.Factory {
     override fun onCreate() {
         super.onCreate()
         NotificationChannels.ensureDaily(this)
-        // Read once up front (a tiny file) so the very first Activity already gets the right theme.
-        PureBlackTheme.install(this, initial = runBlocking { settings.pureBlack.first() })
+        // Read in the background (a tiny file) instead of blocking start-up; the first dark-mode Activity waits for
+        // it only if it isn't done yet, so it's still themed right from the first frame.
+        PureBlackTheme.install(this, initial = applicationScope.async(Dispatchers.IO) { settings.pureBlack.first() })
         applicationScope.launch { settings.pureBlack.collect(PureBlackTheme::setEnabled) }
         applicationScope.launch {
             getThemeMode().collect { mode ->

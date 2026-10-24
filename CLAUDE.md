@@ -22,6 +22,7 @@ export JAVA_HOME=/home/sergiorey/.jdks/temurin-17 PATH=$JAVA_HOME/bin:$PATH
 - Release signing reads `keystore.properties` (gitignored; template in `keystore.properties.example`). Never print or commit the keystore, `*.jks` or `keystorePortadas.txt`.
 - `gradle.properties` must keep `android.builtInKotlin=false` and `android.newDsl=false`: the build applies the Kotlin plugin explicitly and fails without them (both are deprecated, removing them means migrating to AGP's built-in Kotlin).
 - Versioning: bump `versionCode`/`versionName` in `app/build.gradle`; releases are tagged `vX.Y.Z`.
+- Baseline profile: `./gradlew :app:generateBaselineProfile` with a device or emulator connected (USB, not adb over Wi-Fi: the final copy step failed there) regenerates `app/src/release/generated/baselineProfiles/`, which is committed and packaged by every release build. Regenerate after big changes to the home grid, tabs, detail screen or transitions.
 
 ## Architecture
 

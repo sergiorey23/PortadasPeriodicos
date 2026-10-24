@@ -6,8 +6,12 @@ import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.os.Bundle
+import android.util.TypedValue
 import android.view.View
 import android.widget.RemoteViews
+import coil3.request.allowHardware
+import coil3.size.Precision
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.firstOrNull
 import sergirex.portadasperiodicos.domain.model.EditionDate
@@ -61,6 +65,11 @@ class FavoritosWidget : AppWidgetProvider() {
         }
     }
 
+    /** The user resized the widget: reload the cover at the new size. */
+    override fun onAppWidgetOptionsChanged(context: Context, appWidgetManager: AppWidgetManager, appWidgetId: Int, newOptions: Bundle) {
+        launchAsync { renderWidget(context, appWidgetManager, appWidgetId) }
+    }
+
     override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
         val appWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
@@ -98,7 +107,7 @@ class FavoritosWidget : AppWidgetProvider() {
             views.setOnClickPendingIntent(R.id.leftBtn, navigatePendingIntent(context, appWidgetId, ACTION_LEFT))
             views.setOnClickPendingIntent(R.id.rightBtn, navigatePendingIntent(context, appWidgetId, ACTION_RIGHT))
 
-            loadCoverBitmap(context, favorites[index])?.let { views.setImageViewBitmap(R.id.imageViewWidget, it) }
+            loadCoverBitmap(context, favorites[index], appWidgetManager, appWidgetId)?.let { views.setImageViewBitmap(R.id.imageViewWidget, it) }
         }
 
         views.setOnClickPendingIntent(R.id.imageViewWidget, openAppPendingIntent(context))
@@ -106,11 +115,31 @@ class FavoritosWidget : AppWidgetProvider() {
     }
 
     /** Reuses PortadaCoverRepository (date resolution) + Coil (fetch/decode/cache) — the same pipeline the list screens use. */
-    private suspend fun loadCoverBitmap(context: Context, periodico: PeriodicoRef): Bitmap? {
+    private suspend fun loadCoverBitmap(
+        context: Context,
+        periodico: PeriodicoRef,
+        appWidgetManager: AppWidgetManager,
+        appWidgetId: Int
+    ): Bitmap? {
         val cover = getPortadaCovers(listOf(periodico), EditionDate.today(), forceRefresh = false)
             .firstOrNull() ?: return null
-        return context.loadBitmap(cover.imageUrl)
+        val options = appWidgetManager.getAppWidgetOptions(appWidgetId)
+        // The largest the launcher may show it (portrait uses the max height, landscape the max width).
+        val width = context.dpToPx(options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH))
+        val height = context.dpToPx(options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT))
+        return context.loadBitmap(cover.imageUrl) {
+            // The bitmap is parcelled to the launcher, so no hardware bitmap, and no bigger than the widget
+            // (INEXACT never upscales a thumbnail smaller than that). Launchers that don't report a size get the original.
+            allowHardware(false)
+            if (width > 0 && height > 0) {
+                size(width, height)
+                precision(Precision.INEXACT)
+            }
+        }
     }
+
+    private fun Context.dpToPx(dp: Int): Int =
+        TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp.toFloat(), resources.displayMetrics).toInt()
 
     private fun navigatePendingIntent(context: Context, appWidgetId: Int, action: String): PendingIntent {
         val intent = Intent(context, FavoritosWidget::class.java).apply {

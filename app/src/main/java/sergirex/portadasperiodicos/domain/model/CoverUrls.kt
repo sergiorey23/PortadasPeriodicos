@@ -7,7 +7,10 @@ object CoverUrls {
 
     fun full(date: String, country: String, id: String) = "$BASE/$date/$country/$id.jpg"
 
-    fun thumbnail(date: String, country: String, id: String) = "$BASE/$date/$country/$id.640.jpg"
+    /** Width in pixels of the [thumbnail] variant. */
+    const val THUMBNAIL_WIDTH = 640
+
+    fun thumbnail(date: String, country: String, id: String) = "$BASE/$date/$country/$id.$THUMBNAIL_WIDTH.jpg"
 
     /** The edition date encoded in a cover URL's path (`/yyyy/MM/dd/country/file`), or null. */
     fun editionDateOf(pathSegments: List<String>): String? =

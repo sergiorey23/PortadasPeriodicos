@@ -48,8 +48,11 @@ class PortadasFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        adapter = PortadasAdapter(onCoverClick = ::openDetail)
         val grid = GridLayoutManager(context, defaultSpanCount())
+        adapter = PortadasAdapter(
+            columnWidth = { (binding.recyclerView.width.takeIf { it > 0 } ?: resources.displayMetrics.widthPixels) / grid.spanCount },
+            onCoverClick = ::openDetail
+        )
         binding.recyclerView.layoutManager = grid
         binding.recyclerView.adapter = adapter
         binding.refreshLayout.setOnRefreshListener { viewModel.refresh(tab) }

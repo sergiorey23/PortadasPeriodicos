@@ -8,7 +8,9 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import coil3.load
+import coil3.size.Dimension
 import coil3.size.Size
+import sergirex.portadasperiodicos.domain.model.CoverUrls
 import sergirex.portadasperiodicos.domain.model.EditionDate
 import sergirex.portadasperiodicos.databinding.PortadaItemBinding
 import sergirex.portadasperiodicos.domain.model.PortadaCover
@@ -22,6 +24,7 @@ import sergirex.portadasperiodicos.domain.model.PortadaCover
  * used to carry pre-decoded.
  */
 class PortadasAdapter(
+    private val columnWidth: () -> Int,
     private val onCoverClick: (PortadaCover, View) -> Unit
 ) : ListAdapter<PortadaCover, PortadasAdapter.ViewHolder>(DIFF_CALLBACK) {
 
@@ -37,7 +40,11 @@ class PortadasAdapter(
     inner class ViewHolder(private val binding: PortadaItemBinding) : RecyclerView.ViewHolder(binding.root) {
         fun bind(cover: PortadaCover) {
             binding.portadaImageView.contentDescription = cover.periodico.name
-            binding.portadaImageView.load(cover.imageUrl) { size(Size.ORIGINAL) }
+            // An explicit size, not Coil measuring the wrap_content ImageView (that left recreated pages blank).
+            // Decoding at the column width instead of the full thumbnail saves memory with 3 columns or on
+            // tablets; capped at the thumbnail's own width so a single column isn't upscaled.
+            val width = columnWidth().coerceIn(1, CoverUrls.THUMBNAIL_WIDTH)
+            binding.portadaImageView.load(cover.imageUrl) { size(Size(Dimension(width), Dimension.Undefined)) }
             // Judged against the day the cover was asked for: a picked date is named in the toolbar, so its covers need no ribbon.
             val isOld = cover.resolvedDate != cover.requestedDate
             binding.dateRibbon.isVisible = isOld

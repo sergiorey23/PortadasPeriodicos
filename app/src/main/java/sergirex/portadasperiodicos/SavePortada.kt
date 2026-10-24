@@ -5,7 +5,6 @@ import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
@@ -23,9 +22,9 @@ import java.io.FileOutputStream
 import java.io.IOException
 
 /**
- * Saves or shares a newspaper cover. Fetching the image now goes through Coil
- * (`fetchBitmap`) instead of the old hand-rolled `URL.getContent()` +
- * `BitmapFactory.decodeStream`, the same pipeline every other screen uses.
+ * Saves or shares a newspaper cover. The image comes through Coil's cache (`loadImageBytes`), the same
+ * pipeline every other screen uses, and its original JPEG bytes are written as they are: re-encoding a
+ * decoded bitmap made files 2-3x bigger, slower to write, and needed the whole bitmap in memory.
  *
  * `checkPermissions()` can't call `ActivityCompat.requestPermissions` itself the way the
  * old Java version did (casting `context` to `Activity`): an `ActivityResultLauncher` has
@@ -59,13 +58,13 @@ class SavePortada(
     suspend fun saveToGallery(view: View, imageUrl: String, file: File) {
         Toast.makeText(context, "Iniciando descarga...", Toast.LENGTH_SHORT).show()
 
-        val bitmap = context.loadBitmap(imageUrl)
-        if (bitmap == null) {
+        val bytes = context.loadImageBytes(imageUrl)
+        if (bytes == null) {
             Snackbar.make(view, "No se pudo guardar la portada.", Snackbar.LENGTH_LONG).show()
             return
         }
 
-        val imageUri = withContext(Dispatchers.IO) { writeToGallery(bitmap, file) }
+        val imageUri = withContext(Dispatchers.IO) { writeToGallery(bytes, file) }
         if (imageUri == null) {
             Snackbar.make(view, "No se pudo guardar la portada.", Snackbar.LENGTH_LONG).show()
             return
@@ -83,14 +82,13 @@ class SavePortada(
     }
 
     /** Returns the saved image's Uri, or null if anything went wrong (partial output is cleaned up). */
-    private fun writeToGallery(bitmap: Bitmap, file: File): Uri? {
+    private fun writeToGallery(bytes: ByteArray, file: File): Uri? {
         return try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                saveBitmapToMediaStore(bitmap, file.name)
+                saveToMediaStore(bytes, file.name)
             } else {
                 try {
-                    val ok = FileOutputStream(file).use { bitmap.compress(Bitmap.CompressFormat.JPEG, 100, it) }
-                    if (!ok) throw IOException("compress failed")
+                    FileOutputStream(file).use { it.write(bytes) }
                 } catch (e: IOException) {
                     file.delete()
                     throw e
@@ -109,8 +107,8 @@ class SavePortada(
 
     /** Downloads [imageUrl] and hands it off to the system share sheet. Tells the user if the download or the temporary file fails. */
     suspend fun share(imageUrl: String, fileName: String) {
-        val bitmap = context.loadBitmap(imageUrl)
-        val fileUri = bitmap?.let { withContext(Dispatchers.IO) { saveBitmapToCache(fileName, it) } }
+        val bytes = context.loadImageBytes(imageUrl)
+        val fileUri = bytes?.let { withContext(Dispatchers.IO) { saveToCache(fileName, it) } }
         if (fileUri == null) {
             Toast.makeText(context, R.string.share_failed, Toast.LENGTH_LONG).show()
             return
@@ -124,17 +122,17 @@ class SavePortada(
         context.startActivityOrToast(Intent.createChooser(intent, "Compartir portada"))
     }
 
-    private fun saveBitmapToCache(fileName: String, bitmap: Bitmap): Uri? {
+    private fun saveToCache(fileName: String, bytes: ByteArray): Uri? {
         return try {
             val file = File(context.cacheDir, "$fileName.jpg")
-            FileOutputStream(file).use { bitmap.compress(Bitmap.CompressFormat.JPEG, 100, it) }
+            FileOutputStream(file).use { it.write(bytes) }
             FileProvider.getUriForFile(context, "sergirex.portadasperiodicos.fileprovider", file)
         } catch (e: IOException) {
             null
         }
     }
 
-    private fun saveBitmapToMediaStore(bitmap: Bitmap, fileName: String): Uri? {
+    private fun saveToMediaStore(bytes: ByteArray, fileName: String): Uri? {
         val resolver = context.contentResolver
         val values = ContentValues().apply {
             put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
@@ -143,7 +141,7 @@ class SavePortada(
         }
         val imageUri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values) ?: return null
         val wrote = try {
-            resolver.openOutputStream(imageUri)?.use { bitmap.compress(Bitmap.CompressFormat.JPEG, 100, it) }
+            resolver.openOutputStream(imageUri)?.use { it.write(bytes); true }
         } catch (e: IOException) {
             null
         }
