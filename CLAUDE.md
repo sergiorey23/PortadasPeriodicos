@@ -39,6 +39,8 @@ Package-by-layer inside one module: `domain/` (pure Kotlin models, repository in
 
 **Ads / purchase.** Meta Audience Network banners via `AdManager` (home + detail); `BillingManager` (Play Billing, one-time `remove_ads_id`) makes Google Play the authority and writes `AdsEntitlementRepository`; screens observe it through `AdsViewModel` (null = not loaded yet, don't show a banner). Debug builds enable Meta test mode.
 
+**UI motion and theming (Material 3 Expressive, `ui/`).** Screen transitions all go through `ActivityTransitions`: home is the parent (`asParent`), a cover opens the detail screen with a container transform from its grid cell (`launchFrom` → `prepareExpandingChild`/`expandFrom`), Settings fades (`asChild`). These, and `PureBlackTheme.apply` (optional AMOLED overlay, recreates open Activities when toggled), must run in `onCreate` **before** `super.onCreate`. Property animations use `SpringMotion` (springs read from the theme's `motionSpring*` attributes; spatial vs effects) rather than duration/interpolator animators. Pull-to-refresh is the custom `PullToRefreshLayout` with Material's loading indicator (SwipeRefreshLayout was removed).
+
 **Daily reminder.** `NotificationScheduler` is the single place that schedules the 09:00 alarm (setting on **and** notification permission); called at app start, on toggle, on permission result and from `BootReceiver` (alarms don't survive reboot/update). Plain `BroadcastReceiver`s get Hilt through an `EntryPoint` (`Context.notificationScheduler()`), not `@AndroidEntryPoint`, and use `launchAsync` (goAsync + 9 s timeout).
 
 ## Working in this repo
