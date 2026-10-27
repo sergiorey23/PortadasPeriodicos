@@ -404,6 +404,6 @@ class Portadas : AppCompatActivity() {
 
     private companion object {
         const val STATUS_STRIP_LAYER = 1
-        const val MAIN_BANNER_PLACEMENT = "799967435028134_799969321694612"
+        const val MAIN_BANNER_PLACEMENT = "799967435028134_1424356692589202"
     }
 }

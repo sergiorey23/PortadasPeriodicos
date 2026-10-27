@@ -17,6 +17,7 @@ import com.google.android.material.color.MaterialColors
 import androidx.core.content.ContextCompat
 import androidx.appcompat.widget.TooltipCompat
 import android.content.res.ColorStateList
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
@@ -42,11 +43,13 @@ import com.google.android.material.datepicker.DateValidatorPointBackward
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.play.core.review.ReviewManagerFactory
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 import kotlinx.coroutines.launch
 import sergirex.portadasperiodicos.databinding.ActivityPortadaDetalleBinding
 import sergirex.portadasperiodicos.domain.model.CoverUrls
 import sergirex.portadasperiodicos.presentation.ads.AdsViewModel
 import sergirex.portadasperiodicos.domain.model.EditionDate
+import sergirex.portadasperiodicos.domain.model.InterstitialPolicy
 import java.io.File
 import sergirex.portadasperiodicos.ui.ActivityTransitions
 import sergirex.portadasperiodicos.ui.PureBlackTheme
@@ -67,6 +70,24 @@ class PortadaDetalle : AppCompatActivity() {
     private var bannerRequested = false
     private val adManagerDelegate = lazy { AdManager(this) }
     private val adManager by adManagerDelegate
+
+    @Inject
+    lateinit var interstitialPolicy: InterstitialPolicy
+
+    // Whether this open asked for a Play review: that is enough of an interruption, so no interstitial on the way out.
+    private var reviewPromptShown = false
+
+    /**
+     * Shows the interstitial when the user leaves, which is a natural pause (unlike on open, which would delay what they
+     * came to see). Enabled only while one is loaded and the policy allows it.
+     */
+    private val interstitialBackCallback = object : OnBackPressedCallback(false) {
+        override fun handleOnBackPressed() {
+            isEnabled = false
+            interstitialPolicy.recordShown()
+            if (!adManager.showInterstitial { finishAfterTransition() }) finishAfterTransition()
+        }
+    }
 
     // Must be registered before STARTED (i.e. as a field, not inside a click handler) per
     // the Activity Result API contract; SavePortada can't register its own since only an
@@ -89,6 +110,7 @@ class PortadaDetalle : AppCompatActivity() {
         setContentView(binding.root)
         ActivityTransitions.expandFrom(this, binding.detailContent, R.id.detailAppBar)
 
+        onBackPressedDispatcher.addCallback(this, interstitialBackCallback)
         keepContentAboveNavigationBar()
         setupToolbar()
         setupFabs()
@@ -99,7 +121,14 @@ class PortadaDetalle : AppCompatActivity() {
         showBannerAd()
         // Count the visit once per real open (not when the system recreates the Activity).
         if (savedInstanceState == null) {
-            lifecycleScope.launch { if (viewModel.onCoverOpened()) showInAppReviewPrompt() }
+            interstitialPolicy.recordOpen()
+            lifecycleScope.launch {
+                if (viewModel.onCoverOpened()) {
+                    reviewPromptShown = true
+                    interstitialBackCallback.isEnabled = false
+                    showInAppReviewPrompt()
+                }
+            }
         }
     }
 
@@ -271,6 +300,7 @@ class PortadaDetalle : AppCompatActivity() {
                         true -> {
                             if (adManagerDelegate.isInitialized()) adManager.destroy()
                             bannerRequested = false
+                            interstitialBackCallback.isEnabled = false
                             binding.bannerContainerDetail.visibility = View.GONE
                             updateBottomSpace()
                         }
@@ -280,6 +310,12 @@ class PortadaDetalle : AppCompatActivity() {
                             if (!bannerRequested) {
                                 bannerRequested = true
                                 adManager.loadBanner(binding.bannerContainerDetail, DETAIL_BANNER_PLACEMENT)
+                                // Only ask for one when this exit is due: a request nobody will see just wastes fill.
+                                if (interstitialPolicy.shouldShow()) {
+                                    adManager.loadInterstitial(DETAIL_INTERSTITIAL_PLACEMENT) {
+                                        interstitialBackCallback.isEnabled = !reviewPromptShown && interstitialPolicy.shouldShow()
+                                    }
+                                }
                             }
                         }
                     }
@@ -455,7 +491,8 @@ class PortadaDetalle : AppCompatActivity() {
         private const val EXTRA_PORTADAS = "portadas"
         private const val EXTRA_SELECTED_ID = "selected_id"
         private const val APP_BAR_FADE_MS = 150L
-        private const val DETAIL_BANNER_PLACEMENT = "799967435028134_814221240269420"
+        private const val DETAIL_BANNER_PLACEMENT = "799967435028134_1424357055922499"
+        private const val DETAIL_INTERSTITIAL_PLACEMENT = "799967435028134_1424357802589091"
 
         // Button menu motion
         private const val ADD_ICON_OPEN_LEVEL = 5000f // 45 degrees of the 0..90 range
